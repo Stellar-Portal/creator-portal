@@ -218,6 +218,9 @@ td .input.small { width: 108px; }
 .linkbox input { font: 12px var(--f-mono); min-width: 0; flex: 1; }
 .cr-row td:first-child { font-weight: 600; }
 .tagline { display: flex; gap: 6px; flex-wrap: wrap; }
+a.acc { color: inherit; text-decoration: none; }
+a.acc:hover { color: var(--accent); text-decoration: underline; }
+a.tag.acc:hover { border-color: var(--accent); }
 .tag { font-size: 12px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 5px; padding: 1px 7px; white-space: nowrap; }
 
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg);
@@ -284,6 +287,10 @@ td .input.small { width: 108px; }
     var d = new Date(+m[3], +m[2] - 1, +m[1]);
     if (d.getFullYear() !== +m[3] || d.getMonth() !== +m[2] - 1 || d.getDate() !== +m[1]) return '';
     return m[3] + '-' + m[2] + '-' + m[1];
+  }
+  function accLink(a, cls) {
+    a = String(a || '').replace(/^@+/, '');
+    return '<a class="' + cls + '" href="https://www.tiktok.com/@' + encodeURIComponent(a) + '" target="_blank" rel="noopener noreferrer" title="Open @' + esc(a) + ' on TikTok">@' + esc(a) + '</a>';
   }
   function shortLink(u) { var s = String(u || '').replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, ''); return s.length > 44 ? s.slice(0, 42) + '…' : s; }
   function linkHtml(u) { return isUrl(u) ? '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(shortLink(u)) + '</a>' : esc(u); }
@@ -549,7 +556,7 @@ td .input.small { width: 108px; }
     if (shown.length) h += '<div class="table-wrap"><table><thead><tr><th>Posted</th><th>Creator</th>' + (hasAcc ? '<th>Account</th>' : '') + '<th>Link</th><th>Views</th><th>Sent</th><th></th></tr></thead><tbody>' +
       shown.map(function (p) {
         var cr = creatorById(p.creatorId), armed = S.armed === 'delp:' + p.id;
-        return '<tr><td class="date">' + fmtDate(p.postedOn, true) + '</td><td>' + esc(cr ? cr.name : p.creator) + '</td>' + (hasAcc ? '<td class="muted">' + (p.account ? '@' + esc(p.account) : '—') + '</td>' : '') +
+        return '<tr><td class="date">' + fmtDate(p.postedOn, true) + '</td><td>' + esc(cr ? cr.name : p.creator) + '</td>' + (hasAcc ? '<td class="muted">' + (p.account ? accLink(p.account, 'acc') : '—') + '</td>' : '') +
           '<td class="lk">' + linkHtml(p.link) + '</td>' +
           '<td><input class="input small mono" id="v-' + esc(p.id) + '" data-views="' + esc(p.id) + '" value="' + esc(p.views) + '" placeholder="—" aria-label="Views"></td>' +
           '<td class="date faint">' + esc(String(p.submitted || '').slice(0, 10) === p.postedOn ? 'same day' : fmtDate(String(p.submitted || '').slice(0, 10))) + '</td>' +
@@ -581,7 +588,7 @@ td .input.small { width: 108px; }
       return '<tr class="cr-row"><td>' + (editing ? '<input class="input small" style="width:150px" id="rn-' + esc(cr.id) + '" value="' + esc(cr.name) + '" aria-label="Name">' : esc(cr.name)) + '</td>' +
         '<td style="min-width:180px">' + (editing
           ? '<div class="row-actions" style="flex-wrap:nowrap"><input class="input small" style="width:220px" id="ac-' + esc(cr.id) + '" value="' + esc(accs.map(function (a) { return '@' + a; }).join(', ')) + '" placeholder="@account1, @account2" aria-label="Accounts"><button class="btn sm primary" type="button" data-act="save-name" data-id="' + esc(cr.id) + '">Save</button></div>'
-          : (accs.length ? '<div class="tagline">' + accs.map(function (a) { return '<span class="tag">@' + esc(a) + '</span>'; }).join('') + '</div>' : '<span class="faint">None yet</span>')) + '</td>' +
+          : (accs.length ? '<div class="tagline">' + accs.map(function (a) { return accLink(a, 'tag acc'); }).join('') + '</div>' : '<span class="faint">None yet</span>')) + '</td>' +
         '<td><div class="tagline">' + (camps.length ? camps.map(function (n) { return '<span class="tag">' + esc(n) + '</span>'; }).join('') : '<span class="faint">None</span>') + '</div></td>' +
         '<td class="num mono">' + nPosts + '</td>' +
         '<td style="min-width:240px">' + (cr.link ? '<div class="linkbox"><input class="input small" readonly id="lk-' + esc(cr.id) + '" value="' + esc(cr.link) + '" aria-label="Private link for ' + esc(cr.name) + '"><button class="btn sm" type="button" data-act="copy-link" data-id="' + esc(cr.id) + '">Copy</button></div>' : '<span class="faint">Paste your app link above first</span>') + '</td>' +
