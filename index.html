@@ -10,7 +10,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Stellar Advocates">
+<meta name="apple-mobile-web-app-title" content="Stellar Advocates Portal">
 <meta name="theme-color" content="#0626c7">
 </head>
 <body>
@@ -152,9 +152,18 @@ input[type="date"]::-webkit-date-and-time-value { text-align: left; }
 .ep-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 10px 0; }
 .sub { display: block; font-size: 12px; color: var(--muted); font-weight: 500; margin-bottom: 4px; }
 @media (max-width: 560px) { .ep-grid { grid-template-columns: minmax(0, 1fr); } .post-acts { flex-direction: column; align-items: flex-end; } }
-.install { display: flex; gap: 12px; align-items: flex-start; background: var(--accent-soft); border-radius: var(--r); padding: 12px 14px; font-size: 14px; }
-.install b { display: block; }
-.install .x2 { margin-left: auto; flex: none; }
+.install { display: grid; gap: 10px; background: var(--accent-soft); border-radius: var(--r); padding: 14px 16px; font-size: 14px; }
+.install-head { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+.install-head .x2 { margin-left: auto; flex: none; font-size: 18px; }
+.install p { margin: 0; }
+.install .inapp { background: var(--surface); border-radius: var(--r-sm); padding: 10px 12px; }
+.install .ico { width: 18px; height: 18px; vertical-align: -3px; color: var(--accent); }
+.seg { display: inline-flex; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 99px; padding: 3px; justify-self: start; }
+.seg button { border: 0; background: none; border-radius: 99px; padding: 5px 14px; font-weight: 600; font-size: 13px; color: var(--muted); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.steps { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.steps li { padding-left: 2px; }
+.foot { text-align: center; font-size: 13px; color: var(--muted); }
 .linkish { background: none; border: 0; padding: 0; color: inherit; font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }
 .camp-foot { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px; }
 .camp h2 { font-size: 18px; }
@@ -225,6 +234,54 @@ input[type="date"]::-webkit-date-and-time-value { text-align: left; }
 .person .p-note { font-size: 12px; font-weight: 500; color: var(--muted); }
 .person.quiet { border-color: var(--bad); background: var(--bad-soft); }
 .person.quiet .p-note { color: var(--bad); font-weight: 600; }
+.camp-hint { margin-top: -6px; }
+.target { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+.t-box { background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 10px 12px; display: grid; gap: 2px; }
+.t-k { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); }
+.t-v { font: 600 22px/1.2 var(--f-display); }
+.t-s { font-size: 13px; color: var(--muted); }
+.t-s.over { color: var(--bad); }
+.t-box .pbar { margin-top: 6px; }
+.mpick { display: grid; gap: 10px; }
+.search-wrap { position: relative; }
+.suggest { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.suggest:empty { display: none; margin: 0; }
+.sug { border: 1px solid var(--line-strong); background: var(--surface); border-radius: 99px; padding: 6px 12px; cursor: pointer; font-weight: 500; font-size: 14px; }
+.sug:hover, .sug:focus-visible, .sug.first { border-color: var(--accent); background: var(--accent-soft); }
+.sug::before { content: "+ "; color: var(--accent); font-weight: 700; }
+.sug-empty { font-size: 13px; color: var(--muted); padding: 4px 2px; }
+.mlist { display: grid; gap: 6px; }
+.mrow { display: grid; grid-template-columns: minmax(0, 1fr) 140px 36px; gap: 8px; align-items: center; padding: 6px 10px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-sm); }
+.mrow.mhead { background: none; border: 0; padding: 0 10px; font-size: 12px; font-weight: 600; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; }
+.mrow .mname { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mrow .input.small { width: 100%; }
+.mrow .x { font-size: 18px; padding: 0; min-height: 32px; }
+.mfoot { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.assign { font-size: 14px; }
+.over { color: var(--bad); font-weight: 600; }
+.ok-txt { color: var(--ok); font-weight: 600; }
+.stat .of { font-size: 16px; color: var(--faint); font-weight: 500; }
+.stat .sub2 { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.stat .sub2.over { color: var(--bad); }
+.prog { display: grid; }
+.prow { display: grid; grid-template-columns: minmax(90px, 1fr) 70px minmax(80px, 160px) minmax(0, 2fr); gap: 14px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.prow:first-child { border-top: 0; }
+.prow .pname { font-weight: 600; }
+.prow .pcount { font: 500 14px var(--f-mono); }
+.pbar { height: 6px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--line); overflow: hidden; }
+.pbar i { display: block; height: 100%; background: var(--accent); border-radius: 99px; }
+.prow .pstat { font-size: 13px; color: var(--muted); }
+.prow.bad .pname, .prow.bad .pstat { color: var(--bad); }
+.prow.bad .pstat { font-weight: 600; }
+.prow.bad .pbar i { background: var(--bad); }
+.prow.done .pbar i { background: var(--ok); }
+.prow.done .pstat { color: var(--ok); font-weight: 600; }
+@media (max-width: 640px) {
+  .prow { grid-template-columns: minmax(0, 1fr) auto; row-gap: 6px; }
+  .prow .pbar { grid-column: 1 / -1; }
+  .prow .pstat { grid-column: 1 / -1; }
+  .mrow { grid-template-columns: minmax(0, 1fr) 96px 32px; }
+}
 .quiet-note { font-size: 12px; font-weight: 600; color: var(--bad); }
 .notice b { font-weight: 600; }
 
@@ -368,14 +425,53 @@ a.tag.acc:hover { border-color: var(--accent); }
   function isStandalone() {
     try { return window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches; } catch (e) { return false; }
   }
-  function installTip() {
-    if (!window.API_URL || isStandalone() || load('cp-tip-closed')) return '';
-    var ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    var how = ios ? 'In Safari, tap the Share button <span aria-hidden="true">(□↑)</span>, then <b style="display:inline">Add to Home Screen</b>.'
-                  : 'In your browser menu <span aria-hidden="true">(⋮)</span>, tap <b style="display:inline">Add to Home screen</b> or <b style="display:inline">Install app</b>.';
-    return '<div class="install" role="note"><div><b>Save this page to your home screen</b>' + how + ' You’ll be able to open it like an app.</div>' +
-      '<button class="btn ghost sm x2" type="button" data-act="close-tip" aria-label="Dismiss">×</button></div>';
+  var APP_NAME = 'Stellar Advocates Portal';
+  var SHARE_ICO = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 11H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+  function device() {
+    var ua = navigator.userAgent || '';
+    var ios = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    var android = /android/i.test(ua);
+    var inApp = /Instagram|FBAN|FBAV|FB_IAB|musical_ly|BytedanceWebview|TikTok|Snapchat|LinkedInApp|Line\//i.test(ua);
+    var br = /CriOS/.test(ua) ? 'chrome' : /FxiOS/.test(ua) ? 'firefox' : /EdgiOS|EdgA/.test(ua) ? 'edge' : /SamsungBrowser/.test(ua) ? 'samsung' : ios ? 'safari' : 'chrome';
+    return { os: ios ? 'ios' : android ? 'android' : 'desktop', br: br, inApp: inApp };
   }
+  function installSteps(os, br) {
+    if (os === 'ios') {
+      if (br === 'chrome') return ['Tap the <b>Share</b> button ' + SHARE_ICO + ' at the top right, next to the address bar.', 'Scroll down and tap <b>Add to Home Screen</b>.', 'Tap <b>Add</b> (top right).'];
+      if (br === 'firefox' || br === 'edge') return ['Tap the <b>menu</b> button <b>≡</b> at the bottom.', 'Tap <b>Share</b>, then <b>Add to Home Screen</b>.', 'Tap <b>Add</b> (top right).'];
+      return ['Tap the <b>Share</b> button ' + SHARE_ICO + ' at the bottom of Safari (top right on iPad).', 'Scroll down and tap <b>Add to Home Screen</b>.', 'Tap <b>Add</b> (top right).'];
+    }
+    if (br === 'samsung') return ['Tap the <b>menu</b> button <b>≡</b> at the bottom right.', 'Tap <b>Add page to</b>, then <b>Home screen</b>.', 'Tap <b>Add</b>.'];
+    return ['Tap the <b>menu</b> button <b>⋮</b> at the top right of Chrome.', 'Tap <b>Add to Home screen</b> (on some phones it says <b>Install app</b>).', 'Tap <b>Add</b> or <b>Install</b>.'];
+  }
+  function installTip() {
+    if (!window.API_URL || isStandalone()) return '';
+    var dv = device();
+    if (!S.tipForced && (load('cp-tip-closed') || dv.os === 'desktop')) return '';
+    var os = S.tipOs || (dv.os === 'desktop' ? 'ios' : dv.os);
+    var br = os === dv.os ? dv.br : (os === 'ios' ? 'safari' : 'chrome');
+    var h = '<div class="install" role="region" aria-label="Add to home screen"><div class="install-head"><b>Add this page to your home screen</b>' +
+      '<button class="btn ghost sm x2" type="button" data-act="close-tip" aria-label="Hide these steps">×</button></div>' +
+      '<p>It’ll be saved as an app called <b>' + APP_NAME + '</b>, so you can open it in one tap.</p>';
+    if (dv.inApp) {
+      h += '<p class="inapp"><b>You’ve opened this inside an app</b> (like TikTok or Instagram), which can’t save pages. Tap <b>⋯</b> at the top right, choose <b>Open in browser</b>, then follow the steps below.</p>';
+    }
+    if (window.__installPrompt && !dv.inApp) {
+      h += '<button class="btn primary" type="button" data-act="install-now">Add to home screen</button>';
+    } else {
+      h += '<div class="seg" role="group" aria-label="Your phone">' +
+        '<button type="button" data-act="tip-os" data-v="ios" aria-pressed="' + (os === 'ios') + '">iPhone</button>' +
+        '<button type="button" data-act="tip-os" data-v="android" aria-pressed="' + (os === 'android') + '">Android</button></div>' +
+        '<ol class="steps">' + installSteps(os, br).map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ol>' +
+        '<p class="hint">The name is filled in for you. Just keep <b>' + APP_NAME + '</b>.</p>';
+    }
+    return h + '</div>';
+  }
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault(); window.__installPrompt = e;
+    if (S && S.mode === 'creator' && S.data) render();
+  });
+  window.addEventListener('appinstalled', function () { store('cp-tip-closed', '1'); window.__installPrompt = null; if (S && S.data) render(); });
   function start(boot) {
     S = { mode: boot.mode, key: boot.key, data: null, busy: false,
       view: 'campaigns', campaignId: null, filter: 'Active', postCreator: '', edit: null, editCreator: null, armed: null, result: null,
@@ -425,6 +521,11 @@ a.tag.acc:hover { border-color: var(--accent); }
         h += '<div class="camp-pick"><label class="lbl" for="f-campaign">Campaign</label><select class="input" id="f-campaign" data-k="campaign">' +
           (active.length > 1 ? '<option value="">Choose a campaign…</option>' : '') +
           active.map(function (c) { return '<option value="' + esc(c.id) + '"' + (c.id === S.campaign ? ' selected' : '') + '>' + esc(c.name) + '</option>'; }).join('') + '</select></div>';
+        var cur = active.filter(function (c) { return c.id === S.campaign; })[0];
+        if (cur && (toInt(cur.myVideos) || cur.deadline)) {
+          var sent = d.posts.filter(function (p) { return p.campaignId === cur.id; }).length, tg = toInt(cur.myVideos);
+          h += '<p class="hint camp-hint">' + [tg ? sent + ' of ' + tg + ' videos sent' : '', cur.deadline ? 'deadline ' + fmtDate(cur.deadline) : ''].filter(Boolean).join(' · ') + '</p>';
+        }
         h += '<div class="link-rows"><div class="lr-head" aria-hidden="true"><span>Link to your post</span><span>Posted from' + (accs.length ? '' : ' <span class="faint" style="font-weight:400">(optional)</span>') + '</span><span>Date posted <span class="faint" style="font-weight:400">DD/MM/YYYY</span></span><span></span></div>' + S.rows.map(rowHtml).join('') + '</div>';
         if (!accs.length) h += '<p class="hint">Type your account once and it’s saved for next time.</p>';
         var n = S.rows.filter(function (r) { return r.link.trim(); }).length;
@@ -441,9 +542,10 @@ a.tag.acc:hover { border-color: var(--accent); }
         var mine = d.posts.filter(function (p) { return p.campaignId === c.id; }).length;
         return '<article class="camp"><div class="camp-top"><h2>' + esc(c.name) + '</h2><span class="pill ' + (c.status === 'Active' ? 'active' : 'ended') + '">' + esc(c.status) + '</span></div>' +
           (c.artist ? '<div class="muted">' + esc(c.artist) + '</div>' : '') +
+          myTargetHtml(c, mine) +
           (isUrl(c.sound) ? '<a class="sound" href="' + esc(c.sound) + '" target="_blank" rel="noopener noreferrer">♪ Open the sound</a>' : (c.sound ? '<div>♪ ' + esc(c.sound) + '</div>' : '')) +
           (c.brief ? '<p class="brief">' + esc(c.brief) + '</p>' : '') +
-          '<div class="row-actions camp-foot"><span class="hint">' + plural(mine, 'post') + ' sent</span>' +
+          '<div class="row-actions camp-foot"><span class="hint">' + (toInt(c.myVideos) ? mine + ' of ' + toInt(c.myVideos) + ' videos sent' : plural(mine, 'post') + ' sent') + '</span>' +
           (c.status === 'Active' ? '<button class="btn sm" type="button" data-act="send-for" data-id="' + esc(c.id) + '" style="margin-left:auto">Send links for this campaign</button>' : '') + '</div></article>';
       }).join('') + '</section>';
     }
@@ -461,7 +563,25 @@ a.tag.acc:hover { border-color: var(--accent); }
       }).join('') + '</div>';
       h += '</section>';
     }
+    if (window.API_URL && !isStandalone() && !installTip()) h += '<p class="foot"><button class="linkish" type="button" data-act="show-tip">How to add this page to your home screen</button></p>';
     return h + '</main>';
+  }
+  /** Creator-side: their own video count and the campaign deadline. */
+  function myTargetHtml(c, posted) {
+    var target = toInt(c.myVideos), dl = c.deadline ? daysBetween(todayIso(), c.deadline) : null;
+    if (!target && !c.deadline) return '';
+    var h = '<div class="target">';
+    if (target) {
+      var pct = Math.min(100, Math.round(posted / target * 100));
+      h += '<div class="t-box"><span class="t-k">Your videos</span><span class="t-v num">' + target + '</span>' +
+        '<span class="t-s">' + (posted >= target ? 'All done ✓' : posted + ' posted · ' + (target - posted) + ' to go') + '</span>' +
+        '<span class="pbar"><i style="width:' + pct + '%"></i></span></div>';
+    }
+    if (c.deadline) {
+      h += '<div class="t-box"><span class="t-k">Deadline</span><span class="t-v">' + fmtDate(c.deadline) + '</span>' +
+        '<span class="t-s' + (dl < 0 ? ' over' : '') + '">' + (dl > 1 ? dl + ' days left' : dl === 1 ? '1 day left' : dl === 0 ? 'Today' : 'Passed') + '</span></div>';
+    }
+    return h + '</div>';
   }
   function editPostHtml(p) {
     var e = S.editPost, accs = S.data.accounts;
@@ -560,9 +680,11 @@ a.tag.acc:hover { border-color: var(--accent); }
     h += '<div class="clist"><div class="crow head" aria-hidden="true"><span>Campaign</span><span>Status</span><span>Creators</span><span>Links</span><span>Last post</span><span></span></div>';
     h += list.map(function (c) {
       var lp = lastPost(c.id);
-      var q = quietIn(c).length;
-      return '<button type="button" class="crow" data-act="open" data-id="' + esc(c.id) + '"><span><span class="nm">' + esc(c.name) + '</span>' + (c.artist ? '<br><span class="ar">' + esc(c.artist) + '</span>' : '') +
-        (q ? '<br><span class="quiet-note">' + plural(q, 'creator') + ' quiet for 7+ days</span>' : '') + '</span>' +
+      var q = flagsIn(c).length;
+      var due = c.deadline ? 'Due ' + fmtDate(c.deadline) : '';
+      return '<button type="button" class="crow" data-act="open" data-id="' + esc(c.id) + '"><span><span class="nm">' + esc(c.name) + '</span>' +
+        ((c.artist || due) ? '<br><span class="ar">' + [esc(c.artist || ''), due].filter(Boolean).join(' · ') + '</span>' : '') +
+        (q ? '<br><span class="quiet-note">' + plural(q, 'creator') + ' behind</span>' : '') + '</span>' +
         '<span class="c-st"><span class="pill ' + (c.status === 'Active' ? 'active' : 'ended') + '">' + esc(c.status) + '</span></span>' +
         '<span class="crow-meta"><span class="n c-n">' + membersOf(c.id).length + '</span><span class="n c-l">' + postsOf(c.id).length + '</span>' +
         '<span class="c-last mono">' + (lp ? fmtDate(lp) : '—') + '</span></span><span class="chev" aria-hidden="true">›</span></button>';
@@ -575,34 +697,115 @@ a.tag.acc:hover { border-color: var(--accent); }
     var then = new Date(+m[1], +m[2] - 1, +m[3]), now = new Date(); now.setHours(0, 0, 0, 0);
     return Math.round((now - then) / 86400000);
   }
-  /** Creators on an active campaign whose last post there is 7+ days old. */
-  function quietIn(c) {
+  function daysBetween(a, b) {
+    var x = /^(\d{4})-(\d{2})-(\d{2})/.exec(a || ''), y = /^(\d{4})-(\d{2})-(\d{2})/.exec(b || '');
+    if (!x || !y) return null;
+    return Math.round((new Date(+y[1], +y[2] - 1, +y[3]) - new Date(+x[1], +x[2] - 1, +x[3])) / 86400000);
+  }
+  function toInt(v) { var n = parseInt(v, 10); return isNaN(n) ? null : n; }
+  /**
+   * Where one creator stands on one campaign.
+   * With an amount of videos + a campaign deadline: the clock runs from the day they were added
+   * to the deadline, and they're "behind" when they've posted fewer than the share due by today.
+   * Without those: falls back to "no post in 7+ days".
+   */
+  function standing(c, m) {
+    var today = todayIso(), quota = toInt(m.videos);
+    var mine = postsOf(c.id).filter(function (p) { return p.creatorId === m.creatorId; });
+    var posted = mine.length, last = mine.map(function (p) { return p.postedOn; }).sort().pop() || '';
+    var r = { creator: creatorById(m.creatorId), quota: quota, posted: posted, last: last, flag: false, kind: 'ok', text: '' };
+    if (quota && posted >= quota) { r.kind = 'done'; r.text = 'Done'; return r; }
+    if (quota && c.deadline) {
+      var start = m.added && m.added <= c.deadline ? m.added : (c.created && c.created <= c.deadline ? c.created : today);
+      var span = Math.max(1, daysBetween(start, c.deadline));
+      var elapsed = Math.min(span, Math.max(0, daysBetween(start, today)));
+      var expected = Math.floor(quota * elapsed / span), left = quota - posted, daysLeft = daysBetween(today, c.deadline);
+      r.expected = expected;
+      if (daysLeft < 0) { r.flag = true; r.kind = 'missed'; r.text = 'Missed the deadline · ' + left + ' still to post'; return r; }
+      var need = daysLeft <= 7 ? left + ' more by ' + fmtDate(c.deadline) : '~' + Math.ceil(left / (daysLeft / 7)) + ' a week';
+      if (posted < expected) { r.flag = true; r.kind = 'behind'; r.text = 'Behind · should have ' + expected + ' by now · needs ' + need; }
+      else r.text = 'On track · needs ' + need;
+      return r;
+    }
+    if (last && daysSince(last) >= QUIET_DAYS) { r.flag = true; r.kind = 'quiet'; r.text = 'No posts in ' + daysSince(last) + ' days'; }
+    else r.text = posted ? 'Last posted ' + fmtDate(last) : 'No posts yet';
+    if (quota && !c.deadline) r.text += ' · add a deadline to track pace';
+    return r;
+  }
+  function flagsIn(c) {
     if (c.status !== 'Active') return [];
-    var posts = postsOf(c.id);
-    return membersOf(c.id).map(function (m) {
-      var mine = posts.filter(function (p) { return p.creatorId === m.creatorId; }).map(function (p) { return p.postedOn; }).sort();
-      var last = mine.length ? mine[mine.length - 1] : '';
-      return { creator: creatorById(m.creatorId), last: last, days: last ? daysSince(last) : null };
-    }).filter(function (x) { return x.creator && x.last && x.days >= QUIET_DAYS; });
+    return membersOf(c.id).map(function (m) { return standing(c, m); }).filter(function (r) { return r.creator && r.flag; });
   }
   function lastPost(cid) { var p = postsOf(cid); return p.length ? p.map(function (x) { return x.postedOn; }).sort().pop() : ''; }
 
   function campaignForm(e) {
-    var isNew = !e.id;
+    var isNew = !e.id, over = assignState(e).over;
     return '<section class="card" aria-labelledby="cf-h"><h2 id="cf-h">' + (isNew ? 'New campaign' : 'Edit campaign') + '</h2><div class="form-grid">' +
       '<div><label class="lbl" for="e-name">Campaign name</label><input class="input" id="e-name" data-e="name" value="' + esc(e.name || '') + '" placeholder="e.g. Shygirl – Alyse"></div>' +
       '<div><label class="lbl" for="e-artist">Artist</label><input class="input" id="e-artist" data-e="artist" value="' + esc(e.artist || '') + '"></div>' +
       '<div class="full"><label class="lbl" for="e-sound">Sound link</label><input class="input" id="e-sound" data-e="sound" type="url" value="' + esc(e.sound || '') + '" placeholder="https://www.tiktok.com/music/…"></div>' +
       '<div class="full"><label class="lbl" for="e-brief">Brief for creators</label><textarea class="input" id="e-brief" data-e="brief" placeholder="What to post, captions, hashtags…">' + esc(e.brief || '') + '</textarea></div>' +
+      '<div><label class="lbl" for="e-deadline">Deadline <span class="faint" style="font-weight:400">DD/MM/YYYY</span></label><input class="input" id="e-deadline" type="date" data-e="deadline" value="' + esc(e.deadline || '') + '"></div>' +
+      '<div><label class="lbl" for="e-total">Total videos for this campaign</label><input class="input" id="e-total" type="number" min="0" step="1" inputmode="numeric" data-e="totalVideos" value="' + esc(e.totalVideos || '') + '" placeholder="e.g. 30"></div>' +
       '<div><label class="lbl" for="e-status">Status</label><select class="input" id="e-status" data-e="status"><option' + (e.status !== 'Ended' ? ' selected' : '') + '>Active</option><option' + (e.status === 'Ended' ? ' selected' : '') + '>Ended</option></select></div>' +
-      '</div><p class="hint">Creators on this campaign see its name, artist, sound and brief. Ended campaigns stop taking new links.</p>' +
-      '<div class="row-actions"><button class="btn primary" type="button" data-act="save-campaign">' + (isNew ? 'Create campaign' : 'Save changes') + '</button><button class="btn ghost" type="button" data-act="cancel-edit">Cancel</button></div></section>';
+      '<div class="full mpick"><label class="lbl" for="e-search">Creators on this campaign</label>' +
+        '<div class="search-wrap"><input class="input" id="e-search" placeholder="Type a name to add a creator…" autocomplete="off" value="' + esc(e.q || '') + '" role="combobox" aria-controls="e-suggest" aria-expanded="' + (!!(S.sugOpen || e.q)) + '">' +
+        '<div class="suggest" id="e-suggest" role="listbox">' + suggestHtml(e) + '</div></div>' +
+        '<div class="mlist">' + (e.members.length
+          ? '<div class="mrow mhead" aria-hidden="true"><span>Creator</span><span>Amount of videos</span><span></span></div>' + e.members.map(function (m) {
+              var cr = creatorById(m.creatorId), nm = cr ? cr.name : 'Removed creator';
+              return '<div class="mrow"><span class="mname">' + esc(nm) + '</span>' +
+                '<input class="input small" type="number" min="0" step="1" inputmode="numeric" id="mv-' + esc(m.creatorId) + '" data-mv="' + esc(m.creatorId) + '" value="' + esc(m.videos) + '" placeholder="0" aria-label="Amount of videos for ' + esc(nm) + '">' +
+                '<button class="btn ghost sm x" type="button" data-act="m-remove" data-id="' + esc(m.creatorId) + '" aria-label="Remove ' + esc(nm) + '">×</button></div>';
+            }).join('')
+          : '<p class="hint">No one yet. Search above to add creators.</p>') + '</div>' +
+        '<div class="mfoot"><button class="btn sm" type="button" id="e-split" data-act="split"' + (assignState(e).canSplit ? '' : ' disabled') + '>Evenly split</button>' +
+        '<div id="e-assign" class="assign">' + assignHtml(e) + '</div></div>' +
+      '</div>' +
+      '</div><p class="hint">Creators see the campaign name, artist, sound and brief, not the amounts. Ended campaigns stop taking new links.</p>' +
+      '<div class="row-actions"><button class="btn primary" type="button" id="e-save" data-act="save-campaign"' + (over ? ' disabled' : '') + '>' + (isNew ? 'Create campaign' : 'Save changes') + '</button><button class="btn ghost" type="button" data-act="cancel-edit">Cancel</button></div></section>';
+  }
+  function assignState(e) {
+    var total = toInt(e.totalVideos), sum = 0;
+    e.members.forEach(function (m) { sum += toInt(m.videos) || 0; });
+    return { total: total, sum: sum, over: total != null && sum > total, canSplit: total != null && total > 0 && e.members.length > 0 };
+  }
+  function assignHtml(e) {
+    var st = assignState(e);
+    if (!e.members.length) return '';
+    if (st.total == null) return '<span class="faint">' + plural(st.sum, 'video') + ' assigned · add a total to split evenly</span>';
+    if (st.over) return '<span class="over" role="alert">' + st.sum + ' of ' + st.total + ' assigned: that’s ' + (st.sum - st.total) + ' more than the campaign total. Lower someone’s amount or raise the total.</span>';
+    return '<span class="' + (st.sum === st.total ? 'ok-txt' : 'faint') + '">' + st.sum + ' of ' + st.total + ' assigned' + (st.sum < st.total ? ' · ' + (st.total - st.sum) + ' left' : ' ✓') + '</span>';
+  }
+  function suggestHtml(e) {
+    if (!S.sugOpen && !e.q) return '';
+    var taken = {}; e.members.forEach(function (m) { taken[m.creatorId] = true; });
+    var q = String(e.q || '').trim().toLowerCase();
+    var all = S.data.creators.filter(function (c) { return !taken[c.id]; });
+    var hits = all.filter(function (c) { return !q || c.name.toLowerCase().indexOf(q) >= 0; })
+      .sort(function (a, b) { return a.name.localeCompare(b.name); });
+    if (!S.data.creators.length) return '<div class="sug-empty">No creators yet. Add them in the Creators tab first.</div>';
+    if (!all.length) return '<div class="sug-empty">Everyone is already on this campaign.</div>';
+    if (!hits.length) return '<div class="sug-empty">No creator matches “' + esc(e.q) + '”. Add them in the Creators tab first.</div>';
+    return hits.slice(0, 8).map(function (c, i) {
+      return '<button type="button" class="sug' + (i === 0 && q ? ' first' : '') + '" role="option" data-act="m-add" data-id="' + esc(c.id) + '">' + esc(c.name) + '</button>';
+    }).join('') + (hits.length > 8 ? '<div class="sug-empty">' + (hits.length - 8) + ' more. Keep typing to narrow it down.</div>' : '');
+  }
+  function refreshAssign() {
+    var e = S.edit; if (!e) return;
+    var el = document.getElementById('e-assign'); if (el) el.innerHTML = assignHtml(e);
+    var st = assignState(e);
+    var sv = document.getElementById('e-save'); if (sv) sv.disabled = st.over;
+    var sp = document.getElementById('e-split'); if (sp) sp.disabled = !st.canSplit;
+  }
+  function refreshSuggest() {
+    var el = document.getElementById('e-suggest'); if (el && S.edit) el.innerHTML = suggestHtml(S.edit);
+    var inp = document.getElementById('e-search'); if (inp) inp.setAttribute('aria-expanded', String(!!(S.sugOpen || (S.edit && S.edit.q))));
   }
 
   function campaignDetail(c) {
     var d = S.data, mem = {}, posts = postsOf(c.id);
     membersOf(c.id).forEach(function (m) { mem[m.creatorId] = true; });
-    var week = daysAgoIso(6);
     var h = '<button class="back" type="button" data-act="back">← All campaigns</button>';
     if (S.edit && S.edit.id === c.id) h += campaignForm(S.edit);
     else {
@@ -611,26 +814,27 @@ a.tag.acc:hover { border-color: var(--accent); }
         '<div class="row-actions muted">' + (c.artist ? '<span>' + esc(c.artist) + '</span>' : '') + (isUrl(c.sound) ? '<a class="sound" href="' + esc(c.sound) + '" target="_blank" rel="noopener noreferrer">♪ Sound</a>' : '') + '</div>' +
         (c.brief ? '<p class="brief" style="max-width:70ch">' + esc(c.brief) + '</p>' : '') + '</section>';
     }
+    var total = toInt(c.totalVideos), dl = c.deadline ? daysBetween(todayIso(), c.deadline) : null;
     h += '<div class="stats"><div class="stat"><div class="k">Creators</div><div class="v">' + Object.keys(mem).length + '</div></div>' +
-      '<div class="stat"><div class="k">Links logged</div><div class="v">' + posts.length + '</div></div>' +
-      '<div class="stat"><div class="k">Posted last 7 days</div><div class="v">' + posts.filter(function (p) { return p.postedOn >= week; }).length + '</div></div></div>';
+      '<div class="stat"><div class="k">Videos posted</div><div class="v">' + posts.length + (total != null ? '<span class="of"> / ' + total + '</span>' : '') + '</div></div>' +
+      '<div class="stat"><div class="k">Deadline</div><div class="v">' + (c.deadline ? fmtDate(c.deadline) : '—') + '</div>' +
+        (c.deadline ? '<div class="sub2' + (dl < 0 ? ' over' : '') + '">' + (dl > 1 ? dl + ' days left' : dl === 1 ? '1 day left' : dl === 0 ? 'Today' : 'Passed ' + (-dl) + ' days ago') + '</div>' : '') + '</div></div>';
 
-    h += '<section class="card" aria-labelledby="who-h"><div class="card-head"><h2 id="who-h">Who’s on this campaign</h2><span class="hint">Tick a creator to add them. They’ll see it on their page right away.</span></div>';
-    if (!d.creators.length) h += '<div class="empty">No creators yet. Add them in the Creators tab first.</div>';
-    else {
-      var quiet = quietIn(c);
-      if (quiet.length) h += '<div class="notice warn" role="status"><b>No posts in 7+ days:</b> ' + quiet.map(function (q) {
-        return esc(q.creator.name) + ' <span class="faint">(last ' + fmtDate(q.last) + ')</span>';
-      }).join(', ') + '</div>';
-      var quietIds = {}; quiet.forEach(function (q) { quietIds[q.creator.id] = q.days; });
-      h += '<div class="people">' + d.creators.slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).map(function (cr) {
-        var on = !!mem[cr.id], isQuiet = quietIds[cr.id] != null;
-        var lastMine = on ? posts.filter(function (p) { return p.creatorId === cr.id; }).map(function (p) { return p.postedOn; }).sort().pop() : '';
-        var note = !on ? '' : lastMine ? (isQuiet ? quietIds[cr.id] + ' days ago' : 'last ' + fmtDate(lastMine)) : 'no posts yet';
-        return '<label class="person' + (on ? ' on' : '') + (isQuiet ? ' quiet' : '') + '"><input type="checkbox" id="m-' + esc(cr.id) + '" data-act="member" data-id="' + esc(cr.id) + '"' + (on ? ' checked' : '') + '>' +
-          esc(cr.name) + (note ? '<span class="p-note">' + note + '</span>' : '') + '</label>';
-      }).join('') + '</div>';
-    }
+    var rows = membersOf(c.id).map(function (m) { return standing(c, m); }).filter(function (r) { return r.creator; })
+      .sort(function (a, b) { return (b.flag - a.flag) || a.creator.name.localeCompare(b.creator.name); });
+    var flagged = rows.filter(function (r) { return r.flag && c.status === 'Active'; });
+    h += '<section class="card" aria-labelledby="who-h"><div class="card-head"><h2 id="who-h">Who’s on this campaign</h2>' +
+      '<button class="btn sm" type="button" data-act="edit-campaign">Edit creators & amounts</button></div>';
+    if (flagged.length) h += '<div class="notice warn" role="status"><b>Behind:</b> ' + flagged.map(function (r) { return esc(r.creator.name); }).join(', ') + '</div>';
+    if (!rows.length) h += '<div class="empty">No one yet. Click <b>Edit creators & amounts</b> to add creators.</div>';
+    else h += '<div class="prog">' + rows.map(function (r) {
+      var pct = r.quota ? Math.min(100, Math.round(r.posted / r.quota * 100)) : 0;
+      var cls = c.status !== 'Active' ? '' : r.kind === 'done' ? 'done' : r.flag ? 'bad' : '';
+      return '<div class="prow ' + cls + '"><span class="pname">' + esc(r.creator.name) + '</span>' +
+        '<span class="pcount num">' + r.posted + (r.quota ? ' <span class="faint">/ ' + r.quota + '</span>' : '') + '</span>' +
+        '<span class="pbar" aria-hidden="true">' + (r.quota ? '<i style="width:' + pct + '%"></i>' : '') + '</span>' +
+        '<span class="pstat">' + esc(r.text) + '</span></div>';
+    }).join('') + '</div>';
     h += '</section>';
 
     var who = S.postCreator, shown = posts.filter(function (p) { return !who || p.creatorId === who; });
@@ -641,12 +845,11 @@ a.tag.acc:hover { border-color: var(--accent); }
       '</select>' + (shown.length ? '<button class="btn sm" type="button" data-act="copy-links">Copy links</button>' : '') + '</div></div>';
     if (!shown.length) h += '<div class="empty">No links yet. They appear here as soon as a creator sends them.</div>';
     var hasAcc = shown.some(function (p) { return p.account; });
-    if (shown.length) h += '<div class="table-wrap"><table><thead><tr><th>Posted</th><th>Creator</th>' + (hasAcc ? '<th>Account</th>' : '') + '<th>Link</th><th>Views</th><th>Sent</th><th></th></tr></thead><tbody>' +
+    if (shown.length) h += '<div class="table-wrap"><table><thead><tr><th>Posted</th><th>Creator</th>' + (hasAcc ? '<th>Account</th>' : '') + '<th>Link</th><th>Sent</th><th></th></tr></thead><tbody>' +
       shown.map(function (p) {
         var cr = creatorById(p.creatorId), armed = S.armed === 'delp:' + p.id;
         return '<tr><td class="date">' + fmtDate(p.postedOn, true) + '</td><td>' + esc(cr ? cr.name : p.creator) + '</td>' + (hasAcc ? '<td class="muted">' + (p.account ? accLink(p.account, 'acc') : '—') + '</td>' : '') +
           '<td class="lk">' + linkHtml(p.link) + '</td>' +
-          '<td><input class="input small mono" id="v-' + esc(p.id) + '" data-views="' + esc(p.id) + '" value="' + esc(p.views) + '" placeholder="—" aria-label="Views"></td>' +
           '<td class="date faint">' + esc(String(p.submitted || '').slice(0, 10) === p.postedOn ? 'same day' : fmtDate(String(p.submitted || '').slice(0, 10))) + '</td>' +
           '<td><button class="btn ghost sm danger' + (armed ? ' armed' : '') + '" type="button" data-act="del-post" data-id="' + esc(p.id) + '">' + (armed ? 'Delete?' : 'Delete') + '</button></td></tr>';
       }).join('') + '</tbody></table></div>';
@@ -709,7 +912,18 @@ a.tag.acc:hover { border-color: var(--accent); }
       S.editPost = { id: p.id, account: p.account || '', postedOn: p.postedOn, newAcc: false }; S.armed = null; render();
     },
     'cancel-mine': function () { S.editPost = null; render(); },
-    'close-tip': function () { store('cp-tip-closed', '1'); render(); },
+    'close-tip': function () { store('cp-tip-closed', '1'); S.tipForced = false; render(); },
+    'show-tip': function () { S.tipForced = true; render(); window.scrollTo(0, 0); },
+    'tip-os': function (el) { S.tipOs = el.dataset.v; render(); },
+    'install-now': function () {
+      var p = window.__installPrompt; if (!p) return;
+      p.prompt();
+      (p.userChoice || Promise.resolve({})).then(function (r) {
+        window.__installPrompt = null;
+        if (r && r.outcome === 'accepted') { store('cp-tip-closed', '1'); S.tipForced = false; toast('Added. Look for ' + APP_NAME + ' on your home screen.'); }
+        render();
+      });
+    },
     'save-mine': function () {
       var e = S.editPost; if (!e) return;
       if (!e.postedOn || e.postedOn > todayIso()) { toast('Pick the date it was posted (it can’t be in the future).', true); return; }
@@ -720,12 +934,33 @@ a.tag.acc:hover { border-color: var(--accent); }
     'filter': function (el) { S.filter = el.dataset.v; render(); },
     'open': function (el) { S.campaignId = el.dataset.id; S.postCreator = ''; S.edit = null; render(); window.scrollTo(0, 0); },
     'back': function () { S.campaignId = null; S.edit = null; render(); },
-    'new-campaign': function () { S.edit = { name: '', artist: '', sound: '', brief: '', status: 'Active' }; render(); var el = document.getElementById('e-name'); if (el) el.focus(); },
-    'edit-campaign': function () { var c = campaignById(S.campaignId); S.edit = { id: c.id, name: c.name, artist: c.artist, sound: c.sound, brief: c.brief, status: c.status }; render(); },
+    'new-campaign': function () { S.sugOpen = false; S.edit = { name: '', artist: '', sound: '', brief: '', status: 'Active', deadline: '', totalVideos: '', members: [], q: '' }; render(); var el = document.getElementById('e-name'); if (el) el.focus(); },
+    'edit-campaign': function () {
+      var c = campaignById(S.campaignId); S.sugOpen = false;
+      S.edit = { id: c.id, name: c.name, artist: c.artist, sound: c.sound, brief: c.brief, status: c.status, deadline: c.deadline || '', totalVideos: c.totalVideos || '', q: '',
+        members: membersOf(c.id).map(function (m) { return { creatorId: m.creatorId, videos: m.videos || '' }; })
+          .sort(function (a, b) { var x = creatorById(a.creatorId), y = creatorById(b.creatorId); return (x ? x.name : '').localeCompare(y ? y.name : ''); }) };
+      render(); window.scrollTo(0, 0);
+    },
+    'm-add': function (el) {
+      var e = S.edit; if (!e || e.members.some(function (m) { return m.creatorId === el.dataset.id; })) return;
+      e.members.push({ creatorId: el.dataset.id, videos: '' }); e.q = ''; S.sugOpen = true; render();
+      var i = document.getElementById('e-search'); if (i) i.focus();
+    },
+    'm-remove': function (el) { var e = S.edit; e.members = e.members.filter(function (m) { return m.creatorId !== el.dataset.id; }); render(); },
+    'split': function () {
+      var e = S.edit, st = assignState(e); if (!st.canSplit) return;
+      var n = e.members.length, base = Math.floor(st.total / n), rem = st.total % n;
+      e.members.forEach(function (m, i) { m.videos = String(base + (i < rem ? 1 : 0)); });
+      render(); toast(st.total + ' videos split across ' + plural(n, 'creator'));
+    },
     'cancel-edit': function () { S.edit = null; render(); },
     'save-campaign': function () {
       var e = S.edit; if (!String(e.name || '').trim()) { toast('Give the campaign a name.', true); return; }
-      call('adminSaveCampaign', [S.key, e], function (d) {
+      if (assignState(e).over) { toast('You’ve assigned more videos than the campaign total.', true); return; }
+      var payload = { id: e.id, name: e.name, artist: e.artist, sound: e.sound, brief: e.brief, status: e.status, deadline: e.deadline, totalVideos: e.totalVideos,
+        members: e.members.map(function (m) { return { creatorId: m.creatorId, videos: m.videos }; }) };
+      call('adminSaveCampaign', [S.key, payload], function (d) {
         if (!e.id) { var created = d.campaigns.filter(function (c) { return c.name === e.name.trim(); }).pop(); if (created) S.campaignId = created.id; S.filter = e.status === 'Ended' ? 'Ended' : 'Active'; }
         S.edit = null; setData(d); toast(e.id ? 'Saved' : 'Campaign created. Now tick who’s on it.');
       });
@@ -775,7 +1010,7 @@ a.tag.acc:hover { border-color: var(--accent); }
       if (p && p.views !== el.value.trim()) call('adminUpdatePost', [S.key, p.id, { views: el.value.trim() }], function (d) { S.data = d; toast('Views saved'); });
       return;
     }
-    if (el.dataset.k === 'campaign') { S.campaign = el.value; S.result = null; return; }
+    if (el.dataset.k === 'campaign') { S.campaign = el.value; S.result = null; render(); return; }
     if (el.dataset.k === 'ep-acc' && S.editPost) {
       if (el.value === '__new') { S.editPost.newAcc = true; S.editPost.account = ''; render(); var na = document.getElementById('ep-acc'); if (na) na.focus(); }
       else S.editPost.account = el.value;
@@ -793,7 +1028,12 @@ a.tag.acc:hover { border-color: var(--accent); }
   });
   app.addEventListener('input', function (ev) {
     var el = ev.target;
-    if (el.dataset.e && S.edit) { S.edit[el.dataset.e] = el.value; return; }
+    if (el.id === 'e-search' && S.edit) { S.edit.q = el.value; S.sugOpen = true; refreshSuggest(); return; }
+    if (el.dataset.mv && S.edit) {
+      S.edit.members.forEach(function (m) { if (m.creatorId === el.dataset.mv) m.videos = el.value; });
+      refreshAssign(); return;
+    }
+    if (el.dataset.e && S.edit) { S.edit[el.dataset.e] = el.value; if (el.dataset.e === 'totalVideos') refreshAssign(); return; }
     if (el.dataset.k === 'ep-acc-text' && S.editPost) { S.editPost.account = el.value.trim().replace(/^@+/, ''); return; }
     if (el.dataset.k === 'ep-date' && S.editPost) { S.editPost.postedOn = el.value; return; }
     if (el.dataset.k === 'accText' && S.rows[+el.dataset.i]) { S.rows[+el.dataset.i].account = el.value.trim().replace(/^@+/, ''); return; }
@@ -834,7 +1074,28 @@ a.tag.acc:hover { border-color: var(--accent); }
     S.result = null; render();
     toast(urls.length + ' links added. Check the dates before sending.');
   });
+  app.addEventListener('focusin', function (ev) {
+    if (ev.target.id === 'e-search' && S.edit) { S.sugOpen = true; refreshSuggest(); }
+  });
+  app.addEventListener('focusout', function (ev) {
+    if (ev.target.id === 'e-search') setTimeout(function () {
+      var a = document.activeElement;
+      if (a && a.closest && a.closest('.search-wrap')) return;
+      S.sugOpen = false; refreshSuggest();
+    }, 120);
+  });
+  // keep focus in the search box while picking a suggestion
+  app.addEventListener('mousedown', function (ev) { if (ev.target.closest && ev.target.closest('.sug')) ev.preventDefault(); });
   app.addEventListener('keydown', function (ev) {
+    if (ev.target.id === 'e-search') {
+      if (ev.key === 'Enter') { ev.preventDefault(); var first = document.querySelector('#e-suggest .sug'); if (first) actions['m-add'](first); }
+      if (ev.key === 'Escape') { S.edit.q = ''; ev.target.value = ''; S.sugOpen = false; refreshSuggest(); }
+      if (ev.key === 'ArrowDown') { var f = document.querySelector('#e-suggest .sug'); if (f) { ev.preventDefault(); f.focus(); } }
+    }
+    if (ev.target.classList && ev.target.classList.contains('sug')) {
+      if (ev.key === 'ArrowDown' && ev.target.nextElementSibling && ev.target.nextElementSibling.classList.contains('sug')) { ev.preventDefault(); ev.target.nextElementSibling.focus(); }
+      if (ev.key === 'ArrowUp') { ev.preventDefault(); (ev.target.previousElementSibling || document.getElementById('e-search')).focus(); }
+    }
     if (ev.key === 'Enter' && ev.target.id === 'new-creator') { ev.preventDefault(); actions['add-creator'](); }
     if (ev.key === 'Enter' && ev.target.id && (ev.target.id.indexOf('rn-') === 0 || ev.target.id.indexOf('ac-') === 0)) { ev.preventDefault(); actions['save-name']({ dataset: { id: ev.target.id.slice(3) } }); }
     if (ev.key === 'Enter' && ev.target.dataset && ev.target.dataset.views) { ev.target.blur(); }
