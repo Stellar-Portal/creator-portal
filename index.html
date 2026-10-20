@@ -472,7 +472,7 @@ a.tag.acc:hover { border-color: var(--accent); }
     }, function (e) { busy(false); toast(e.message, true); });
   }
   /* Must match VERSION in Code.gs. */
-  var SCRIPT_VERSION = '2026-10-20.2';
+  var SCRIPT_VERSION = '2026-10-20.3';
   /** Fills in anything an older script doesn't send, so the page never gets stuck. */
   function normalize(d) {
     if (!d || typeof d !== 'object') return d;
@@ -558,8 +558,8 @@ a.tag.acc:hover { border-color: var(--accent); }
     if (S && S.mode === 'creator' && S.data) render();
   });
   window.addEventListener('appinstalled', function () { store('cp-tip-closed', '1'); window.__installPrompt = null; if (S && S.data) render(); });
-  function start(boot) {
-    S = { mode: boot.mode, key: boot.key, data: null, busy: false,
+  function start(boot, isRetry) {
+    S = { mode: boot.mode, key: boot.key, data: null, busy: false, boot: boot, retried: !!isRetry,
       view: 'campaigns', campaignId: null, filter: 'Active', postCreator: '', edit: null, editCreator: null, armed: null, result: null,
       rows: [{ link: '', date: todayIso(), account: null }], campaign: '', ctab: 'send', lastAcc: '' };
     document.body.className = boot.mode === 'creator' ? 'creator' : 'team';
@@ -573,11 +573,19 @@ a.tag.acc:hover { border-color: var(--accent); }
         (S.mode === 'admin' && d && d.version !== SCRIPT_VERSION ? 'The Google script is an older version than this page. In Apps Script: Deploy → Manage deployments → pencil icon → New version → Deploy. Then reload.' : 'Reload the page and try again.') + '</p></div>'; return; }
       if (boot.mode === 'creator' && d.push) initPush(d.push);
     },
-      function (e) { if (boot.mode === 'creator') store('cp-creator', null); gate(boot.mode === 'admin' ? 'This team link doesn’t work' : 'This link isn’t active', e.message); });
+      function (e) {
+        var bad = /no longer active|team link is not valid/i.test(e.message);
+        if (!bad && !S.retried) { S.retried = true; app.innerHTML = '<div class="loading">Still loading…</div>'; return setTimeout(function () { start(boot, true); }, 1500); }
+        // Only forget the remembered link when it really was switched off (not on a slow or dropped connection)
+        if (bad && boot.mode === 'creator') store('cp-creator', null);
+        if (bad) gate(boot.mode === 'admin' ? 'This team link doesn’t work' : 'This link isn’t active', e.message);
+        else gate('Couldn’t open the portal', e.message + ' Your link is fine.', true);
+      });
   }
   window.__startPortal = start;
-  function gate(title, msg) {
-    app.innerHTML = '<div class="gate">' + brand() + '<h1>' + esc(title) + '</h1><p class="muted">' + esc(msg) + '</p></div>';
+  function gate(title, msg, retry) {
+    app.innerHTML = '<div class="gate">' + brand() + '<h1>' + esc(title) + '</h1><p class="muted">' + esc(msg) + '</p>' +
+      (retry ? '<button class="btn primary" type="button" data-act="retry">Try again</button>' : '') + '</div>';
   }
   function render() {
     S.armedTimer && clearTimeout(S.armedTimer);
@@ -1374,6 +1382,7 @@ a.tag.acc:hover { border-color: var(--accent); }
       call('updateMyPost', [S.key, e.id, { postedOn: e.postedOn, account: String(e.account || '').replace(/^@+/, '') }], function (d) { S.data = d; S.editPost = null; render(); toast('Saved'); });
     },
     'del-mine': function (el) { if (!arm('del:' + el.dataset.id)) return; call('deleteMyPost', [S.key, el.dataset.id], function (d) { S.data = d; S.armed = null; S.result = null; render(); toast('Removed'); }); },
+    'retry': function () { start(S.boot, true); },
     'push-on': function () {
       var OS = window.__OS; if (!OS) { toast('Notifications are still loading. Try again in a moment.', true); return; }
       // Must run straight from the tap (iPhone only shows the question then)
