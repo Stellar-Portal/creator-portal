@@ -366,6 +366,7 @@ a.tag.acc:hover { border-color: var(--accent); }
 .pay-row td { vertical-align: middle; }
 .subtle-link { background: none; border: 0; padding: 0; color: var(--muted); font: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; }
 .tagpick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.grp-chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 </style>
 
 <div id="app"><div class="loading">Loading…</div></div>
@@ -887,6 +888,25 @@ a.tag.acc:hover { border-color: var(--accent); }
     S.data.creators.forEach(function (c) { (c.tags || []).forEach(function (t) { if (!seen[t.toLowerCase()]) { seen[t.toLowerCase()] = 1; out.push(t); } }); });
     return out.sort(function (a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
   }
+  function hasTag(list, t) { return (list || []).some(function (x) { return x.toLowerCase() === String(t).toLowerCase(); }); }
+  /** Every group in use, plus ones typed in this session (so they stay as buttons even if switched off again). */
+  function groupLabels(e) {
+    var out = allTags();
+    (S.newTags || []).concat(e ? e.tagList : []).forEach(function (t) { if (!hasTag(out, t)) out.push(t); });
+    return out.sort(function (a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
+  }
+  function addNewTag(e, raw) {
+    var added = false;
+    String(raw || '').split(',').forEach(function (t) {
+      t = t.replace(/\s+/g, ' ').trim().replace(/^#/, '').slice(0, 30); if (!t) return;
+      var known = groupLabels(e).filter(function (x) { return x.toLowerCase() === t.toLowerCase(); })[0];
+      t = known || t;   // reuse the existing spelling
+      if (!hasTag(e.tagList, t)) e.tagList.push(t);
+      S.newTags = S.newTags || []; if (!hasTag(S.newTags, t)) S.newTags.push(t);
+      added = true;
+    });
+    return added;
+  }
   function inTag(c, t) { return (c.tags || []).some(function (x) { return x.toLowerCase() === t.toLowerCase(); }); }
   function tagsHtml(c) { return (c.tags || []).map(function (t) { return '<span class="gtag">' + esc(t) + '</span>'; }).join(''); }
   function ordinal(n) { var s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
@@ -1209,14 +1229,19 @@ a.tag.acc:hover { border-color: var(--accent); }
   }
 
   function creatorForm(e) {
-    var tags = allTags().filter(function (t) { return !String(e.tags || '').split(',').some(function (x) { return x.trim().toLowerCase() === t.toLowerCase(); }); });
+    var labels = groupLabels(e);
     return '<section class="card" aria-labelledby="ce-h"><h2 id="ce-h">Edit ' + esc(e.origName) + '</h2><div class="form-grid">' +
       '<div><label class="lbl" for="ce-name">Name</label><input class="input" id="ce-name" data-ce="name" value="' + esc(e.name) + '"></div>' +
       '<div><label class="lbl" for="ce-email">Email <span class="faint" style="font-weight:400">for new-campaign emails</span></label><input class="input" id="ce-email" type="email" data-ce="email" value="' + esc(e.email) + '" placeholder="name@example.com" autocomplete="off"></div>' +
       '<div class="full"><label class="lbl" for="ce-acc">TikTok accounts</label><input class="input" id="ce-acc" data-ce="accounts" value="' + esc(e.accounts) + '" placeholder="@account1, @account2" autocomplete="off"></div>' +
-      '<div class="full"><label class="lbl" for="ce-tags">Groups</label><input class="input" id="ce-tags" data-ce="tags" value="' + esc(e.tags) + '" placeholder="e.g. hyperpop, indie" autocomplete="off">' +
-        (tags.length ? '<div class="tagpick">' + tags.map(function (t) { return '<button type="button" class="sug" data-act="tag-add" data-tag="' + esc(t) + '">' + esc(t) + '</button>'; }).join('') + '</div>' : '') +
-        '<p class="hint" style="margin-top:6px">Separate groups with commas. Only the team sees groups.</p></div>' +
+      '<div class="full"><span class="lbl" id="ce-tags-l">Groups</span>' +
+        (labels.length ? '<div class="tagpick" role="group" aria-labelledby="ce-tags-l">' + labels.map(function (t) {
+          var on = hasTag(e.tagList, t);
+          return '<button type="button" class="chip grp-chip" data-act="tag-toggle" data-tag="' + esc(t) + '" aria-pressed="' + on + '">' + (on ? '✓ ' : '+ ') + esc(t) + '</button>';
+        }).join('') + '</div>' : '') +
+        '<div class="row-actions" style="flex-wrap:nowrap;margin-top:8px"><input class="input" id="ce-newtag" placeholder="' + (labels.length ? 'New group…' : 'e.g. hyperpop') + '" autocomplete="off" style="flex:1;max-width:320px" aria-label="New group name">' +
+        '<button class="btn sm" type="button" data-act="tag-new">Add group</button></div>' +
+        '<p class="hint" style="margin-top:6px">Tap a group to add or remove it. New groups appear here for every creator. Only the team sees groups.</p></div>' +
       '<div><label class="lbl" for="ce-pay">Pay date <span class="faint" style="font-weight:400">DD/MM/YYYY</span></label><input class="input" id="ce-pay" type="date" data-ce="payStart" value="' + esc(e.payStart) + '">' +
         '<p class="hint" style="margin-top:6px">Their next pay day. It repeats every month on the same day.</p></div>' +
       '<div class="full"><label class="lbl" for="ce-notes">Notes <span class="faint" style="font-weight:400">only the team sees these</span></label><textarea class="input" id="ce-notes" data-ce="notes" style="min-height:70px">' + esc(e.notes) + '</textarea></div>' +
@@ -1480,20 +1505,28 @@ a.tag.acc:hover { border-color: var(--accent); }
     'edit-cr': function () {
       var cr = creatorById(S.creatorId); if (!cr) return;
       S.crEdit = { id: cr.id, origName: cr.name, name: cr.name, email: cr.email || '', notes: cr.notes || '', payStart: cr.payStart || '',
-        accounts: (cr.accounts || []).map(function (a) { return '@' + a; }).join(', '), tags: (cr.tags || []).join(', ') };
+        accounts: (cr.accounts || []).map(function (a) { return '@' + a; }).join(', '), tagList: (cr.tags || []).slice() };
       render(); window.scrollTo(0, 0); var i = document.getElementById('ce-name'); if (i) i.focus();
     },
     'cancel-cr-edit': function () { S.crEdit = null; render(); },
-    'tag-add': function (el) {
+    'tag-toggle': function (el) {
       var e = S.crEdit; if (!e) return;
-      var cur = String(e.tags || '').split(',').map(function (x) { return x.trim(); }).filter(Boolean);
-      cur.push(el.dataset.tag); e.tags = cur.join(', '); render();
+      var t = el.dataset.tag;
+      if (hasTag(e.tagList, t)) e.tagList = e.tagList.filter(function (x) { return x.toLowerCase() !== t.toLowerCase(); });
+      else e.tagList.push(t);
+      render();
+    },
+    'tag-new': function () {
+      var e = S.crEdit, inp = document.getElementById('ce-newtag'); if (!e || !inp) return;
+      if (!addNewTag(e, inp.value)) { toast('Type a group name first.', true); inp.focus(); return; }
+      render(); var i = document.getElementById('ce-newtag'); if (i) i.focus();
     },
     'save-cr': function () {
       var e = S.crEdit; if (!e) return;
       if (!String(e.name).trim()) { toast('Add a name.', true); return; }
       if (e.email.trim() && !/^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(e.email.trim())) { toast('That email address doesn’t look right.', true); return; }
-      call('adminSaveCreator', [S.key, { id: e.id, name: e.name, email: e.email.trim(), notes: e.notes, payStart: e.payStart, accounts: e.accounts, tags: e.tags }],
+      var typed = document.getElementById('ce-newtag'); if (typed && typed.value.trim()) addNewTag(e, typed.value);   // typed but not added yet
+      call('adminSaveCreator', [S.key, { id: e.id, name: e.name, email: e.email.trim(), notes: e.notes, payStart: e.payStart, accounts: e.accounts, tags: e.tagList }],
         function (d) { S.crEdit = null; setData(d); toast('Saved'); });
     },
     'pay': function (el) {
@@ -1640,6 +1673,7 @@ a.tag.acc:hover { border-color: var(--accent); }
       if (ev.key === 'ArrowUp') { ev.preventDefault(); (ev.target.previousElementSibling || document.getElementById('e-search')).focus(); }
     }
     if (ev.key === 'Enter' && ev.target.id === 'new-creator') { ev.preventDefault(); actions['add-creator'](); }
+    if (ev.key === 'Enter' && ev.target.id === 'ce-newtag') { ev.preventDefault(); actions['tag-new'](); }
     if (ev.key === 'Enter' && ev.target.id === 'pin') { ev.preventDefault(); var b = document.querySelector('[data-act="pin-show"]'); if (b) actions['pin-show'](b); }
     if (ev.key === 'Enter' && ev.target.id && (ev.target.id.indexOf('rn-') === 0 || ev.target.id.indexOf('ac-') === 0)) { ev.preventDefault(); actions['save-name']({ dataset: { id: ev.target.id.slice(3) } }); }
     if (ev.key === 'Enter' && ev.target.dataset && ev.target.dataset.views) { ev.target.blur(); }
