@@ -309,6 +309,7 @@ a.tag.acc:hover { border-color: var(--accent); }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg);
   padding: 10px 16px; border-radius: 99px; font-size: 14px; font-weight: 500; z-index: 20; box-shadow: 0 6px 20px rgb(0 0 0 / 0.2); max-width: calc(100% - 32px); }
 .toast.bad { background: var(--bad); color: #fff; }
+.toast.busy-note { bottom: calc(68px + env(safe-area-inset-bottom, 0px)); background: var(--surface); color: var(--ink); border: 1px solid var(--line-strong); }
 .loading { display: grid; place-items: center; min-height: 50vh; color: var(--muted); }
 .gate { max-width: 460px; margin: 12vh auto 0; padding: 0 16px; display: grid; gap: 10px; text-align: center; justify-items: center; }
 
@@ -393,7 +394,8 @@ a.tag.acc:hover { border-color: var(--accent); }
         }, 140);
       } else if (window.API_URL) {
         var ctl = window.AbortController ? new AbortController() : null, slow = false;
-        var timer = setTimeout(function () { slow = true; if (ctl) ctl.abort(); }, 60000);
+        // Google normally answers in 2–5 s (up to ~20 s when it's waking up). After 30 s the reply has got lost.
+        var timer = setTimeout(function () { slow = true; if (ctl) ctl.abort(); }, 30000);
         fetch(window.API_URL, {
           method: 'POST', credentials: 'omit', redirect: 'follow', signal: ctl ? ctl.signal : undefined,
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -462,14 +464,44 @@ a.tag.acc:hover { border-color: var(--accent); }
       } else fallback();
     } catch (e) { fallback(); }
   }
-  function busy(on) { S.busy = on; document.body.style.cursor = on ? 'progress' : ''; }
+  /* While a request is out: a visible "Saving…" note after a moment (with seconds), instead of only a spinning cursor. */
+  var busyTimer, busyStart = 0;
+  function busy(on) {
+    S.busy = on; document.body.style.cursor = on ? 'progress' : '';
+    clearInterval(busyTimer);
+    var host = document.getElementById('busy-host');
+    if (!host) { host = document.createElement('div'); host.id = 'busy-host'; document.body.appendChild(host); }
+    host.innerHTML = '';
+    if (!on) return;
+    busyStart = Date.now();
+    busyTimer = setInterval(function () {
+      var secs = Math.round((Date.now() - busyStart) / 1000);
+      if (secs < 2) return;
+      host.innerHTML = '<div class="toast busy-note" role="status">Saving… ' + secs + 's' + (secs >= 8 ? ' · Google is slow right now, hang on' : '') + '</div>';
+    }, 500);
+  }
+  function stillBusy() {
+    var secs = Math.round((Date.now() - busyStart) / 1000);
+    toast('Still waiting for Google on the last change (' + secs + 's). Your click wasn’t sent: try again once it’s done.', true);
+  }
   function call(fn, args, after) {
-    if (S.busy) return;
+    if (S.busy) { stillBusy(); return; }
     busy(true);
     return api.apply(null, [fn].concat(args)).then(function (res) {
       busy(false);
       try { after(normalize(res)); } catch (e) { showCrash(e); }
-    }, function (e) { busy(false); toast(e.message, true); });
+    }, function (e) {
+      busy(false);
+      if (!/taking too long|Couldn’t reach the server/.test(e.message) || !S.data) return toast(e.message, true);
+      // The reply got lost on the way back. Google may well have saved it, so fetch what's really there now.
+      var view = S.mode === 'admin' ? 'adminView' : 'creatorView';
+      toast('Google didn’t answer in time. Checking what was saved…');
+      busy(true);
+      api(view, S.key).then(function (d) {
+        busy(false); setData(d);
+        toast('Google didn’t confirm that change. The page now shows what’s actually saved: if your change isn’t there, do it again.', true);
+      }, function () { busy(false); toast('Couldn’t reach Google. Check your connection, then reload the page.', true); });
+    });
   }
   /* Must match VERSION in Code.gs. */
   var SCRIPT_VERSION = '2026-10-20.3';
@@ -1588,7 +1620,9 @@ a.tag.acc:hover { border-color: var(--accent); }
   app.addEventListener('click', function (ev) {
     var el = ev.target.closest('[data-act]');
     if (!el || el.dataset.act === 'member') return;
-    if (S.busy) return;
+    // While waiting on Google, moving around is fine; anything that saves says why it can't run yet
+    var NAV = /^(tab|open|back|open-cr|back-cr|ctab|filter|group-filter|cancel-edit|cancel-cr-edit|cancel-mine|lg-cancel|al-cancel|lg-req-cancel|show-old|close-tip|show-tip|tip-os|push-hint-close)$/;
+    if (S.busy && !NAV.test(el.dataset.act)) { ev.preventDefault(); stillBusy(); return; }
     var fn = actions[el.dataset.act]; if (fn) { ev.preventDefault(); fn(el); }
   });
   app.addEventListener('change', function (ev) {
