@@ -695,8 +695,9 @@ a.tag.acc:hover { border-color: var(--accent); }
     document.head.appendChild(sc);
     window.OneSignalDeferred.push(function (OS) {
       var base = pushBase();
-      return OS.init({ appId: cfg.appId, serviceWorkerPath: base.slice(1) + 'push/onesignal/OneSignalSDKWorker.js',
-        serviceWorkerParam: { scope: base + 'push/onesignal/' }, autoResubscribe: true })
+      // OneSignalSDKWorker.js sits next to index.html
+      return OS.init({ appId: cfg.appId, serviceWorkerPath: base.slice(1) + 'OneSignalSDKWorker.js',
+        serviceWorkerParam: { scope: base }, autoResubscribe: true })
         .then(function () { return OS.login(cfg.id); })
         .then(function () {
           window.__OS = OS;
@@ -708,7 +709,9 @@ a.tag.acc:hover { border-color: var(--accent); }
   }
   function syncPush() {
     var OS = window.__OS; if (!OS) return;
-    var on = !!OS.User.PushSubscription.optedIn, perm = (window.Notification && Notification.permission) || 'default';
+    // Only "on" once OneSignal has actually registered this phone (it then has a subscription id)
+    var sub = OS.User.PushSubscription, on = !!(sub.optedIn && sub.id), perm = (window.Notification && Notification.permission) || 'default';
+    if (sub.optedIn && !sub.id) { setTimeout(syncPush, 1500); if (S.pushState !== 'loading') { S.pushState = 'loading'; refreshPush(); } return; }
     var was = S.pushState;
     S.pushState = on ? 'on' : perm === 'denied' ? 'blocked' : 'off';
     // Only "on" is reported automatically: a second device that never turned them on mustn't switch off the first one
@@ -1498,7 +1501,15 @@ a.tag.acc:hover { border-color: var(--accent); }
     'cancel-cr': function () { S.editCreator = null; render(); },
     'reset': function (el) { if (!arm('reset:' + el.dataset.id)) return; call('adminResetLink', [S.key, el.dataset.id], function (d) { setData(d); toast('New link made. Send it to them; the old one no longer works.'); }); },
     'del-creator': function (el) { if (!arm('delcr:' + el.dataset.id)) return; call('adminDeleteCreator', [S.key, el.dataset.id], function (d) { S.creatorId = null; setData(d); toast('Creator deleted'); }); },
-    'test-push': function (el) { call('adminTestPush', [S.key, el.dataset.id], function () { toast('Test notification sent'); }); },
+    'test-push': function (el) {
+      var cr = creatorById(el.dataset.id);
+      if (S.busy) return; busy(true);
+      api('adminTestPush', S.key, el.dataset.id).then(function () { busy(false); toast('Test notification sent'); }, function (e) {
+        busy(false);
+        toast(/invalid_aliases|not subscribed|hasn’t turned on/i.test(e.message)
+          ? (cr ? cr.name : 'This creator') + '’s phone isn’t registered yet. On their phone: open the portal, go to My details and tap Turn on notifications.' : e.message, true);
+      });
+    },
     'open-cr': function (el) { S.view = 'creators'; S.creatorId = el.dataset.id; S.crEdit = null; S.alForm = null; S.armed = null; render(); window.scrollTo(0, 0); },
     'back-cr': function () { S.creatorId = null; S.crEdit = null; S.alForm = null; render(); },
     'group-filter': function (el) { S.group = el.dataset.v; render(); },
