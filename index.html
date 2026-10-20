@@ -391,17 +391,22 @@ a.tag.acc:hover { border-color: var(--accent); }
           catch (e) { reject(new Error(e.message || String(e))); }
         }, 140);
       } else if (window.API_URL) {
+        var ctl = window.AbortController ? new AbortController() : null, slow = false;
+        var timer = setTimeout(function () { slow = true; if (ctl) ctl.abort(); }, 60000);
         fetch(window.API_URL, {
-          method: 'POST', credentials: 'omit', redirect: 'follow',
+          method: 'POST', credentials: 'omit', redirect: 'follow', signal: ctl ? ctl.signal : undefined,
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ fn: fn, args: args })
         }).then(function (r) {
           if (!r.ok) throw new Error('The server didn’t answer (' + r.status + '). Try again in a moment.');
           return r.json().catch(function () { throw new Error('The server sent something unexpected. Try again in a moment.'); });
         }).then(function (j) {
+          clearTimeout(timer);
           if (j && j.ok) resolve(j.data); else reject(new Error((j && j.error) || 'Something went wrong. Try again.'));
         }).catch(function (e) {
+          clearTimeout(timer);
           var m = (e && e.message) || '';
+          if (slow) m = 'The server is taking too long to answer. Try again in a moment.';
           reject(new Error(/failed to fetch|networkerror|load failed|network/i.test(m) ? 'Couldn’t reach the server. Check your connection and try again.' : m));
         });
       } else reject(new Error('This page is not connected to its sheet.'));
@@ -460,7 +465,32 @@ a.tag.acc:hover { border-color: var(--accent); }
   function call(fn, args, after) {
     if (S.busy) return;
     busy(true);
-    return api.apply(null, [fn].concat(args)).then(function (res) { busy(false); after(res); }, function (e) { busy(false); toast(e.message, true); });
+    return api.apply(null, [fn].concat(args)).then(function (res) {
+      busy(false);
+      try { after(normalize(res)); } catch (e) { showCrash(e); }
+    }, function (e) { busy(false); toast(e.message, true); });
+  }
+  /* Must match VERSION in Code.gs. */
+  var SCRIPT_VERSION = '2026-10-20.2';
+  /** Fills in anything an older script doesn't send, so the page never gets stuck. */
+  function normalize(d) {
+    if (!d || typeof d !== 'object') return d;
+    if (d.view) normalize(d.view);
+    (d.campaigns || []).forEach(function (c) { if (!c.sounds) c.sounds = c.sound ? [{ label: '', url: c.sound }] : []; });
+    (d.creators || []).forEach(function (c) { c.logins = c.logins || []; c.tags = c.tags || []; c.accounts = c.accounts || []; c.push = c.push || ''; c.email = c.email || ''; });
+    if (d.posts && !d.logins && d.name) d.logins = [];
+    if (d.accounts === undefined && d.name) d.accounts = [];
+    return d;
+  }
+  function showCrash(e) {
+    if (window.console) console.error(e);
+    var old = S.data && S.data.version !== SCRIPT_VERSION;
+    toast(old && S.mode === 'admin' ? 'The Google script is an older version than this page. Redeploy it (Deploy → Manage deployments → New version).' : 'Something went wrong showing this page. Reload and try again.', true);
+  }
+  function versionBanner() {
+    if (S.mode !== 'admin' || !S.data || !window.API_URL || S.data.version === SCRIPT_VERSION) return '';
+    return '<div class="notice bad" role="alert"><b>The Google script needs redeploying.</b> This page is newer than the script Google is running, so some things won’t work. ' +
+      'In Apps Script: <b>Deploy → Manage deployments → pencil icon → Version: New version → Deploy</b>, then reload this page.</div>';
   }
 
   /* ── start ─────────────────────────────────────────────── */
@@ -507,7 +537,7 @@ a.tag.acc:hover { border-color: var(--accent); }
     var br = os === dv.os ? dv.br : (os === 'ios' ? 'safari' : 'chrome');
     var h = '<div class="install" role="region" aria-label="Add to home screen"><div class="install-head"><b>Add this page to your home screen</b>' +
       '<button class="btn ghost sm x2" type="button" data-act="close-tip" aria-label="Hide these steps">×</button></div>' +
-      '<p>It’ll be saved as an app called <b>' + APP_NAME + '</b>, so you can open it in one tap.</p>';
+      '<p>It’ll be saved as an app called <b>' + APP_NAME + '</b>, so you can open it in one tap' + (S.data && S.data.push ? ' and get a notification when you’re added to a campaign' : '') + '.</p>';
     if (dv.inApp) {
       h += '<p class="inapp"><b>You’ve opened this inside an app</b> (like TikTok or Instagram), which can’t save pages. Tap <b>⋯</b> at the top right, choose <b>Open in browser</b>, then follow the steps below.</p>';
     }
@@ -535,7 +565,13 @@ a.tag.acc:hover { border-color: var(--accent); }
     if (boot.mode === 'none') return gate('Ask the Stellar team for your link', 'This page only opens from the private link you were sent.');
     app.innerHTML = '<div class="loading">Loading…</div>';
     var fn = boot.mode === 'admin' ? 'adminView' : 'creatorView';
-    api(fn, S.key).then(function (d) { S.data = d; render(); },
+    if (boot.mode === 'creator' && /campaigns/.test(location.hash || '')) S.ctab = 'campaigns';
+    api(fn, S.key).then(function (d) {
+      S.data = normalize(d);
+      try { render(); } catch (e) { showCrash(e); app.innerHTML = '<div class="gate">' + brand() + '<h1>This page couldn’t open</h1><p class="muted">' +
+        (S.mode === 'admin' && d && d.version !== SCRIPT_VERSION ? 'The Google script is an older version than this page. In Apps Script: Deploy → Manage deployments → pencil icon → New version → Deploy. Then reload.' : 'Reload the page and try again.') + '</p></div>'; return; }
+      if (boot.mode === 'creator' && d.push) initPush(d.push);
+    },
       function (e) { if (boot.mode === 'creator') store('cp-creator', null); gate(boot.mode === 'admin' ? 'This team link doesn’t work' : 'This link isn’t active', e.message); });
   }
   window.__startPortal = start;
@@ -569,6 +605,8 @@ a.tag.acc:hover { border-color: var(--accent); }
       return '<button type="button" data-act="ctab" data-v="' + t[0] + '"' + (tab === t[0] ? ' aria-current="page"' : '') + '>' + t[1] + (n && !dot ? ' <span class="num tab-n">' + n + '</span>' : '') + dot + '</button>';
     }).join('') + '</nav>';
 
+    if (S.pushState === 'off' && tab !== 'details' && !load('cp-push-hint-closed')) h += '<div class="notice ok push-hint" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span style="flex:1;min-width:200px">Get a notification on your phone when you’re added to a campaign.</span>' +
+      '<button class="btn sm primary" type="button" data-act="push-on">Turn on</button><button class="btn ghost sm" type="button" data-act="push-hint-close" aria-label="Hide">×</button></div>';
     if (tab === 'send') {
       h += '<section class="card" aria-label="Send links">';
       if (!active.length) {
@@ -640,10 +678,69 @@ a.tag.acc:hover { border-color: var(--accent); }
   function loginFor(acc) { return (S.data.logins || []).filter(function (l) { return l.account.toLowerCase() === String(acc).toLowerCase(); })[0]; }
   function missingLogins() { return (S.data.accounts || []).filter(function (a) { return !loginFor(a); }); }
 
+  /* ── phone notifications (OneSignal web push) ── */
+  function pushBase() { return location.pathname.replace(/[^\/]*$/, ''); }
+  function initPush(cfg) {
+    if (S.pushStarted || !window.API_URL) return;
+    S.pushStarted = true;
+    var dv = device();
+    if (dv.os === 'ios' && !isStandalone()) { S.pushState = 'needs-install'; return refreshPush(); }
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !window.Notification) { S.pushState = dv.inApp ? 'in-app' : 'unsupported'; return refreshPush(); }
+    S.pushState = 'loading';
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    var sc = document.createElement('script');
+    sc.src = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js'; sc.defer = true;
+    sc.onerror = function () { S.pushState = 'error'; refreshPush(); };
+    document.head.appendChild(sc);
+    window.OneSignalDeferred.push(function (OS) {
+      var base = pushBase();
+      return OS.init({ appId: cfg.appId, serviceWorkerPath: base.slice(1) + 'push/onesignal/OneSignalSDKWorker.js',
+        serviceWorkerParam: { scope: base + 'push/onesignal/' }, autoResubscribe: true })
+        .then(function () { return OS.login(cfg.id); })
+        .then(function () {
+          window.__OS = OS;
+          OS.User.PushSubscription.addEventListener('change', syncPush);
+          syncPush();
+        })
+        .catch(function (e) { S.pushState = 'error'; S.pushErr = (e && e.message) || ''; refreshPush(); });
+    });
+  }
+  function syncPush() {
+    var OS = window.__OS; if (!OS) return;
+    var on = !!OS.User.PushSubscription.optedIn, perm = (window.Notification && Notification.permission) || 'default';
+    var was = S.pushState;
+    S.pushState = on ? 'on' : perm === 'denied' ? 'blocked' : 'off';
+    // Only "on" is reported automatically: a second device that never turned them on mustn't switch off the first one
+    if (on && S.data && S.data.push && !S.data.push.on) { S.data.push.on = true; api('creatorSetPush', S.key, true).catch(function () {}); }
+    if (was !== S.pushState) refreshPush();
+  }
+  /** Updates just the notification bits, so typing elsewhere on the page isn't interrupted. */
+  function refreshPush() {
+    var el = document.getElementById('push-card'); if (el) el.innerHTML = pushCardInner();
+    var hint = document.querySelector('.push-hint');
+    if (hint && S.pushState !== 'off') hint.remove();
+    else if (!hint && S.pushState === 'off' && S.ctab !== 'details' && !document.activeElement.matches('input, textarea, select')) render();
+  }
+  function pushCardInner() {
+    var st = S.pushState || 'loading';
+    var why = '<p class="hint">Get a notification on your phone when you’re added to a new campaign.</p>';
+    if (st === 'on') return '<p><span class="pill ok">On</span></p><p class="hint">You’ll get a notification on this phone when you’re added to a campaign.</p>' +
+      '<div><button class="subtle-link" type="button" data-act="push-off">Turn off on this phone</button></div>';
+    if (st === 'off') return why + '<div><button class="btn primary" type="button" data-act="push-on">Turn on notifications</button></div>';
+    if (st === 'needs-install') return why + '<p class="hint">On iPhone this only works once the portal is on your home screen. Add it, open it from your home screen, then come back to this tab.</p>' +
+      '<div><button class="btn" type="button" data-act="show-tip">Show me how</button></div>';
+    if (st === 'in-app') return why + '<p class="hint">You’ve opened this inside another app (like TikTok or Instagram). Tap <b>⋯</b>, choose <b>Open in browser</b>, and turn them on from there.</p>';
+    if (st === 'blocked') return '<p><span class="pill bad">Blocked</span></p><p class="hint">Notifications are blocked for this page. Turn them on in your phone’s settings (Notifications → ' + APP_NAME + ', or your browser’s site settings), then come back here.</p>';
+    if (st === 'unsupported') return '<p class="hint">This browser can’t show notifications. Try Chrome or Safari, or add the portal to your home screen.</p>';
+    if (st === 'error') return '<p class="hint">Notifications couldn’t load right now. Check your connection and reload the page.</p>';
+    return '<p class="hint">Checking…</p>';
+  }
+
   /* Creator: their email + one locked login per account */
   function myDetailsHtml() {
     var d = S.data, f = S.loginForm;
-    var h = '<section class="card" aria-labelledby="em-h"><h2 id="em-h">Email</h2>' +
+    var h = d.push ? '<section class="card" aria-labelledby="pn-h"><h2 id="pn-h">Phone notifications</h2><div id="push-card" style="display:grid;gap:10px">' + pushCardInner() + '</div></section>' : '';
+    h += '<section class="card" aria-labelledby="em-h"><h2 id="em-h">Email</h2>' +
       '<p class="hint">We’ll email you when you’re added to a new campaign.</p>' +
       '<div class="row-actions" style="flex-wrap:nowrap"><input class="input" id="my-email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" value="' + esc(d.email || '') + '" style="flex:1">' +
       '<button class="btn primary" type="button" data-act="save-email">Save</button></div></section>';
@@ -780,7 +877,7 @@ a.tag.acc:hover { border-color: var(--accent); }
       '<nav class="tabs ctabs" aria-label="Sections">' + tabs.map(function (t) {
         return '<button type="button" data-act="tab" data-v="' + t[0] + '"' + (cur === t[0] ? ' aria-current="page"' : '') + '>' + t[1] +
           (t[2] ? '<span class="tab-dot" aria-label="' + t[2] + ' need attention">' + t[2] + '</span>' : '') + '</button>';
-      }).join('') + '</nav></div></header><main class="wrap">';
+      }).join('') + '</nav></div></header><main class="wrap">' + versionBanner();
     if (cur === 'creators') h += S.creatorId && creatorById(S.creatorId) ? creatorDetail(creatorById(S.creatorId)) : creatorsTab();
     else if (cur === 'payments') h += paymentsTab();
     else if (S.campaignId && campaignById(S.campaignId)) h += campaignDetail(campaignById(S.campaignId));
@@ -912,7 +1009,8 @@ a.tag.acc:hover { border-color: var(--accent); }
           ? '<div class="mrow mhead" aria-hidden="true"><span>Creator</span><span>Amount of videos</span><span></span></div>' + e.members.map(function (m) {
               var cr = creatorById(m.creatorId), nm = cr ? cr.name : 'Removed creator';
               var isNew = !e.orig || !e.orig[m.creatorId];
-              var note = isNew && cr && e.status !== 'Ended' ? (cr.email ? (e.notify ? '<span class="m-note">will be emailed</span>' : '') : '<span class="m-note">no email</span>') : '';
+              var reach = cr ? [cr.email ? 'email' : '', /^On/.test(cr.push || '') ? 'phone' : ''].filter(Boolean) : [];
+              var note = isNew && cr && e.status !== 'Ended' ? (reach.length ? (e.notify ? '<span class="m-note">will be notified by ' + reach.join(' + ') + '</span>' : '') : '<span class="m-note">no email or phone notifications</span>') : '';
               return '<div class="mrow"><span class="mname">' + esc(nm) + note + '</span>' +
                 '<input class="input small" type="number" min="0" step="1" inputmode="numeric" id="mv-' + esc(m.creatorId) + '" data-mv="' + esc(m.creatorId) + '" value="' + esc(m.videos) + '" placeholder="0" aria-label="Amount of videos for ' + esc(nm) + '">' +
                 '<button class="btn ghost sm x" type="button" data-act="m-remove" data-id="' + esc(m.creatorId) + '" aria-label="Remove ' + esc(nm) + '">×</button></div>';
@@ -920,7 +1018,7 @@ a.tag.acc:hover { border-color: var(--accent); }
           : '<p class="hint">No one yet. Search above to add creators.</p>') + '</div>' +
         '<div class="mfoot"><button class="btn sm" type="button" id="e-split" data-act="split"' + (assignState(e).canSplit ? '' : ' disabled') + '>Evenly split</button>' +
         '<div id="e-assign" class="assign">' + assignHtml(e) + '</div></div>' +
-        '<label class="check"><input type="checkbox" id="e-notify"' + (e.notify ? ' checked' : '') + '> Email the creators I add (if they have an email address)</label>' +
+        '<label class="check"><input type="checkbox" id="e-notify"' + (e.notify ? ' checked' : '') + '> Let the creators I add know (email, and a phone notification if they turned those on)</label>' +
       '</div>' +
       '</div><p class="hint">Creators see the campaign name, artist, sounds, brief, the deadline and their own amount of videos. They never see who else is on it. Ended campaigns stop taking new links.</p>' +
       '<div class="row-actions"><button class="btn primary" type="button" id="e-save" data-act="save-campaign"' + (over ? ' disabled' : '') + '>' + (isNew ? 'Create campaign' : 'Save changes') + '</button><button class="btn ghost" type="button" data-act="cancel-edit">Cancel</button></div></section>';
@@ -1076,6 +1174,11 @@ a.tag.acc:hover { border-color: var(--accent); }
       var p = cr.pay;
       h += '<div class="kv">' +
         factBox('Email', cr.email ? esc(cr.email) : '<span class="faint">None</span>', cr.email ? 'Gets emailed about new campaigns' : 'Not emailed about new campaigns') +
+        factBox('Phone notifications', !d.pushReady ? '<span class="faint">Not set up</span>' : /^On/.test(cr.push) ? 'On' : '<span class="faint">Off</span>',
+          !d.pushReady ? 'Google Sheet: Advocates Portal → Set up phone notifications'
+            : /^On/.test(cr.push) ? esc(cr.push.replace(/^On since (\d{4}-\d{2}-\d{2})$/, function (m, x) { return 'Since ' + fmtDate(x); })) +
+              ' <button class="btn sm" type="button" data-act="test-push" data-id="' + esc(cr.id) + '" style="margin-left:6px">Send a test</button>'
+            : 'They turn them on in their portal under My details') +
         factBox('Pay', p ? fmtDate(p.due.length ? p.due[0] : p.next) : '<span class="faint">No pay date</span>',
           p ? payLine(cr) + '<br>' + payStatus(p) + (p.due.length ? ' <button class="btn sm primary" type="button" data-act="pay" data-how="next" data-id="' + esc(cr.id) + '" style="margin-left:6px">Mark paid</button>' : '') : 'Click Edit to add one') +
         (cr.notes ? factBox('Notes', '<span style="font:400 14px/1.5 var(--f-body);white-space:pre-wrap">' + esc(cr.notes) + '</span>') : '') + '</div>';
@@ -1216,7 +1319,7 @@ a.tag.acc:hover { border-color: var(--accent); }
     clearTimeout(S.armedTimer); S.armedTimer = setTimeout(function () { if (S.armed === key) { S.armed = null; render(); } }, 4000);
     return false;
   }
-  function setData(d) { S.data = d; S.armed = null; render(); }
+  function setData(d) { S.data = normalize(d); S.armed = null; render(); }
   var actions = {
     'add-row': function () { var prev = S.rows[S.rows.length - 1]; S.rows.push({ link: '', date: prev.date || todayIso(), account: prev.account, newAcc: prev.newAcc }); S.result = null; render(); var el = document.getElementById('link-' + (S.rows.length - 1)); if (el) el.focus(); },
     'acc-cancel': function (el) { var r = S.rows[+el.dataset.i]; r.newAcc = false; r.account = defaultAccount(); render(); },
@@ -1247,6 +1350,29 @@ a.tag.acc:hover { border-color: var(--accent); }
       call('updateMyPost', [S.key, e.id, { postedOn: e.postedOn, account: String(e.account || '').replace(/^@+/, '') }], function (d) { S.data = d; S.editPost = null; render(); toast('Saved'); });
     },
     'del-mine': function (el) { if (!arm('del:' + el.dataset.id)) return; call('deleteMyPost', [S.key, el.dataset.id], function (d) { S.data = d; S.armed = null; S.result = null; render(); toast('Removed'); }); },
+    'push-on': function () {
+      var OS = window.__OS; if (!OS) { toast('Notifications are still loading. Try again in a moment.', true); return; }
+      // Must run straight from the tap (iPhone only shows the question then)
+      Promise.resolve(OS.Notifications.requestPermission())
+        .then(function () { return OS.User.PushSubscription.optedIn ? null : OS.User.PushSubscription.optIn(); })
+        .catch(function () {})
+        .then(function () {
+          setTimeout(function () {
+            syncPush();
+            if (S.pushState === 'on') toast('Notifications are on');
+            else if (S.pushState === 'blocked') toast('Notifications are blocked. Turn them on in your phone’s settings.', true);
+          }, 600);
+        });
+    },
+    'push-off': function () {
+      var OS = window.__OS; if (!OS) return;
+      Promise.resolve(OS.User.PushSubscription.optOut()).catch(function () {}).then(function () {
+        if (S.data.push) S.data.push.on = false;
+        api('creatorSetPush', S.key, false).catch(function () {});
+        setTimeout(function () { syncPush(); toast('Notifications are off on this phone'); }, 400);
+      });
+    },
+    'push-hint-close': function () { store('cp-push-hint-closed', '1'); render(); },
     'save-email': function () {
       var v = (document.getElementById('my-email') || {}).value || '';
       call('creatorSaveEmail', [S.key, v.trim()], function (d) { S.data = d; render(); toast(v.trim() ? 'Saved. We’ll email you about new campaigns.' : 'Email removed'); });
@@ -1319,7 +1445,9 @@ a.tag.acc:hover { border-color: var(--accent); }
         S.edit = null; setData(d);
         var em = d.emailed, bits = [];
         if (em && em.sent.length) bits.push('emailed ' + em.sent.join(', '));
-        if (em && em.noEmail.length) bits.push(em.noEmail.join(', ') + ' ha' + (em.noEmail.length > 1 ? 've' : 's') + ' no email');
+        if (em && em.pushed && em.pushed.length) bits.push('phone notification to ' + em.pushed.join(', '));
+        var unreached = em ? em.noEmail.filter(function (n) { return !em.pushed || em.pushed.indexOf(n) < 0; }) : [];
+        if (unreached.length) bits.push(unreached.join(', ') + ' couldn’t be notified (no email)');
         if (em && em.failed.length) bits.push('couldn’t email ' + em.failed.join(', '));
         toast((e.id ? 'Saved' : 'Campaign created') + (bits.length ? ' · ' + bits.join(' · ') : ''));
       });
@@ -1349,6 +1477,7 @@ a.tag.acc:hover { border-color: var(--accent); }
     'cancel-cr': function () { S.editCreator = null; render(); },
     'reset': function (el) { if (!arm('reset:' + el.dataset.id)) return; call('adminResetLink', [S.key, el.dataset.id], function (d) { setData(d); toast('New link made. Send it to them; the old one no longer works.'); }); },
     'del-creator': function (el) { if (!arm('delcr:' + el.dataset.id)) return; call('adminDeleteCreator', [S.key, el.dataset.id], function (d) { S.creatorId = null; setData(d); toast('Creator deleted'); }); },
+    'test-push': function (el) { call('adminTestPush', [S.key, el.dataset.id], function () { toast('Test notification sent'); }); },
     'open-cr': function (el) { S.view = 'creators'; S.creatorId = el.dataset.id; S.crEdit = null; S.alForm = null; S.armed = null; render(); window.scrollTo(0, 0); },
     'back-cr': function () { S.creatorId = null; S.crEdit = null; S.alForm = null; render(); },
     'group-filter': function (el) { S.group = el.dataset.v; render(); },
