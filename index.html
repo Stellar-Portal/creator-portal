@@ -1502,10 +1502,13 @@ a.tag.acc:hover { border-color: var(--accent); }
     'reset': function (el) { if (!arm('reset:' + el.dataset.id)) return; call('adminResetLink', [S.key, el.dataset.id], function (d) { setData(d); toast('New link made. Send it to them; the old one no longer works.'); }); },
     'del-creator': function (el) { if (!arm('delcr:' + el.dataset.id)) return; call('adminDeleteCreator', [S.key, el.dataset.id], function (d) { S.creatorId = null; setData(d); toast('Creator deleted'); }); },
     'test-push': function (el) {
-      var cr = creatorById(el.dataset.id);
-      if (S.busy) return; busy(true);
-      api('adminTestPush', S.key, el.dataset.id).then(function () { busy(false); toast('Test notification sent'); }, function (e) {
-        busy(false);
+      var cr = creatorById(el.dataset.id), label = el.textContent;
+      if (el.disabled) return;
+      // The button shows its own progress (no busy cursor), so the rest of the page stays usable
+      el.disabled = true; el.textContent = 'Sending…';
+      function done(txt) { el.textContent = txt; setTimeout(function () { el.disabled = false; el.textContent = label; }, 3000); }
+      api('adminTestPush', S.key, el.dataset.id).then(function () { done('Sent ✓'); toast('Test notification sent. It can take up to a minute to arrive.'); }, function (e) {
+        done('Not sent');
         toast(/invalid_aliases|not subscribed|hasn’t turned on/i.test(e.message)
           ? (cr ? cr.name : 'This creator') + '’s phone isn’t registered yet. On their phone: open the portal, go to My details and tap Turn on notifications.' : e.message, true);
       });
