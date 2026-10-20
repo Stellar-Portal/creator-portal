@@ -311,6 +311,61 @@ a.tag.acc:hover { border-color: var(--accent); }
 .toast.bad { background: var(--bad); color: #fff; }
 .loading { display: grid; place-items: center; min-height: 50vh; color: var(--muted); }
 .gate { max-width: 460px; margin: 12vh auto 0; padding: 0 16px; display: grid; gap: 10px; text-align: center; justify-items: center; }
+
+/* sounds */
+.sounds { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.sounds .snd-txt { font-weight: 600; font-size: 14px; color: var(--muted); }
+.slist { display: grid; gap: 8px; }
+.srow { display: grid; grid-template-columns: minmax(0, 190px) minmax(0, 1fr) 36px; gap: 8px; align-items: center; }
+.srow .x { font-size: 18px; padding: 0; min-height: 36px; }
+@media (max-width: 600px) {
+  .srow { grid-template-columns: minmax(0, 1fr) 36px; padding: 10px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-sm); }
+  .srow .s-url { grid-column: 1 / 2; }
+  .srow .x { grid-column: 2; grid-row: 1; }
+}
+.check { display: flex; gap: 8px; align-items: center; font-size: 14px; cursor: pointer; }
+.check input { width: 17px; height: 17px; margin: 0; accent-color: var(--accent); flex: none; }
+/* pills and small labels */
+.pill.new { background: var(--accent-soft); color: var(--accent); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.lock { background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); }
+.gtag { font-size: 12px; font-weight: 600; background: var(--accent-soft); color: var(--accent); border-radius: 99px; padding: 2px 9px; white-space: nowrap; }
+.tab-dot { display: inline-block; min-width: 18px; height: 18px; line-height: 18px; text-align: center; border-radius: 99px; background: var(--bad); color: #fff; font-size: 11px; font-weight: 700; padding: 0 5px; margin-left: 4px; }
+.ctabs { overflow-x: auto; max-width: 100%; scrollbar-width: none; }
+.ctabs::-webkit-scrollbar { display: none; }
+.ctabs button { white-space: nowrap; }
+@media (max-width: 480px) {
+  .creator .ctabs { display: grid; grid-template-columns: 1fr 1fr; border-radius: 14px; justify-self: stretch; }
+  .creator .ctabs button { border-radius: 10px; padding: 8px 10px; }
+}
+.sug.grp::before { content: "+ "; }
+.sug.grp { border-style: dashed; }
+.m-note { font-size: 12px; color: var(--faint); font-weight: 500; margin-left: 6px; }
+/* logins */
+.lg { display: grid; gap: 10px; padding: 14px 0; border-top: 1px solid var(--line); }
+.lg:first-child { border-top: 0; padding-top: 0; }
+.lg-top { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.lg-top .acc-n { font-weight: 600; }
+.lg-top .row-actions { margin-left: auto; }
+.lg-meta { font-size: 13px; color: var(--muted); }
+.lg-form { display: grid; gap: 12px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; }
+.secret { display: grid; grid-template-columns: 130px minmax(0, 1fr) auto; gap: 6px 10px; align-items: center; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 10px 12px; }
+.secret .k { color: var(--muted); font-size: 13px; }
+.secret .v { font: 13px var(--f-mono); overflow-wrap: anywhere; }
+.secret.old { opacity: .75; }
+.secret .full { grid-column: 1 / -1; font-size: 12px; color: var(--faint); }
+@media (max-width: 560px) { .secret { grid-template-columns: minmax(0, 1fr) auto; } .secret .k { grid-column: 1 / -1; margin-bottom: -4px; } }
+.pin-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.pin-row .input { width: 150px; }
+.kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.kv .t-v { font-size: 17px; overflow-wrap: anywhere; }
+.namebtn { background: none; border: 0; padding: 0; font: inherit; font-weight: 600; color: inherit; cursor: pointer; text-align: left; }
+.namebtn:hover { color: var(--accent); text-decoration: underline; }
+.pay-row td { vertical-align: middle; }
+.subtle-link { background: none; border: 0; padding: 0; color: var(--muted); font: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; }
+.tagpick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 </style>
 
 <div id="app"><div class="loading">Loading…</div></div>
@@ -506,9 +561,12 @@ a.tag.acc:hover { border-color: var(--accent); }
     var h = '<header class="top"><div class="top-in">' + brand() + '</div></header><main class="wrap">';
     h += '<section><h1>Hi, ' + esc(d.name) + '</h1><p class="lede">Only you and the Stellar team can see this page.</p></section>';
     h += installTip();
-    h += '<nav class="tabs ctabs" aria-label="Sections">' + [['send', 'Send links'], ['campaigns', 'Campaigns'], ['posts', 'My posts']].map(function (t) {
+    var missing = missingLogins().length, fresh = d.campaigns.filter(isNewCampaign).length;
+    h += '<nav class="tabs ctabs" aria-label="Sections">' + [['send', 'Send links'], ['campaigns', 'Campaigns'], ['posts', 'My posts'], ['details', 'My details']].map(function (t) {
       var n = t[0] === 'campaigns' ? d.campaigns.length : t[0] === 'posts' ? d.posts.length : 0;
-      return '<button type="button" data-act="ctab" data-v="' + t[0] + '"' + (tab === t[0] ? ' aria-current="page"' : '') + '>' + t[1] + (n ? ' <span class="num tab-n">' + n + '</span>' : '') + '</button>';
+      var dot = t[0] === 'details' && missing ? '<span class="tab-dot" aria-label="' + plural(missing, 'login') + ' to add">' + missing + '</span>'
+        : t[0] === 'campaigns' && fresh ? '<span class="tab-dot" aria-label="' + plural(fresh, 'new campaign') + '">' + fresh + '</span>' : '';
+      return '<button type="button" data-act="ctab" data-v="' + t[0] + '"' + (tab === t[0] ? ' aria-current="page"' : '') + '>' + t[1] + (n && !dot ? ' <span class="num tab-n">' + n + '</span>' : '') + dot + '</button>';
     }).join('') + '</nav>';
 
     if (tab === 'send') {
@@ -540,10 +598,11 @@ a.tag.acc:hover { border-color: var(--accent); }
       if (!d.campaigns.length) h += '<div class="empty">You’re not on any campaigns yet.</div>';
       else h += '<section class="camp-cards" aria-label="Your campaigns">' + d.campaigns.map(function (c) {
         var mine = d.posts.filter(function (p) { return p.campaignId === c.id; }).length;
-        return '<article class="camp"><div class="camp-top"><h2>' + esc(c.name) + '</h2><span class="pill ' + (c.status === 'Active' ? 'active' : 'ended') + '">' + esc(c.status) + '</span></div>' +
+        return '<article class="camp"><div class="camp-top"><h2>' + esc(c.name) + '</h2><span class="row-actions">' + (isNewCampaign(c) ? '<span class="pill new">New</span>' : '') +
+          '<span class="pill ' + (c.status === 'Active' ? 'active' : 'ended') + '">' + esc(c.status) + '</span></span></div>' +
           (c.artist ? '<div class="muted">' + esc(c.artist) + '</div>' : '') +
           myTargetHtml(c, mine) +
-          (isUrl(c.sound) ? '<a class="sound" href="' + esc(c.sound) + '" target="_blank" rel="noopener noreferrer">♪ Open the sound</a>' : (c.sound ? '<div>♪ ' + esc(c.sound) + '</div>' : '')) +
+          soundsHtml(c.sounds, true) +
           (c.brief ? '<p class="brief">' + esc(c.brief) + '</p>' : '') +
           '<div class="row-actions camp-foot"><span class="hint">' + (toInt(c.myVideos) ? mine + ' of ' + toInt(c.myVideos) + ' videos sent' : plural(mine, 'post') + ' sent') + '</span>' +
           (c.status === 'Active' ? '<button class="btn sm" type="button" data-act="send-for" data-id="' + esc(c.id) + '" style="margin-left:auto">Send links for this campaign</button>' : '') + '</div></article>';
@@ -563,8 +622,69 @@ a.tag.acc:hover { border-color: var(--accent); }
       }).join('') + '</div>';
       h += '</section>';
     }
+    if (tab === 'details') h += myDetailsHtml();
     if (window.API_URL && !isStandalone() && !installTip()) h += '<p class="foot"><button class="linkish" type="button" data-act="show-tip">How to add this page to your home screen</button></p>';
     return h + '</main>';
+  }
+  /** "♪ Chorus  ♪ Sound 2" — links when there's a link, plain text otherwise. */
+  function soundsHtml(list, big) {
+    list = list || [];
+    if (!list.length) return '';
+    var n = list.length;
+    return '<div class="sounds">' + list.map(function (s, i) {
+      var name = s.label || (n > 1 ? 'Sound ' + (i + 1) : (big ? 'Open the sound' : 'Sound'));
+      return s.url ? '<a class="sound" href="' + esc(s.url) + '" target="_blank" rel="noopener noreferrer">♪ ' + esc(name) + '</a>' : '<span class="snd-txt">♪ ' + esc(s.label) + '</span>';
+    }).join('') + '</div>';
+  }
+  function isNewCampaign(c) { var n = daysSince(c.added); return c.status === 'Active' && n != null && n <= 7; }
+  function loginFor(acc) { return (S.data.logins || []).filter(function (l) { return l.account.toLowerCase() === String(acc).toLowerCase(); })[0]; }
+  function missingLogins() { return (S.data.accounts || []).filter(function (a) { return !loginFor(a); }); }
+
+  /* Creator: their email + one locked login per account */
+  function myDetailsHtml() {
+    var d = S.data, f = S.loginForm;
+    var h = '<section class="card" aria-labelledby="em-h"><h2 id="em-h">Email</h2>' +
+      '<p class="hint">We’ll email you when you’re added to a new campaign.</p>' +
+      '<div class="row-actions" style="flex-wrap:nowrap"><input class="input" id="my-email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" value="' + esc(d.email || '') + '" style="flex:1">' +
+      '<button class="btn primary" type="button" data-act="save-email">Save</button></div></section>';
+    h += '<section class="card" aria-labelledby="lg-h"><h2 id="lg-h">Account logins</h2>' +
+      '<p class="hint">Send us the login for each account you post from. Once it’s sent it’s locked: only the Stellar team can see it, and it can’t be changed here. If you change a password, tap <b>I changed my password</b> and we’ll unlock it so you can send the new one.</p>';
+    var accs = d.accounts.slice();
+    (d.logins || []).forEach(function (l) { if (!accs.some(function (a) { return a.toLowerCase() === l.account.toLowerCase(); })) accs.push(l.account); });
+    if (!accs.length && !(f && f.isNew)) h += '<div class="empty">No accounts yet. Add one below.</div>';
+    h += '<div>' + accs.map(function (a) {
+      var l = loginFor(a), open = f && !f.isNew && f.account.toLowerCase() === a.toLowerCase();
+      var st = !l ? '<span class="pill warn">Not sent yet</span>' : l.status === 'locked' ? '<span class="pill ok">Saved · locked</span>'
+        : l.status === 'requested' ? '<span class="pill warn">Waiting for the team</span>' : '<span class="pill new">Unlocked</span>';
+      var act = '';
+      if (!open) {
+        if (!l) act = '<button class="btn sm primary" type="button" data-act="lg-open" data-acc="' + esc(a) + '">Add login</button>';
+        else if (l.status === 'open') act = '<button class="btn sm primary" type="button" data-act="lg-open" data-acc="' + esc(a) + '">Send new login</button>';
+        else if (l.status === 'locked') act = '<button class="btn sm ghost" type="button" data-act="lg-req" data-acc="' + esc(a) + '">I changed my password</button>';
+      }
+      var x = '<div class="lg"><div class="lg-top"><span class="acc-n">@' + esc(a) + '</span>' + st + '<span class="row-actions">' + act + '</span></div>';
+      if (l && !open) x += '<p class="lg-meta">' + (l.status === 'requested' ? 'You asked to update this on ' + fmtDate(String(l.requestedAt || l.savedAt).slice(0, 10)) + '. The team will unlock it so you can send the new login.'
+        : l.status === 'open' ? 'The team unlocked this so you can send your new login.' : 'Sent ' + fmtDate(String(l.savedAt).slice(0, 10)) + '.') + '</p>';
+      if (S.reqFor && S.reqFor.toLowerCase() === a.toLowerCase()) x += '<div class="lg-form"><label class="sub" for="req-note">What changed? <span class="faint">(optional)</span></label>' +
+        '<textarea class="input" id="req-note" style="min-height:70px" placeholder="e.g. TikTok asked me to reset it"></textarea>' +
+        '<div class="row-actions"><button class="btn primary sm" type="button" data-act="lg-req-send" data-acc="' + esc(a) + '">Ask the team to unlock it</button><button class="btn ghost sm" type="button" data-act="lg-req-cancel">Cancel</button></div></div>';
+      if (open) x += loginFormHtml(f);
+      return x + '</div>';
+    }).join('') + '</div>';
+    if (f && f.isNew) h += '<div class="lg">' + loginFormHtml(f) + '</div>';
+    else h += '<div><button class="btn ghost" type="button" data-act="lg-new">+ Add a login for another account</button></div>';
+    return h + '</section>';
+  }
+  function loginFormHtml(f) {
+    var plain = ' autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"';
+    return '<div class="lg-form">' +
+      (f.isNew ? '<div><label class="sub" for="lg-acc">Account</label><input class="input" id="lg-acc" data-lg="account" placeholder="@account"' + plain + ' value="' + esc(f.account ? '@' + f.account : '') + '"></div>' : '') +
+      '<div><label class="sub" for="lg-login">Email or phone number you log in with</label><input class="input" id="lg-login" data-lg="login"' + plain + ' value="' + esc(f.login || '') + '"></div>' +
+      '<div><label class="sub" for="lg-pw">TikTok password</label><input class="input mono" id="lg-pw" data-lg="password"' + plain + ' value="' + esc(f.password || '') + '"></div>' +
+      '<div><label class="sub" for="lg-epw">Email password <span class="faint">(only if this account has its own email)</span></label><input class="input mono" id="lg-epw" data-lg="emailPassword"' + plain + ' value="' + esc(f.emailPassword || '') + '"></div>' +
+      '<div><label class="sub" for="lg-notes">Anything else we need? <span class="faint">(optional)</span></label><textarea class="input" id="lg-notes" data-lg="notes" style="min-height:70px" placeholder="e.g. birthday on the account, backup codes">' + esc(f.notes || '') + '</textarea></div>' +
+      '<p class="hint">Double-check it: once sent, it’s locked.</p>' +
+      '<div class="row-actions"><button class="btn primary" type="button" data-act="lg-send">Send login</button><button class="btn ghost" type="button" data-act="lg-cancel">Cancel</button></div></div>';
   }
   /** Creator-side: their own video count and the campaign deadline. */
   function myTargetHtml(c, posted) {
@@ -652,13 +772,46 @@ a.tag.acc:hover { border-color: var(--accent); }
 
   /* ── team page ─────────────────────────────────────────── */
   function teamPage() {
+    var nReq = S.data.creators.filter(function (c) { return c.logins.some(function (l) { return l.status === 'requested'; }); }).length;
+    var nPay = S.data.creators.filter(function (c) { return c.pay && c.pay.due.length; }).length;
+    var tabs = [['campaigns', 'Campaigns', 0], ['creators', 'Creators', nReq], ['payments', 'Payments', nPay]];
+    var cur = S.view === 'creators' || S.view === 'payments' ? S.view : 'campaigns';
     var h = '<header class="top"><div class="top-in">' + brand(' <span class="badge">Team view</span>') +
-      '<nav class="tabs" aria-label="Sections"><button type="button" data-act="tab" data-v="campaigns"' + (S.view !== 'creators' ? ' aria-current="page"' : '') + '>Campaigns</button>' +
-      '<button type="button" data-act="tab" data-v="creators"' + (S.view === 'creators' ? ' aria-current="page"' : '') + '>Creators</button></nav></div></header><main class="wrap">';
-    if (S.view === 'creators') h += creatorsTab();
+      '<nav class="tabs ctabs" aria-label="Sections">' + tabs.map(function (t) {
+        return '<button type="button" data-act="tab" data-v="' + t[0] + '"' + (cur === t[0] ? ' aria-current="page"' : '') + '>' + t[1] +
+          (t[2] ? '<span class="tab-dot" aria-label="' + t[2] + ' need attention">' + t[2] + '</span>' : '') + '</button>';
+      }).join('') + '</nav></div></header><main class="wrap">';
+    if (cur === 'creators') h += S.creatorId && creatorById(S.creatorId) ? creatorDetail(creatorById(S.creatorId)) : creatorsTab();
+    else if (cur === 'payments') h += paymentsTab();
     else if (S.campaignId && campaignById(S.campaignId)) h += campaignDetail(campaignById(S.campaignId));
     else h += campaignList();
     return h + '</main>';
+  }
+  function allTags() {
+    var seen = {}, out = [];
+    S.data.creators.forEach(function (c) { (c.tags || []).forEach(function (t) { if (!seen[t.toLowerCase()]) { seen[t.toLowerCase()] = 1; out.push(t); } }); });
+    return out.sort(function (a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
+  }
+  function inTag(c, t) { return (c.tags || []).some(function (x) { return x.toLowerCase() === t.toLowerCase(); }); }
+  function tagsHtml(c) { return (c.tags || []).map(function (t) { return '<span class="gtag">' + esc(t) + '</span>'; }).join(''); }
+  function ordinal(n) { var s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
+  /** "Due today", "5 days late", "in 3 days" */
+  function relDay(iso) {
+    var n = daysBetween(todayIso(), iso);
+    if (n == null) return '';
+    return n === 0 ? 'today' : n === 1 ? 'tomorrow' : n > 1 ? 'in ' + n + ' days' : n === -1 ? '1 day late' : (-n) + ' days late';
+  }
+  function payLine(c) {
+    var p = c.pay; if (!p) return '';
+    return 'Monthly on the ' + (p.day >= 29 ? ordinal(p.day) + ' (or the last day of the month)' : ordinal(p.day));
+  }
+  function loginSummary(c) {
+    var accs = c.accounts || [], saved = c.logins.length, req = c.logins.filter(function (l) { return l.status === 'requested'; }).length;
+    var missing = accs.filter(function (a) { return !c.logins.some(function (l) { return l.account.toLowerCase() === a.toLowerCase(); }); }).length;
+    if (req) return '<span class="pill warn">Wants to update</span>';
+    if (!saved && !accs.length) return '<span class="faint">—</span>';
+    if (!missing) return '<span class="pill ok">' + (saved === 1 ? 'Saved' : 'All ' + saved + ' saved') + '</span>';
+    return '<span class="pill lock">' + saved + ' of ' + (saved + missing) + ' saved</span>';
   }
   function campaignById(id) { return S.data.campaigns.filter(function (c) { return c.id === id; })[0]; }
   function creatorById(id) { return S.data.creators.filter(function (c) { return c.id === id; })[0]; }
@@ -743,26 +896,33 @@ a.tag.acc:hover { border-color: var(--accent); }
     return '<section class="card" aria-labelledby="cf-h"><h2 id="cf-h">' + (isNew ? 'New campaign' : 'Edit campaign') + '</h2><div class="form-grid">' +
       '<div><label class="lbl" for="e-name">Campaign name</label><input class="input" id="e-name" data-e="name" value="' + esc(e.name || '') + '" placeholder="e.g. Shygirl – Alyse"></div>' +
       '<div><label class="lbl" for="e-artist">Artist</label><input class="input" id="e-artist" data-e="artist" value="' + esc(e.artist || '') + '"></div>' +
-      '<div class="full"><label class="lbl" for="e-sound">Sound link</label><input class="input" id="e-sound" data-e="sound" type="url" value="' + esc(e.sound || '') + '" placeholder="https://www.tiktok.com/music/…"></div>' +
+      '<div class="full"><span class="lbl" id="snd-l">Sounds</span><div class="slist" role="group" aria-labelledby="snd-l">' + e.sounds.map(function (sd, i) {
+        return '<div class="srow"><input class="input" id="snd-l-' + i + '" data-snd="label" data-i="' + i + '" value="' + esc(sd.label || '') + '" placeholder="Name, e.g. Chorus" aria-label="Sound ' + (i + 1) + ' name">' +
+          '<input class="input s-url" id="snd-u-' + i + '" type="url" data-snd="url" data-i="' + i + '" value="' + esc(sd.url || '') + '" placeholder="https://www.tiktok.com/music/…" aria-label="Sound ' + (i + 1) + ' link">' +
+          '<button class="btn ghost sm x" type="button" data-act="snd-rm" data-i="' + i + '" aria-label="Remove sound ' + (i + 1) + '">×</button></div>';
+      }).join('') + '</div><div style="margin-top:6px"><button class="btn ghost sm" type="button" data-act="snd-add">+ Add another sound</button></div></div>' +
       '<div class="full"><label class="lbl" for="e-brief">Brief for creators</label><textarea class="input" id="e-brief" data-e="brief" placeholder="What to post, captions, hashtags…">' + esc(e.brief || '') + '</textarea></div>' +
       '<div><label class="lbl" for="e-deadline">Deadline <span class="faint" style="font-weight:400">DD/MM/YYYY</span></label><input class="input" id="e-deadline" type="date" data-e="deadline" value="' + esc(e.deadline || '') + '"></div>' +
       '<div><label class="lbl" for="e-total">Total videos for this campaign</label><input class="input" id="e-total" type="number" min="0" step="1" inputmode="numeric" data-e="totalVideos" value="' + esc(e.totalVideos || '') + '" placeholder="e.g. 30"></div>' +
       '<div><label class="lbl" for="e-status">Status</label><select class="input" id="e-status" data-e="status"><option' + (e.status !== 'Ended' ? ' selected' : '') + '>Active</option><option' + (e.status === 'Ended' ? ' selected' : '') + '>Ended</option></select></div>' +
       '<div class="full mpick"><label class="lbl" for="e-search">Creators on this campaign</label>' +
-        '<div class="search-wrap"><input class="input" id="e-search" placeholder="Type a name to add a creator…" autocomplete="off" value="' + esc(e.q || '') + '" role="combobox" aria-controls="e-suggest" aria-expanded="' + (!!(S.sugOpen || e.q)) + '">' +
+        '<div class="search-wrap"><input class="input" id="e-search" placeholder="Type a name or group to add creators…" autocomplete="off" value="' + esc(e.q || '') + '" role="combobox" aria-controls="e-suggest" aria-expanded="' + (!!(S.sugOpen || e.q)) + '">' +
         '<div class="suggest" id="e-suggest" role="listbox">' + suggestHtml(e) + '</div></div>' +
         '<div class="mlist">' + (e.members.length
           ? '<div class="mrow mhead" aria-hidden="true"><span>Creator</span><span>Amount of videos</span><span></span></div>' + e.members.map(function (m) {
               var cr = creatorById(m.creatorId), nm = cr ? cr.name : 'Removed creator';
-              return '<div class="mrow"><span class="mname">' + esc(nm) + '</span>' +
+              var isNew = !e.orig || !e.orig[m.creatorId];
+              var note = isNew && cr && e.status !== 'Ended' ? (cr.email ? (e.notify ? '<span class="m-note">will be emailed</span>' : '') : '<span class="m-note">no email</span>') : '';
+              return '<div class="mrow"><span class="mname">' + esc(nm) + note + '</span>' +
                 '<input class="input small" type="number" min="0" step="1" inputmode="numeric" id="mv-' + esc(m.creatorId) + '" data-mv="' + esc(m.creatorId) + '" value="' + esc(m.videos) + '" placeholder="0" aria-label="Amount of videos for ' + esc(nm) + '">' +
                 '<button class="btn ghost sm x" type="button" data-act="m-remove" data-id="' + esc(m.creatorId) + '" aria-label="Remove ' + esc(nm) + '">×</button></div>';
             }).join('')
           : '<p class="hint">No one yet. Search above to add creators.</p>') + '</div>' +
         '<div class="mfoot"><button class="btn sm" type="button" id="e-split" data-act="split"' + (assignState(e).canSplit ? '' : ' disabled') + '>Evenly split</button>' +
         '<div id="e-assign" class="assign">' + assignHtml(e) + '</div></div>' +
+        '<label class="check"><input type="checkbox" id="e-notify"' + (e.notify ? ' checked' : '') + '> Email the creators I add (if they have an email address)</label>' +
       '</div>' +
-      '</div><p class="hint">Creators see the campaign name, artist, sound and brief, not the amounts. Ended campaigns stop taking new links.</p>' +
+      '</div><p class="hint">Creators see the campaign name, artist, sounds, brief, the deadline and their own amount of videos. They never see who else is on it. Ended campaigns stop taking new links.</p>' +
       '<div class="row-actions"><button class="btn primary" type="button" id="e-save" data-act="save-campaign"' + (over ? ' disabled' : '') + '>' + (isNew ? 'Create campaign' : 'Save changes') + '</button><button class="btn ghost" type="button" data-act="cancel-edit">Cancel</button></div></section>';
   }
   function assignState(e) {
@@ -786,8 +946,12 @@ a.tag.acc:hover { border-color: var(--accent); }
       .sort(function (a, b) { return a.name.localeCompare(b.name); });
     if (!S.data.creators.length) return '<div class="sug-empty">No creators yet. Add them in the Creators tab first.</div>';
     if (!all.length) return '<div class="sug-empty">Everyone is already on this campaign.</div>';
-    if (!hits.length) return '<div class="sug-empty">No creator matches “' + esc(e.q) + '”. Add them in the Creators tab first.</div>';
-    return hits.slice(0, 8).map(function (c, i) {
+    var groups = allTags().map(function (t) { return { t: t, n: all.filter(function (c) { return inTag(c, t); }).length }; })
+      .filter(function (g) { return g.n && (!q || g.t.toLowerCase().indexOf(q) >= 0); });
+    if (!hits.length && !groups.length) return '<div class="sug-empty">No creator or group matches “' + esc(e.q) + '”. Add them in the Creators tab first.</div>';
+    return groups.map(function (g, i) {
+      return '<button type="button" class="sug grp' + (i === 0 && q && !hits.length ? ' first' : '') + '" role="option" data-act="m-add-group" data-tag="' + esc(g.t) + '">Everyone in ' + esc(g.t) + ' (' + g.n + ')</button>';
+    }).join('') + hits.slice(0, 8).map(function (c, i) {
       return '<button type="button" class="sug' + (i === 0 && q ? ' first' : '') + '" role="option" data-act="m-add" data-id="' + esc(c.id) + '">' + esc(c.name) + '</button>';
     }).join('') + (hits.length > 8 ? '<div class="sug-empty">' + (hits.length - 8) + ' more. Keep typing to narrow it down.</div>' : '');
   }
@@ -811,7 +975,7 @@ a.tag.acc:hover { border-color: var(--accent); }
     else {
       h += '<section style="display:grid;gap:8px"><div class="detail-head"><h1>' + esc(c.name) + '</h1><span class="pill ' + (c.status === 'Active' ? 'active' : 'ended') + '">' + esc(c.status) + '</span>' +
         '<div class="row-actions"><button class="btn" type="button" data-act="edit-campaign">Edit</button></div></div>' +
-        '<div class="row-actions muted">' + (c.artist ? '<span>' + esc(c.artist) + '</span>' : '') + (isUrl(c.sound) ? '<a class="sound" href="' + esc(c.sound) + '" target="_blank" rel="noopener noreferrer">♪ Sound</a>' : '') + '</div>' +
+        '<div class="row-actions muted">' + (c.artist ? '<span>' + esc(c.artist) + '</span>' : '') + '</div>' + soundsHtml(c.sounds) +
         (c.brief ? '<p class="brief" style="max-width:70ch">' + esc(c.brief) + '</p>' : '') + '</section>';
     }
     var total = toInt(c.totalVideos), dl = c.deadline ? daysBetween(todayIso(), c.deadline) : null;
@@ -830,7 +994,7 @@ a.tag.acc:hover { border-color: var(--accent); }
     else h += '<div class="prog">' + rows.map(function (r) {
       var pct = r.quota ? Math.min(100, Math.round(r.posted / r.quota * 100)) : 0;
       var cls = c.status !== 'Active' ? '' : r.kind === 'done' ? 'done' : r.flag ? 'bad' : '';
-      return '<div class="prow ' + cls + '"><span class="pname">' + esc(r.creator.name) + '</span>' +
+      return '<div class="prow ' + cls + '"><span class="pname"><button class="namebtn" type="button" data-act="open-cr" data-id="' + esc(r.creator.id) + '">' + esc(r.creator.name) + '</button></span>' +
         '<span class="pcount num">' + r.posted + (r.quota ? ' <span class="faint">/ ' + r.quota + '</span>' : '') + '</span>' +
         '<span class="pbar" aria-hidden="true">' + (r.quota ? '<i style="width:' + pct + '%"></i>' : '') + '</span>' +
         '<span class="pstat">' + esc(r.text) + '</span></div>';
@@ -862,33 +1026,186 @@ a.tag.acc:hover { border-color: var(--accent); }
   }
 
   function creatorsTab() {
-    var d = S.data, h = '<section><h1>Creators</h1><p class="lede">Everyone gets their own private link. It only shows the campaigns you put them on and the links they sent themselves.</p></section>';
+    var d = S.data, h = '<section><h1>Creators</h1><p class="lede">Everyone gets their own private link. It only shows the campaigns you put them on and the links they sent themselves. Click a name to see their details, logins and pay date.</p></section>';
     if (!d.baseUrl) h += '<section class="card" aria-labelledby="url-h" style="border-color:var(--accent)"><h2 id="url-h">One-time step: paste your app link</h2>' +
       '<p class="hint">In the Apps Script editor, go to <b>Deploy → Manage deployments</b> and copy the <b>Web app</b> URL (it ends in /exec). Creator links are built from it.</p>' +
       '<div class="row-actions" style="flex-wrap:nowrap"><input class="input" id="app-url" placeholder="https://script.google.com/macros/s/…/exec" style="flex:1" autocomplete="off">' +
       '<button class="btn primary" type="button" data-act="save-appurl">Save</button></div></section>';
-    h += '<section class="card" aria-labelledby="add-h"><h2 id="add-h">Add a creator</h2><p class="hint">After adding, click Edit to list their accounts so they can pick from a dropdown.</p><div class="row-actions" style="flex-wrap:nowrap"><input class="input" id="new-creator" placeholder="Name, e.g. Alyssa" style="flex:1" autocomplete="off">' +
+    h += '<section class="card" aria-labelledby="add-h"><h2 id="add-h">Add a creator</h2><p class="hint">Then click their name to add their accounts, groups, email and pay date.</p><div class="row-actions" style="flex-wrap:nowrap"><input class="input" id="new-creator" placeholder="Name, e.g. Alyssa" style="flex:1" autocomplete="off">' +
       '<button class="btn primary" type="button" data-act="add-creator">Add</button></div></section>';
     if (!d.creators.length) return h + '<div class="empty">No creators yet.</div>';
-    var list = d.creators.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
-    h += '<section class="card"><div class="table-wrap"><table><thead><tr><th>Name</th><th>Accounts</th><th>Campaigns</th><th>Links</th><th>Private link</th><th></th></tr></thead><tbody>' + list.map(function (cr) {
-      var camps = d.members.filter(function (m) { return m.creatorId === cr.id; }).map(function (m) { var c = campaignById(m.campaignId); return c ? c.name : ''; }).filter(Boolean);
-      var nPosts = d.posts.filter(function (p) { return p.creatorId === cr.id; }).length;
-      var editing = S.editCreator === cr.id, armedR = S.armed === 'reset:' + cr.id, armedD = S.armed === 'delcr:' + cr.id;
+    var tags = allTags(), g = S.group || '';
+    if (g && g !== '__none' && !tags.some(function (t) { return t.toLowerCase() === g.toLowerCase(); })) g = S.group = '';
+    var noGroup = d.creators.filter(function (c) { return !(c.tags || []).length; }).length;
+    var list = d.creators.filter(function (c) { return !g || (g === '__none' ? !(c.tags || []).length : inTag(c, g)); })
+      .sort(function (a, b) { return a.name.localeCompare(b.name); });
+    if (tags.length) h += '<div class="chips" role="group" aria-label="Filter by group">' +
+      [['', 'All', d.creators.length]].concat(tags.map(function (t) { return [t, t, d.creators.filter(function (c) { return inTag(c, t); }).length]; }))
+        .concat(noGroup && noGroup < d.creators.length ? [['__none', 'No group', noGroup]] : [])
+        .map(function (x) { return '<button type="button" class="chip" data-act="group-filter" data-v="' + esc(x[0]) + '" aria-pressed="' + (g.toLowerCase() === x[0].toLowerCase()) + '">' + esc(x[1]) + ' <span class="num">' + x[2] + '</span></button>'; }).join('') + '</div>';
+    h += '<section class="card"><div class="table-wrap"><table><thead><tr><th>Name</th><th>Groups</th><th>Accounts</th><th>Campaigns</th><th>Logins</th><th>Private link</th></tr></thead><tbody>' + list.map(function (cr) {
+      var nCamps = d.members.filter(function (m) { var c = m.creatorId === cr.id && campaignById(m.campaignId); return c && c.status === 'Active'; }).length;
       var accs = cr.accounts || [];
-      return '<tr class="cr-row"><td>' + (editing ? '<input class="input small" style="width:150px" id="rn-' + esc(cr.id) + '" value="' + esc(cr.name) + '" aria-label="Name">' : esc(cr.name)) + '</td>' +
-        '<td style="min-width:180px">' + (editing
-          ? '<div class="row-actions" style="flex-wrap:nowrap"><input class="input small" style="width:220px" id="ac-' + esc(cr.id) + '" value="' + esc(accs.map(function (a) { return '@' + a; }).join(', ')) + '" placeholder="@account1, @account2" aria-label="Accounts"><button class="btn sm primary" type="button" data-act="save-name" data-id="' + esc(cr.id) + '">Save</button></div>'
-          : (accs.length ? '<div class="tagline">' + accs.map(function (a) { return accLink(a, 'tag acc'); }).join('') + '</div>' : '<span class="faint">None yet</span>')) + '</td>' +
-        '<td><div class="tagline">' + (camps.length ? camps.map(function (n) { return '<span class="tag">' + esc(n) + '</span>'; }).join('') : '<span class="faint">None</span>') + '</div></td>' +
-        '<td class="num mono">' + nPosts + '</td>' +
-        '<td style="min-width:240px">' + (cr.link ? '<div class="linkbox"><input class="input small" readonly id="lk-' + esc(cr.id) + '" value="' + esc(cr.link) + '" aria-label="Private link for ' + esc(cr.name) + '"><button class="btn sm" type="button" data-act="copy-link" data-id="' + esc(cr.id) + '">Copy</button></div>' : '<span class="faint">Paste your app link above first</span>') + '</td>' +
-        '<td><div class="row-actions" style="flex-wrap:nowrap">' +
-        (editing ? '<button class="btn ghost sm" type="button" data-act="cancel-cr">Cancel</button>' : '<button class="btn ghost sm" type="button" data-act="rename" data-id="' + esc(cr.id) + '">Edit</button>') +
-        '<button class="btn ghost sm' + (armedR ? ' danger armed' : '') + '" type="button" data-act="reset" data-id="' + esc(cr.id) + '" title="Makes a new link and switches off the old one">' + (armedR ? 'Old link stops working. Confirm' : 'New link') + '</button>' +
-        (nPosts ? '' : '<button class="btn ghost sm danger' + (armedD ? ' armed' : '') + '" type="button" data-act="del-creator" data-id="' + esc(cr.id) + '">' + (armedD ? 'Delete?' : 'Delete') + '</button>') +
-        '</div></td></tr>';
+      return '<tr class="cr-row"><td><button class="namebtn" type="button" data-act="open-cr" data-id="' + esc(cr.id) + '">' + esc(cr.name) + '</button></td>' +
+        '<td><div class="tagline">' + (cr.tags.length ? tagsHtml(cr) : '<span class="faint">—</span>') + '</div></td>' +
+        '<td style="min-width:150px">' + (accs.length ? '<div class="tagline">' + accs.slice(0, 3).map(function (a) { return accLink(a, 'tag acc'); }).join('') + (accs.length > 3 ? '<span class="faint">+' + (accs.length - 3) + '</span>' : '') + '</div>' : '<span class="faint">None yet</span>') + '</td>' +
+        '<td class="num mono">' + (nCamps ? nCamps + ' active' : '<span class="faint">—</span>') + '</td>' +
+        '<td>' + loginSummary(cr) + '</td>' +
+        '<td style="min-width:240px">' + (cr.link ? '<div class="linkbox"><input class="input small" readonly id="lk-' + esc(cr.id) + '" value="' + esc(cr.link) + '" aria-label="Private link for ' + esc(cr.name) + '"><button class="btn sm" type="button" data-act="copy-link" data-id="' + esc(cr.id) + '">Copy</button></div>' : '<span class="faint">Paste your app link above first</span>') + '</td></tr>';
     }).join('') + '</tbody></table></div></section>';
+    return h;
+  }
+
+  function factBox(k, v, sub) { return '<div class="t-box"><span class="t-k">' + k + '</span><span class="t-v">' + v + '</span>' + (sub ? '<span class="t-s">' + sub + '</span>' : '') + '</div>'; }
+  function payStatus(p) {
+    if (!p) return '';
+    if (p.due.length > 1) return '<span class="pill bad">' + p.due.length + ' payments unpaid</span>';
+    if (p.due.length) { var n = daysBetween(todayIso(), p.due[0]); return '<span class="pill ' + (n === 0 ? 'warn' : 'bad') + '">' + (n === 0 ? 'Due today' : (-n) + ' day' + (n === -1 ? '' : 's') + ' late') + '</span>'; }
+    var m = daysBetween(todayIso(), p.next);
+    return '<span class="pill ' + (m <= 3 ? 'warn' : 'lock') + '">Due ' + relDay(p.next) + '</span>';
+  }
+
+  function creatorDetail(cr) {
+    var d = S.data, ed = S.crEdit && S.crEdit.id === cr.id ? S.crEdit : null;
+    var h = '<button class="back" type="button" data-act="back-cr">← All creators</button>';
+    if (ed) h += creatorForm(ed);
+    else {
+      h += '<section style="display:grid;gap:10px"><div class="detail-head"><h1>' + esc(cr.name) + '</h1>' + (cr.tags.length ? '<div class="tagline">' + tagsHtml(cr) + '</div>' : '') +
+        '<div class="row-actions"><button class="btn" type="button" data-act="edit-cr">Edit</button></div></div>' +
+        (cr.accounts.length ? '<div class="tagline">' + cr.accounts.map(function (a) { return accLink(a, 'tag acc'); }).join('') + '</div>' : '') + '</section>';
+      var p = cr.pay;
+      h += '<div class="kv">' +
+        factBox('Email', cr.email ? esc(cr.email) : '<span class="faint">None</span>', cr.email ? 'Gets emailed about new campaigns' : 'Not emailed about new campaigns') +
+        factBox('Pay', p ? fmtDate(p.due.length ? p.due[0] : p.next) : '<span class="faint">No pay date</span>',
+          p ? payLine(cr) + '<br>' + payStatus(p) + (p.due.length ? ' <button class="btn sm primary" type="button" data-act="pay" data-how="next" data-id="' + esc(cr.id) + '" style="margin-left:6px">Mark paid</button>' : '') : 'Click Edit to add one') +
+        (cr.notes ? factBox('Notes', '<span style="font:400 14px/1.5 var(--f-body);white-space:pre-wrap">' + esc(cr.notes) + '</span>') : '') + '</div>';
+    }
+    var armedR = S.armed === 'reset:' + cr.id;
+    h += '<section class="card" aria-labelledby="pl-h"><h2 id="pl-h">Private link</h2>' +
+      (cr.link ? '<div class="linkbox"><input class="input small" readonly id="lk-' + esc(cr.id) + '" value="' + esc(cr.link) + '" aria-label="Private link"><button class="btn sm" type="button" data-act="copy-link" data-id="' + esc(cr.id) + '">Copy</button>' +
+        '<button class="btn sm ghost' + (armedR ? ' danger armed' : '') + '" type="button" data-act="reset" data-id="' + esc(cr.id) + '" title="Makes a new link and switches off the old one">' + (armedR ? 'Old link stops working. Confirm' : 'New link') + '</button></div>' +
+        '<p class="hint">Stopped working with them? Click <b>New link</b> and don’t send it: their old link stops working, and their posts and logins stay here.</p>'
+        : '<p class="hint">Paste your app link in the Creators tab first.</p>') + '</section>';
+
+    var mine = d.members.filter(function (m) { return m.creatorId === cr.id && campaignById(m.campaignId); });
+    h += '<section class="card" aria-labelledby="cc-h"><h2 id="cc-h">Campaigns</h2>';
+    if (!mine.length) h += '<p class="hint">Not on any campaign yet. Add them from a campaign’s Edit page.</p>';
+    else h += '<div class="prog">' + mine.map(function (m) {
+      var c = campaignById(m.campaignId), r = standing(c, m), cls = c.status !== 'Active' ? '' : r.kind === 'done' ? 'done' : r.flag ? 'bad' : '';
+      var pct = r.quota ? Math.min(100, Math.round(r.posted / r.quota * 100)) : 0;
+      return '<div class="prow ' + cls + '"><span class="pname"><button class="namebtn" type="button" data-act="open" data-id="' + esc(c.id) + '">' + esc(c.name) + '</button>' + (c.status !== 'Active' ? ' <span class="faint" style="font-weight:400">(ended)</span>' : '') + '</span>' +
+        '<span class="pcount num">' + r.posted + (r.quota ? ' <span class="faint">/ ' + r.quota + '</span>' : '') + '</span>' +
+        '<span class="pbar" aria-hidden="true">' + (r.quota ? '<i style="width:' + pct + '%"></i>' : '') + '</span><span class="pstat">' + esc(c.status === 'Active' ? r.text : plural(r.posted, 'post')) + '</span></div>';
+    }).join('') + '</div>';
+    h += '</section>';
+    h += loginsCard(cr);
+    var nPosts = d.posts.filter(function (x) { return x.creatorId === cr.id; }).length;
+    if (!nPosts && !cr.logins.length) {
+      var armedD = S.armed === 'delcr:' + cr.id;
+      h += '<div><button class="btn sm danger' + (armedD ? ' armed' : '') + '" type="button" data-act="del-creator" data-id="' + esc(cr.id) + '">' + (armedD ? 'Click again to delete ' + esc(cr.name) : 'Delete creator') + '</button></div>';
+    } else h += '<p class="hint">Creators with posts or saved logins can’t be deleted, so nothing is lost. Use <b>New link</b> above to switch off their access.</p>';
+    return h;
+  }
+
+  function creatorForm(e) {
+    var tags = allTags().filter(function (t) { return !String(e.tags || '').split(',').some(function (x) { return x.trim().toLowerCase() === t.toLowerCase(); }); });
+    return '<section class="card" aria-labelledby="ce-h"><h2 id="ce-h">Edit ' + esc(e.origName) + '</h2><div class="form-grid">' +
+      '<div><label class="lbl" for="ce-name">Name</label><input class="input" id="ce-name" data-ce="name" value="' + esc(e.name) + '"></div>' +
+      '<div><label class="lbl" for="ce-email">Email <span class="faint" style="font-weight:400">for new-campaign emails</span></label><input class="input" id="ce-email" type="email" data-ce="email" value="' + esc(e.email) + '" placeholder="name@example.com" autocomplete="off"></div>' +
+      '<div class="full"><label class="lbl" for="ce-acc">TikTok accounts</label><input class="input" id="ce-acc" data-ce="accounts" value="' + esc(e.accounts) + '" placeholder="@account1, @account2" autocomplete="off"></div>' +
+      '<div class="full"><label class="lbl" for="ce-tags">Groups</label><input class="input" id="ce-tags" data-ce="tags" value="' + esc(e.tags) + '" placeholder="e.g. hyperpop, indie" autocomplete="off">' +
+        (tags.length ? '<div class="tagpick">' + tags.map(function (t) { return '<button type="button" class="sug" data-act="tag-add" data-tag="' + esc(t) + '">' + esc(t) + '</button>'; }).join('') + '</div>' : '') +
+        '<p class="hint" style="margin-top:6px">Separate groups with commas. Only the team sees groups.</p></div>' +
+      '<div><label class="lbl" for="ce-pay">Pay date <span class="faint" style="font-weight:400">DD/MM/YYYY</span></label><input class="input" id="ce-pay" type="date" data-ce="payStart" value="' + esc(e.payStart) + '">' +
+        '<p class="hint" style="margin-top:6px">Their next pay day. It repeats every month on the same day.</p></div>' +
+      '<div class="full"><label class="lbl" for="ce-notes">Notes <span class="faint" style="font-weight:400">only the team sees these</span></label><textarea class="input" id="ce-notes" data-ce="notes" style="min-height:70px">' + esc(e.notes) + '</textarea></div>' +
+      '</div><div class="row-actions"><button class="btn primary" type="button" data-act="save-cr">Save</button><button class="btn ghost" type="button" data-act="cancel-cr-edit">Cancel</button></div></section>';
+  }
+
+  function loginsCard(cr) {
+    var d = S.data, sec = S.secrets && S.secrets[cr.id];
+    var accs = (cr.accounts || []).slice();
+    cr.logins.forEach(function (l) { if (!accs.some(function (a) { return a.toLowerCase() === l.account.toLowerCase(); })) accs.push(l.account); });
+    var h = '<section class="card" aria-labelledby="lgs-h"><div class="card-head"><h2 id="lgs-h">Account logins</h2>' +
+      (sec ? '<button class="btn sm ghost" type="button" data-act="pin-hide">Hide passwords</button>' : '') + '</div>' +
+      '<p class="hint">' + esc(cr.name) + ' sends these from their page. Once sent, a login is locked: they can’t see or change it. If they change a password they ask here, and you click <b>Unlock</b> so they can send the new one. It locks again as soon as they do.</p>';
+    if (!sec) {
+      if (!d.pinSet) h += '<div class="notice warn">To see passwords here, set a PIN first: in the Google Sheet, open <b>Advocates Portal → Set logins PIN</b>. Until then they’re only in the sheet’s <b>Logins</b> tab.</div>';
+      else if (cr.logins.length || accs.length) h += '<div class="pin-row">' + (S.pin ? '' : '<input class="input" id="pin" type="password" autocomplete="off" placeholder="Logins PIN" aria-label="Logins PIN">') +
+        '<button class="btn" type="button" data-act="pin-show" data-id="' + esc(cr.id) + '">Show passwords</button></div>';
+    }
+    if (!accs.length) h += '<div class="empty">No accounts yet.</div>';
+    h += '<div>' + accs.map(function (a) {
+      var al = a.toLowerCase();
+      var l = cr.logins.filter(function (x) { return x.account.toLowerCase() === al; })[0];
+      var rows = sec ? sec.filter(function (x) { return x.account.toLowerCase() === al; }) : [];
+      var cur = rows.filter(function (x) { return x.status !== 'old'; })[0], old = rows.filter(function (x) { return x.status === 'old'; });
+      var editing = S.alForm && S.alForm.creatorId === cr.id && !S.alForm.isNew && S.alForm.account.toLowerCase() === al;
+      var pill = !l ? '<span class="pill warn">Not sent</span>' : l.status === 'locked' ? '<span class="pill ok">Locked</span>'
+        : l.status === 'requested' ? '<span class="pill warn">Wants to update</span>' : '<span class="pill new">Unlocked</span>';
+      var acts = '';
+      if (l && l.status !== 'open') acts += '<button class="btn sm' + (l.status === 'requested' ? ' primary' : ' ghost') + '" type="button" data-act="lg-unlock" data-id="' + esc(l.id) + '" title="Lets them send new details once">Unlock</button>';
+      if (l && l.status === 'open') acts += '<button class="btn sm ghost" type="button" data-act="lg-lock" data-id="' + esc(l.id) + '">Lock again</button>';
+      if (sec && !editing) acts += '<button class="btn sm ghost" type="button" data-act="al-open" data-cid="' + esc(cr.id) + '" data-acc="' + esc(a) + '">' + (cur ? 'Edit' : 'Add') + '</button>';
+      var x = '<div class="lg"><div class="lg-top">' + accLink(a, 'acc acc-n') + pill + '<span class="row-actions">' + acts + '</span></div>';
+      if (l) x += '<p class="lg-meta">Saved ' + fmtDate(String(l.savedAt).slice(0, 10)) + ' by ' + (l.savedBy === 'Team' ? 'the team' : esc(cr.name)) +
+        (l.status === 'open' ? ' · Unlocked: they can send new details once' : '') + '</p>';
+      if (l && l.status === 'requested') x += '<div class="notice warn">Asked to update on ' + fmtDate(String(l.requestedAt).slice(0, 10)) + (l.request ? ': “' + esc(l.request) + '”' : '') + '. Click <b>Unlock</b> so they can send the new login, or <b>Edit</b> if they sent it to you another way.</div>';
+      if (cur && !editing) x += secretHtml(cur, false);
+      if (old.length && !editing) {
+        var showOld = S.showOld && S.showOld[cr.id + '|' + al];
+        x += '<div><button class="subtle-link" type="button" data-act="show-old" data-k="' + esc(cr.id + '|' + al) + '">' + (showOld ? 'Hide' : 'Show') + ' older versions (' + old.length + ')</button></div>' +
+          (showOld ? old.map(function (o) { return secretHtml(o, true); }).join('') : '');
+      }
+      if (editing) x += adminLoginForm(S.alForm);
+      return x + '</div>';
+    }).join('') + '</div>';
+    if (sec) {
+      if (S.alForm && S.alForm.creatorId === cr.id && S.alForm.isNew) h += '<div class="lg">' + adminLoginForm(S.alForm) + '</div>';
+      else h += '<div><button class="btn ghost sm" type="button" data-act="al-new" data-cid="' + esc(cr.id) + '">+ Add a login for another account</button></div>';
+    }
+    return h + '</section>';
+  }
+  function secretHtml(r, isOld) {
+    function line(k, v) {
+      if (!v) return '';
+      return '<span class="k">' + k + '</span><span class="v">' + esc(v) + '</span><button class="btn ghost sm" type="button" data-act="copy-val" data-v="' + esc(v) + '">Copy</button>';
+    }
+    return '<div class="secret' + (isOld ? ' old' : '') + '">' + line('Login', r.login) + line('Password', r.password) + line('Email password', r.emailPassword) +
+      (r.notes ? '<span class="k">Notes</span><span class="v" style="font-family:var(--f-body);white-space:pre-wrap;grid-column:span 2">' + esc(r.notes) + '</span>' : '') +
+      '<span class="full">' + (isOld ? 'Old version · ' : '') + 'Saved ' + esc(r.savedAt) + ' by ' + (r.savedBy === 'Team' ? 'the team' : 'the creator') + '</span></div>';
+  }
+  function adminLoginForm(f) {
+    var plain = ' autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"';
+    return '<div class="lg-form"><div class="form-grid">' +
+      (f.isNew ? '<div class="full"><label class="sub" for="al-acc">Account</label><input class="input" id="al-acc" data-al="account" placeholder="@account"' + plain + ' value="' + esc(f.account ? '@' + f.account : '') + '"></div>' : '') +
+      '<div><label class="sub" for="al-login">Login (email or phone)</label><input class="input" id="al-login" data-al="login"' + plain + ' value="' + esc(f.login) + '"></div>' +
+      '<div><label class="sub" for="al-pw">Password</label><input class="input mono" id="al-pw" data-al="password"' + plain + ' value="' + esc(f.password) + '"></div>' +
+      '<div><label class="sub" for="al-epw">Email password</label><input class="input mono" id="al-epw" data-al="emailPassword"' + plain + ' value="' + esc(f.emailPassword) + '"></div>' +
+      '<div><label class="sub" for="al-notes">Notes</label><input class="input" id="al-notes" data-al="notes"' + plain + ' value="' + esc(f.notes) + '"></div>' +
+      '</div><p class="hint">Saving keeps the previous version under “older versions” and locks the login.</p>' +
+      '<div class="row-actions"><button class="btn primary sm" type="button" data-act="al-save">Save login</button><button class="btn ghost sm" type="button" data-act="al-cancel">Cancel</button></div></div>';
+  }
+
+  function paymentsTab() {
+    var d = S.data;
+    var withPay = d.creators.filter(function (c) { return c.pay; }), without = d.creators.filter(function (c) { return !c.pay; });
+    var h = '<section><h1>Payments</h1><p class="lede">Each creator is paid every month on the day of their pay date. Once you’ve paid someone, click <b>Mark paid</b> and it moves on to the next month.</p></section>';
+    h += d.remindersTo ? '<p class="hint">Reminder emails go to <b>' + esc(d.remindersTo) + '</b> on the morning anyone is due.</p>'
+      : '<div class="notice warn">Want an email on pay day? In the Google Sheet, open <b>Advocates Portal → Turn on email reminders</b>.</div>';
+    if (!withPay.length) h += '<div class="empty">No pay dates yet. Open a creator in the Creators tab, click <b>Edit</b> and add their pay date.</div>';
+    else {
+      withPay.sort(function (a, b) { return (a.pay.next).localeCompare(b.pay.next) || a.name.localeCompare(b.name); });
+      h += '<section class="card"><div class="table-wrap"><table><thead><tr><th>Creator</th><th>Gets paid</th><th>Next payment</th><th>Status</th><th></th></tr></thead><tbody>' + withPay.map(function (c) {
+        var p = c.pay;
+        return '<tr class="pay-row"><td><button class="namebtn" type="button" data-act="open-cr" data-id="' + esc(c.id) + '">' + esc(c.name) + '</button></td>' +
+          '<td class="muted">' + ordinal(p.day) + ' of each month</td>' +
+          '<td class="date">' + fmtDate(p.next, true) + '</td><td>' + payStatus(p) + '</td>' +
+          '<td><div class="row-actions" style="flex-wrap:nowrap"><button class="btn sm' + (p.due.length ? ' primary' : '') + '" type="button" data-act="pay" data-how="next" data-id="' + esc(c.id) + '">Mark paid</button>' +
+          (p.lastPaid ? '<button class="subtle-link" type="button" data-act="pay" data-how="undo" data-id="' + esc(c.id) + '" title="Last marked paid: ' + esc(fmtDate(p.lastPaid)) + '">Undo ' + fmtDate(p.lastPaid) + '</button>' : '') + '</div></td></tr>';
+      }).join('') + '</tbody></table></div></section>';
+    }
+    if (without.length && withPay.length) h += '<p class="hint">No pay date yet: ' + without.map(function (c) { return '<button class="subtle-link" type="button" data-act="open-cr" data-id="' + esc(c.id) + '">' + esc(c.name) + '</button>'; }).join(', ') + '</p>';
     return h;
   }
 
@@ -930,14 +1247,38 @@ a.tag.acc:hover { border-color: var(--accent); }
       call('updateMyPost', [S.key, e.id, { postedOn: e.postedOn, account: String(e.account || '').replace(/^@+/, '') }], function (d) { S.data = d; S.editPost = null; render(); toast('Saved'); });
     },
     'del-mine': function (el) { if (!arm('del:' + el.dataset.id)) return; call('deleteMyPost', [S.key, el.dataset.id], function (d) { S.data = d; S.armed = null; S.result = null; render(); toast('Removed'); }); },
-    'tab': function (el) { S.view = el.dataset.v; S.campaignId = null; S.edit = null; S.armed = null; render(); window.scrollTo(0, 0); },
+    'save-email': function () {
+      var v = (document.getElementById('my-email') || {}).value || '';
+      call('creatorSaveEmail', [S.key, v.trim()], function (d) { S.data = d; render(); toast(v.trim() ? 'Saved. We’ll email you about new campaigns.' : 'Email removed'); });
+    },
+    'lg-open': function (el) { S.reqFor = null; S.loginForm = { account: el.dataset.acc, login: '', password: '', emailPassword: '', notes: '' }; render(); var i = document.getElementById('lg-login'); if (i) i.focus(); },
+    'lg-new': function () { S.reqFor = null; S.loginForm = { isNew: true, account: '', login: '', password: '', emailPassword: '', notes: '' }; render(); var i = document.getElementById('lg-acc'); if (i) i.focus(); },
+    'lg-cancel': function () { S.loginForm = null; render(); },
+    'lg-send': function () {
+      var f = S.loginForm; if (!f) return;
+      var acc = String(f.account || '').trim().replace(/^@+/, '');
+      if (!acc) { toast('Add the account name.', true); return; }
+      if (!String(f.login || '').trim()) { toast('Add the email or phone number you log in with.', true); return; }
+      if (!String(f.password || '').trim()) { toast('Add the password.', true); return; }
+      call('creatorSaveLogin', [S.key, { account: acc, login: f.login, password: f.password, emailPassword: f.emailPassword, notes: f.notes }],
+        function (d) { S.data = d; S.loginForm = null; render(); toast('Login sent for @' + acc + '. Thanks!'); });
+    },
+    'lg-req': function (el) { S.loginForm = null; S.reqFor = el.dataset.acc; render(); var t = document.getElementById('req-note'); if (t) t.focus(); },
+    'lg-req-cancel': function () { S.reqFor = null; render(); },
+    'lg-req-send': function (el) {
+      var note = (document.getElementById('req-note') || {}).value || '';
+      call('creatorRequestUnlock', [S.key, el.dataset.acc, note], function (d) { S.data = d; S.reqFor = null; render(); toast('Sent. The team will unlock it so you can send the new login.'); });
+    },
+    'tab': function (el) { S.view = el.dataset.v; S.campaignId = null; S.creatorId = null; S.crEdit = null; S.alForm = null; S.edit = null; S.armed = null; render(); window.scrollTo(0, 0); },
     'filter': function (el) { S.filter = el.dataset.v; render(); },
-    'open': function (el) { S.campaignId = el.dataset.id; S.postCreator = ''; S.edit = null; render(); window.scrollTo(0, 0); },
+    'open': function (el) { S.view = 'campaigns'; S.campaignId = el.dataset.id; S.postCreator = ''; S.edit = null; render(); window.scrollTo(0, 0); },
     'back': function () { S.campaignId = null; S.edit = null; render(); },
-    'new-campaign': function () { S.sugOpen = false; S.edit = { name: '', artist: '', sound: '', brief: '', status: 'Active', deadline: '', totalVideos: '', members: [], q: '' }; render(); var el = document.getElementById('e-name'); if (el) el.focus(); },
+    'new-campaign': function () { S.sugOpen = false; S.edit = { name: '', artist: '', sounds: [{ label: '', url: '' }], brief: '', status: 'Active', deadline: '', totalVideos: '', members: [], q: '', notify: true, orig: {} }; render(); var el = document.getElementById('e-name'); if (el) el.focus(); },
     'edit-campaign': function () {
       var c = campaignById(S.campaignId); S.sugOpen = false;
-      S.edit = { id: c.id, name: c.name, artist: c.artist, sound: c.sound, brief: c.brief, status: c.status, deadline: c.deadline || '', totalVideos: c.totalVideos || '', q: '',
+      var orig = {}; membersOf(c.id).forEach(function (m) { orig[m.creatorId] = true; });
+      S.edit = { id: c.id, name: c.name, artist: c.artist, brief: c.brief, status: c.status, deadline: c.deadline || '', totalVideos: c.totalVideos || '', q: '', notify: true, orig: orig,
+        sounds: (c.sounds && c.sounds.length ? c.sounds : [{ label: '', url: '' }]).map(function (x) { return { label: x.label, url: x.url }; }),
         members: membersOf(c.id).map(function (m) { return { creatorId: m.creatorId, videos: m.videos || '' }; })
           .sort(function (a, b) { var x = creatorById(a.creatorId), y = creatorById(b.creatorId); return (x ? x.name : '').localeCompare(y ? y.name : ''); }) };
       render(); window.scrollTo(0, 0);
@@ -947,6 +1288,16 @@ a.tag.acc:hover { border-color: var(--accent); }
       e.members.push({ creatorId: el.dataset.id, videos: '' }); e.q = ''; S.sugOpen = true; render();
       var i = document.getElementById('e-search'); if (i) i.focus();
     },
+    'm-add-group': function (el) {
+      var e = S.edit; if (!e) return;
+      var t = el.dataset.tag, added = 0;
+      S.data.creators.filter(function (c) { return inTag(c, t); }).sort(function (a, b) { return a.name.localeCompare(b.name); }).forEach(function (c) {
+        if (!e.members.some(function (m) { return m.creatorId === c.id; })) { e.members.push({ creatorId: c.id, videos: '' }); added++; }
+      });
+      e.q = ''; S.sugOpen = false; render(); toast(plural(added, 'creator') + ' from ' + t + ' added');
+    },
+    'snd-add': function () { S.edit.sounds.push({ label: '', url: '' }); render(); var i = document.getElementById('snd-l-' + (S.edit.sounds.length - 1)); if (i) i.focus(); },
+    'snd-rm': function (el) { S.edit.sounds.splice(+el.dataset.i, 1); if (!S.edit.sounds.length) S.edit.sounds.push({ label: '', url: '' }); render(); },
     'm-remove': function (el) { var e = S.edit; e.members = e.members.filter(function (m) { return m.creatorId !== el.dataset.id; }); render(); },
     'split': function () {
       var e = S.edit, st = assignState(e); if (!st.canSplit) return;
@@ -958,11 +1309,19 @@ a.tag.acc:hover { border-color: var(--accent); }
     'save-campaign': function () {
       var e = S.edit; if (!String(e.name || '').trim()) { toast('Give the campaign a name.', true); return; }
       if (assignState(e).over) { toast('You’ve assigned more videos than the campaign total.', true); return; }
-      var payload = { id: e.id, name: e.name, artist: e.artist, sound: e.sound, brief: e.brief, status: e.status, deadline: e.deadline, totalVideos: e.totalVideos,
+      var badSnd = e.sounds.filter(function (x) { return String(x.url || '').trim() && !isUrl(x.url); })[0];
+      if (badSnd) { toast('Sound links should start with https://', true); return; }
+      var payload = { id: e.id, name: e.name, artist: e.artist, brief: e.brief, status: e.status, deadline: e.deadline, totalVideos: e.totalVideos, notify: !!e.notify,
+        sounds: e.sounds.map(function (x) { return { label: String(x.label || '').trim(), url: String(x.url || '').trim() }; }).filter(function (x) { return x.label || x.url; }),
         members: e.members.map(function (m) { return { creatorId: m.creatorId, videos: m.videos }; }) };
       call('adminSaveCampaign', [S.key, payload], function (d) {
         if (!e.id) { var created = d.campaigns.filter(function (c) { return c.name === e.name.trim(); }).pop(); if (created) S.campaignId = created.id; S.filter = e.status === 'Ended' ? 'Ended' : 'Active'; }
-        S.edit = null; setData(d); toast(e.id ? 'Saved' : 'Campaign created. Now tick who’s on it.');
+        S.edit = null; setData(d);
+        var em = d.emailed, bits = [];
+        if (em && em.sent.length) bits.push('emailed ' + em.sent.join(', '));
+        if (em && em.noEmail.length) bits.push(em.noEmail.join(', ') + ' ha' + (em.noEmail.length > 1 ? 've' : 's') + ' no email');
+        if (em && em.failed.length) bits.push('couldn’t email ' + em.failed.join(', '));
+        toast((e.id ? 'Saved' : 'Campaign created') + (bits.length ? ' · ' + bits.join(' · ') : ''));
       });
     },
     'del-campaign': function () { if (!arm('delc:' + S.campaignId)) return; call('adminDeleteCampaign', [S.key, S.campaignId], function (d) { S.campaignId = null; setData(d); toast('Campaign deleted'); }); },
@@ -989,7 +1348,61 @@ a.tag.acc:hover { border-color: var(--accent); }
     },
     'cancel-cr': function () { S.editCreator = null; render(); },
     'reset': function (el) { if (!arm('reset:' + el.dataset.id)) return; call('adminResetLink', [S.key, el.dataset.id], function (d) { setData(d); toast('New link made. Send it to them; the old one no longer works.'); }); },
-    'del-creator': function (el) { if (!arm('delcr:' + el.dataset.id)) return; call('adminDeleteCreator', [S.key, el.dataset.id], function (d) { setData(d); toast('Creator deleted'); }); }
+    'del-creator': function (el) { if (!arm('delcr:' + el.dataset.id)) return; call('adminDeleteCreator', [S.key, el.dataset.id], function (d) { S.creatorId = null; setData(d); toast('Creator deleted'); }); },
+    'open-cr': function (el) { S.view = 'creators'; S.creatorId = el.dataset.id; S.crEdit = null; S.alForm = null; S.armed = null; render(); window.scrollTo(0, 0); },
+    'back-cr': function () { S.creatorId = null; S.crEdit = null; S.alForm = null; render(); },
+    'group-filter': function (el) { S.group = el.dataset.v; render(); },
+    'edit-cr': function () {
+      var cr = creatorById(S.creatorId); if (!cr) return;
+      S.crEdit = { id: cr.id, origName: cr.name, name: cr.name, email: cr.email || '', notes: cr.notes || '', payStart: cr.payStart || '',
+        accounts: (cr.accounts || []).map(function (a) { return '@' + a; }).join(', '), tags: (cr.tags || []).join(', ') };
+      render(); window.scrollTo(0, 0); var i = document.getElementById('ce-name'); if (i) i.focus();
+    },
+    'cancel-cr-edit': function () { S.crEdit = null; render(); },
+    'tag-add': function (el) {
+      var e = S.crEdit; if (!e) return;
+      var cur = String(e.tags || '').split(',').map(function (x) { return x.trim(); }).filter(Boolean);
+      cur.push(el.dataset.tag); e.tags = cur.join(', '); render();
+    },
+    'save-cr': function () {
+      var e = S.crEdit; if (!e) return;
+      if (!String(e.name).trim()) { toast('Add a name.', true); return; }
+      if (e.email.trim() && !/^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(e.email.trim())) { toast('That email address doesn’t look right.', true); return; }
+      call('adminSaveCreator', [S.key, { id: e.id, name: e.name, email: e.email.trim(), notes: e.notes, payStart: e.payStart, accounts: e.accounts, tags: e.tags }],
+        function (d) { S.crEdit = null; setData(d); toast('Saved'); });
+    },
+    'pay': function (el) {
+      var cr = creatorById(el.dataset.id), how = el.dataset.how, when = cr && cr.pay ? (how === 'undo' ? cr.pay.lastPaid : cr.pay.next) : '';
+      call('adminSetPaid', [S.key, el.dataset.id, how], function (d) {
+        setData(d); toast(how === 'undo' ? 'Undone: ' + fmtDate(when) + ' is unpaid again' : cr.name + ' marked paid for ' + fmtDate(when));
+      });
+    },
+    'pin-show': function (el) {
+      var inp = document.getElementById('pin'), pin = inp ? inp.value.trim() : S.pin, cid = el.dataset.id;
+      if (!pin) { toast('Type the logins PIN first.', true); if (inp) inp.focus(); return; }
+      call('adminLogins', [S.key, pin, cid], function (rows) { S.pin = pin; S.secrets = S.secrets || {}; S.secrets[cid] = rows; render(); });
+    },
+    'pin-hide': function () { S.secrets = {}; S.pin = null; S.alForm = null; render(); },
+    'lg-unlock': function (el) { call('adminSetLoginStatus', [S.key, el.dataset.id, true], function (d) { setData(d); toast('Unlocked. They can now send the new login from their page.'); }); },
+    'lg-lock': function (el) { call('adminSetLoginStatus', [S.key, el.dataset.id, false], function (d) { setData(d); toast('Locked again'); }); },
+    'show-old': function (el) { S.showOld = S.showOld || {}; S.showOld[el.dataset.k] = !S.showOld[el.dataset.k]; render(); },
+    'copy-val': function (el) { copy(el.dataset.v); },
+    'al-open': function (el) {
+      var cid = el.dataset.cid, acc = el.dataset.acc;
+      var cur = ((S.secrets && S.secrets[cid]) || []).filter(function (x) { return x.account.toLowerCase() === acc.toLowerCase() && x.status !== 'old'; })[0] || {};
+      S.alForm = { creatorId: cid, account: acc, login: cur.login || '', password: cur.password || '', emailPassword: cur.emailPassword || '', notes: cur.notes || '' };
+      render(); var i = document.getElementById('al-login'); if (i) i.focus();
+    },
+    'al-new': function (el) { S.alForm = { creatorId: el.dataset.cid, isNew: true, account: '', login: '', password: '', emailPassword: '', notes: '' }; render(); var i = document.getElementById('al-acc'); if (i) i.focus(); },
+    'al-cancel': function () { S.alForm = null; render(); },
+    'al-save': function () {
+      var f = S.alForm; if (!f) return;
+      var acc = String(f.account || '').trim().replace(/^@+/, '');
+      if (!acc) { toast('Add the account name.', true); return; }
+      call('adminSaveLogin', [S.key, S.pin, f.creatorId, { account: acc, login: f.login, password: f.password, emailPassword: f.emailPassword, notes: f.notes }], function (r) {
+        S.secrets[f.creatorId] = r.logins; S.alForm = null; setData(r.view); toast('Login saved for @' + acc);
+      });
+    }
   };
   app.addEventListener('click', function (ev) {
     var el = ev.target.closest('[data-act]');
@@ -1010,6 +1423,7 @@ a.tag.acc:hover { border-color: var(--accent); }
       if (p && p.views !== el.value.trim()) call('adminUpdatePost', [S.key, p.id, { views: el.value.trim() }], function (d) { S.data = d; toast('Views saved'); });
       return;
     }
+    if (el.id === 'e-notify' && S.edit) { S.edit.notify = el.checked; render(); return; }
     if (el.dataset.k === 'campaign') { S.campaign = el.value; S.result = null; render(); return; }
     if (el.dataset.k === 'ep-acc' && S.editPost) {
       if (el.value === '__new') { S.editPost.newAcc = true; S.editPost.account = ''; render(); var na = document.getElementById('ep-acc'); if (na) na.focus(); }
@@ -1034,6 +1448,10 @@ a.tag.acc:hover { border-color: var(--accent); }
       refreshAssign(); return;
     }
     if (el.dataset.e && S.edit) { S.edit[el.dataset.e] = el.value; if (el.dataset.e === 'totalVideos') refreshAssign(); return; }
+    if (el.dataset.lg && S.loginForm) { S.loginForm[el.dataset.lg] = el.value; return; }
+    if (el.dataset.ce && S.crEdit) { S.crEdit[el.dataset.ce] = el.value; return; }
+    if (el.dataset.al && S.alForm) { S.alForm[el.dataset.al] = el.value; return; }
+    if (el.dataset.snd && S.edit) { S.edit.sounds[+el.dataset.i][el.dataset.snd] = el.value; return; }
     if (el.dataset.k === 'ep-acc-text' && S.editPost) { S.editPost.account = el.value.trim().replace(/^@+/, ''); return; }
     if (el.dataset.k === 'ep-date' && S.editPost) { S.editPost.postedOn = el.value; return; }
     if (el.dataset.k === 'accText' && S.rows[+el.dataset.i]) { S.rows[+el.dataset.i].account = el.value.trim().replace(/^@+/, ''); return; }
@@ -1097,6 +1515,7 @@ a.tag.acc:hover { border-color: var(--accent); }
       if (ev.key === 'ArrowUp') { ev.preventDefault(); (ev.target.previousElementSibling || document.getElementById('e-search')).focus(); }
     }
     if (ev.key === 'Enter' && ev.target.id === 'new-creator') { ev.preventDefault(); actions['add-creator'](); }
+    if (ev.key === 'Enter' && ev.target.id === 'pin') { ev.preventDefault(); var b = document.querySelector('[data-act="pin-show"]'); if (b) actions['pin-show'](b); }
     if (ev.key === 'Enter' && ev.target.id && (ev.target.id.indexOf('rn-') === 0 || ev.target.id.indexOf('ac-') === 0)) { ev.preventDefault(); actions['save-name']({ dataset: { id: ev.target.id.slice(3) } }); }
     if (ev.key === 'Enter' && ev.target.dataset && ev.target.dataset.views) { ev.target.blur(); }
   });
