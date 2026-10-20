@@ -778,8 +778,6 @@ a.tag.acc:hover { border-color: var(--accent); }
       (f.isNew ? '<div><label class="sub" for="lg-acc">Account</label><input class="input" id="lg-acc" data-lg="account" placeholder="@account"' + plain + ' value="' + esc(f.account ? '@' + f.account : '') + '"></div>' : '') +
       '<div><label class="sub" for="lg-login">Email or phone number you log in with</label><input class="input" id="lg-login" data-lg="login"' + plain + ' value="' + esc(f.login || '') + '"></div>' +
       '<div><label class="sub" for="lg-pw">TikTok password</label><input class="input mono" id="lg-pw" data-lg="password"' + plain + ' value="' + esc(f.password || '') + '"></div>' +
-      '<div><label class="sub" for="lg-epw">Email password <span class="faint">(only if this account has its own email)</span></label><input class="input mono" id="lg-epw" data-lg="emailPassword"' + plain + ' value="' + esc(f.emailPassword || '') + '"></div>' +
-      '<div><label class="sub" for="lg-notes">Anything else we need? <span class="faint">(optional)</span></label><textarea class="input" id="lg-notes" data-lg="notes" style="min-height:70px" placeholder="e.g. birthday on the account, backup codes">' + esc(f.notes || '') + '</textarea></div>' +
       '<p class="hint">Double-check it: once sent, it’s locked.</p>' +
       '<div class="row-actions"><button class="btn primary" type="button" data-act="lg-send">Send login</button><button class="btn ghost" type="button" data-act="lg-cancel">Cancel</button></div></div>';
   }
@@ -1284,8 +1282,6 @@ a.tag.acc:hover { border-color: var(--accent); }
       (f.isNew ? '<div class="full"><label class="sub" for="al-acc">Account</label><input class="input" id="al-acc" data-al="account" placeholder="@account"' + plain + ' value="' + esc(f.account ? '@' + f.account : '') + '"></div>' : '') +
       '<div><label class="sub" for="al-login">Login (email or phone)</label><input class="input" id="al-login" data-al="login"' + plain + ' value="' + esc(f.login) + '"></div>' +
       '<div><label class="sub" for="al-pw">Password</label><input class="input mono" id="al-pw" data-al="password"' + plain + ' value="' + esc(f.password) + '"></div>' +
-      '<div><label class="sub" for="al-epw">Email password</label><input class="input mono" id="al-epw" data-al="emailPassword"' + plain + ' value="' + esc(f.emailPassword) + '"></div>' +
-      '<div><label class="sub" for="al-notes">Notes</label><input class="input" id="al-notes" data-al="notes"' + plain + ' value="' + esc(f.notes) + '"></div>' +
       '</div><p class="hint">Saving keeps the previous version under “older versions” and locks the login.</p>' +
       '<div class="row-actions"><button class="btn primary sm" type="button" data-act="al-save">Save login</button><button class="btn ghost sm" type="button" data-act="al-cancel">Cancel</button></div></div>';
   }
