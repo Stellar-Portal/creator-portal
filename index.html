@@ -12,6 +12,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Stellar Advocates Portal">
 <meta name="theme-color" content="#0626c7">
+<meta name="color-scheme" content="only light">
 </head>
 <body>
 <title>Stellar Advocates Portal</title>
@@ -29,21 +30,7 @@
   --f-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
   --f-mono: var(--f-body);
   --r: 18px; --r-sm: 11px;
-  color-scheme: light;
-}
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #000000; --surface: #1c1c1e; --surface-2: #2c2c2e; --line: #38383a; --line-strong: #48484a;
-  --ink: #f5f5f7; --muted: #a1a1a6; --faint: #8e8e93;
-  --accent: #8aa0ff; --accent-press: #a9b9ff; --accent-ink: #050d3a; --accent-soft: #1b2347;
-  --ok: #52c98a; --ok-soft: #14301f; --warn: #f0b252; --warn-soft: #33260f; --bad: #ff7a6b; --bad-soft: #3a1714;
-  color-scheme: dark;
-} }
-:root[data-theme="dark"] {
-  --bg: #000000; --surface: #1c1c1e; --surface-2: #2c2c2e; --line: #38383a; --line-strong: #48484a;
-  --ink: #f5f5f7; --muted: #a1a1a6; --faint: #8e8e93;
-  --accent: #8aa0ff; --accent-press: #a9b9ff; --accent-ink: #050d3a; --accent-soft: #1b2347;
-  --ok: #52c98a; --ok-soft: #14301f; --warn: #f0b252; --warn-soft: #33260f; --bad: #ff7a6b; --bad-soft: #3a1714;
-  color-scheme: dark;
+  color-scheme: only light;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; }
@@ -59,9 +46,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .brand { display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; font: 700 17px/1 var(--f-display); letter-spacing: -0.01em; }
 .logo { height: 22px; width: auto; display: block; }
 .logo-d { display: none; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .logo-l { display: none; } :root:not([data-theme="light"]) .logo-d { display: block; } }
-:root[data-theme="dark"] .logo-l { display: none; }
-:root[data-theme="dark"] .logo-d { display: block; }
 .brand-sub { font: 600 13px/1 var(--f-body); color: var(--muted); padding-left: 10px; border-left: 1px solid var(--line-strong); letter-spacing: 0; }
 .eq { display: inline-flex; align-items: flex-end; gap: 2px; height: 16px; }
 .eq i { width: 3px; background: var(--accent); border-radius: 1px; display: block; }
@@ -341,9 +325,6 @@ td.c-tags { min-width: 180px; } td.c-accs { min-width: 170px; }
 .gchip { --th: 345; background: hsl(var(--th) 85% 96%); color: hsl(var(--th) 65% 30%); border-color: hsl(var(--th) 60% 84%); }
 .gchip[aria-pressed="true"] { background: hsl(var(--th) 65% 38%); border-color: hsl(var(--th) 65% 38%); color: #fff; }
 .seg.match button { font-size: 12px; padding: 4px 12px; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .gtag { background: hsl(var(--th) 35% 20%); color: hsl(var(--th) 75% 78%); }
-  :root:not([data-theme="light"]) .gchip[aria-pressed="true"], :root:not([data-theme="light"]) .grp-chip[aria-pressed="true"] { background: hsl(var(--th) 50% 45%); border-color: hsl(var(--th) 50% 45%); } }
-:root[data-theme="dark"] .gtag { background: hsl(var(--th) 35% 20%); color: hsl(var(--th) 75% 78%); }
 .tab-dot { display: inline-block; min-width: 18px; height: 18px; line-height: 18px; text-align: center; border-radius: 99px; background: var(--bad); color: #fff; font-size: 11px; font-weight: 700; padding: 0 5px; margin-left: 4px; }
 .ctabs { overflow-x: auto; max-width: 100%; scrollbar-width: none; }
 .ctabs::-webkit-scrollbar { display: none; }
@@ -438,7 +419,6 @@ label.lbl { font-weight: 600; font-size: 13px; }
 .crow.head { text-transform: none; letter-spacing: 0; font-size: 12px; color: var(--muted); background: var(--surface); }
 th { text-transform: none; letter-spacing: 0; color: var(--muted); font-size: 12px; padding: 12px 16px; border-bottom-color: var(--line); }
 td { padding: 14px 16px; border-bottom-color: #f0f0f0; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) td { border-bottom-color: var(--line); } }
 .mrow.mhead, .stat .k { text-transform: none; }
 .mrow { border-radius: var(--r-sm); }
 .lg-form, .secret, .install { border-radius: var(--r-sm); }
