@@ -366,6 +366,12 @@ a.tag.acc:hover { border-color: var(--accent); }
 .namebtn:hover { color: var(--accent); text-decoration: underline; }
 .pay-row td { vertical-align: middle; }
 .subtle-link { background: none; border: 0; padding: 0; color: var(--muted); font: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; }
+.guide-top { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted); text-decoration: none;
+  border: 1px solid var(--line-strong); border-radius: 99px; padding: 6px 12px; background: var(--surface); }
+.guide-top:hover { color: var(--ink); border-color: var(--ink); }
+.guide-inline { font-weight: 600; color: var(--accent); text-decoration: none; }
+.guide-inline:hover { text-decoration: underline; }
+@media (max-width: 420px) { .guide-top span { display: none; } .guide-top { padding: 7px; } .guide-top::after { content: "Guide"; } }
 .tagpick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .grp-chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 </style>
@@ -635,7 +641,7 @@ a.tag.acc:hover { border-color: var(--accent); }
     var d = S.data, tab = S.ctab || 'send';
     var active = d.campaigns.filter(function (c) { return c.status === 'Active'; });
     if (!active.some(function (c) { return c.id === S.campaign; })) S.campaign = active.length === 1 ? active[0].id : '';
-    var h = '<header class="top"><div class="top-in">' + brand() + '</div></header><main class="wrap">';
+    var h = '<header class="top"><div class="top-in">' + brand() + guideLink('guide-top') + '</div></header><main class="wrap">';
     h += '<section><h1>Hi, ' + esc(d.name) + '</h1><p class="lede">Only you and the Stellar team can see this page.</p></section>';
     h += installTip();
     var missing = missingLogins().length, fresh = d.campaigns.filter(isNewCampaign).length;
@@ -674,6 +680,7 @@ a.tag.acc:hover { border-color: var(--accent); }
     }
 
     if (tab === 'campaigns') {
+      h += '<p class="hint">Need ideas? ' + guideLink('guide-inline') + ' has eight post formats that perform well.</p>';
       if (!d.campaigns.length) h += '<div class="empty">You’re not on any campaigns yet.</div>';
       else h += '<section class="camp-cards" aria-label="Your campaigns">' + d.campaigns.map(function (c) {
         var mine = d.posts.filter(function (p) { return p.campaignId === c.id; }).length;
@@ -704,6 +711,13 @@ a.tag.acc:hover { border-color: var(--accent); }
     if (tab === 'details') h += myDetailsHtml();
     if (window.API_URL && !isStandalone() && !installTip()) h += '<p class="foot"><button class="linkish" type="button" data-act="show-tip">How to add this page to your home screen</button></p>';
     return h + '</main>';
+  }
+  /** The Advocate Content Playbook (content-playbook.pdf, next to index.html on GitHub). */
+  var GUIDE_ICO = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
+  function guideLink(cls) {
+    return cls === 'guide-inline'
+      ? '<a class="guide-inline" href="content-playbook.pdf" target="_blank" rel="noopener">The Content Playbook ↗</a>'
+      : '<a class="guide-top" href="content-playbook.pdf" target="_blank" rel="noopener" title="Advocate Content Playbook: post formats that work">' + GUIDE_ICO + '<span>Content playbook</span></a>';
   }
   /** "♪ Chorus  ♪ Sound 2" — links when there's a link, plain text otherwise. */
   function soundsHtml(list, big) {
