@@ -27,7 +27,7 @@
   --ok: #1a7f37; --ok-soft: #e6f4ea; --warn: #9a5b00; --warn-soft: #fff4e0; --bad: #c9302c; --bad-soft: #fdeceb;
   --f-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
   --f-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
-  --f-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --f-mono: var(--f-body);
   --r: 18px; --r-sm: 11px;
   color-scheme: light;
 }
@@ -334,8 +334,9 @@ a.tag.acc:hover { border-color: var(--accent); }
 .pill.lock { background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); }
 .gtag { --th: 345; font-size: 12px; font-weight: 600; background: hsl(var(--th) 85% 94%); color: hsl(var(--th) 65% 32%); border-radius: 99px; padding: 2px 9px; white-space: nowrap; }
 .tagrow { display: flex; gap: 6px; align-items: center; flex-wrap: nowrap; }
-.tagrow .more { font-size: 12px; font-weight: 600; color: var(--muted); background: var(--surface-2); border: 1px solid var(--line); border-radius: 99px; padding: 1px 7px; cursor: default; white-space: nowrap; }
-td.c-tags { min-width: 230px; } td.c-accs { min-width: 190px; }
+.tagrow .more { font: inherit; font-size: 12px; font-weight: 600; color: var(--accent); background: var(--accent-soft); border: 0; border-radius: 99px; padding: 2px 9px; cursor: pointer; white-space: nowrap; }
+.tagrow .more:hover { text-decoration: underline; }
+td.c-tags { min-width: 180px; } td.c-accs { min-width: 170px; }
 .gfilter { display: grid; gap: 8px; }
 .gchip { --th: 345; background: hsl(var(--th) 85% 96%); color: hsl(var(--th) 65% 30%); border-color: hsl(var(--th) 60% 84%); }
 .gchip[aria-pressed="true"] { background: hsl(var(--th) 65% 38%); border-color: hsl(var(--th) 65% 38%); color: #fff; }
@@ -484,6 +485,16 @@ td { padding: 14px 16px; border-bottom-color: #f0f0f0; }
 .gnav .guide-top { color: rgba(255,255,255,0.8); border-color: rgba(255,255,255,0.3); background: transparent; }
 .gnav .guide-top:hover { color: #fff; border-color: #fff; }
 .creator .wrap { padding-top: 32px; }
+
+/* numbers in the system font, lined up (tabular), as in Stellar OS */
+.mono, .num, .count, .crow .n, .prow .pcount, td.date, .post .when, .summary b, .stat .v, .t-v, .views, .tab-n, .gopt .num { font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.crow .n, .prow .pcount { font-weight: 400; }
+td.date, .post .when { font-size: 13px; }
+.views { font-weight: 400; }
+.linkbox input, td.lk a, .post .lk, .secret .v { font-size: 13px; }
+.tagrow.open { flex-wrap: wrap; row-gap: 6px; }
+button.more { font: inherit; font-size: 12px; font-weight: 600; color: var(--accent); background: var(--accent-soft); border: 0; border-radius: 99px; padding: 2px 9px; cursor: pointer; white-space: nowrap; }
+button.more:hover { filter: brightness(0.96); }
 
 /* group filter dropdown */
 .gdrop { position: relative; display: inline-block; }
@@ -1093,9 +1104,19 @@ td { padding: 14px 16px; border-bottom-color: #f0f0f0; }
   function inTag(c, t) { return (c.tags || []).some(function (x) { return x.toLowerCase() === t.toLowerCase(); }); }
   function tagsHtml(c) { return (c.tags || []).map(function (t) { return '<span class="gtag" style="' + tagStyle(t) + '">' + esc(t) + '</span>'; }).join(''); }
   /** First few groups on one line, then "+2" (hover shows the rest). Keeps table rows one line tall. */
-  function compactTags(tags, n) {
-    return '<div class="tagrow">' + tags.slice(0, n).map(function (t) { return '<span class="gtag" style="' + tagStyle(t) + '">' + esc(t) + '</span>'; }).join('') +
-      (tags.length > n ? '<span class="more" title="' + esc(tags.slice(n).join(', ')) + '">+' + (tags.length - n) + '</span>' : '') + '</div>';
+  function compactTags(cr, n) {
+    var tags = cr.tags, open = S.exp && S.exp[cr.id];
+    return '<div class="tagrow' + (open ? ' open' : '') + '">' + (open ? tags : tags.slice(0, n)).map(function (t) { return '<span class="gtag" style="' + tagStyle(t) + '">' + esc(t) + '</span>'; }).join('') +
+      (tags.length > n ? moreBtn(cr, open ? 0 : tags.length - n) : '') + '</div>';
+  }
+  function compactAccs(cr) {
+    var accs = cr.accounts, open = S.exp && S.exp[cr.id];
+    return '<div class="tagrow' + (open ? ' open' : '') + '">' + (open ? accs : accs.slice(0, 1)).map(function (a) { return accLink(a, 'tag acc'); }).join('') +
+      (accs.length > 1 ? moreBtn(cr, open ? 0 : accs.length - 1) : '') + '</div>';
+  }
+  /** "+3" opens the row (all groups and accounts); "Less" closes it again. */
+  function moreBtn(cr, n) {
+    return '<button type="button" class="more" data-act="row-exp" data-id="' + esc(cr.id) + '" aria-expanded="' + !n + '">' + (n ? '+' + n : 'Less') + '</button>';
   }
   /** Each group gets its own colour: groups are coloured in A–Z order from a set of clearly different hues,
       so up to 12 groups never share a colour (and everyone on the team sees the same colours). */
@@ -1371,20 +1392,23 @@ td { padding: 14px 16px; border-bottom-color: #f0f0f0; }
           (noGroup && noGroup < d.creators.length ? '<label class="gopt"><input type="checkbox" data-gopt="__none"' + (sel.indexOf('__none') >= 0 ? ' checked' : '') + '><span>No group</span><span class="num">' + noGroup + '</span></label>' : '') +
           (picked.length > 1 ? '<div class="gdrop-sep"></div><div class="seg match" role="group" aria-label="How to combine groups"><button type="button" data-act="group-match" data-v="any" aria-pressed="' + !matchAll + '">In any of these</button>' +
             '<button type="button" data-act="group-match" data-v="all" aria-pressed="' + matchAll + '">In all of these</button></div>' : '') +
-          '<div class="gdrop-sep"></div><div class="gdrop-foot"><button class="subtle-link" type="button" data-act="group-filter" data-v="">Clear</button>' +
+          '<div class="gdrop-sep"></div><div class="gdrop-foot"><span class="row-actions"><button class="subtle-link" type="button" data-act="group-all">Select all</button>' +
+          '<button class="subtle-link" type="button" data-act="group-filter" data-v="">Clear</button></span>' +
           '<button class="btn sm primary" type="button" data-act="gdrop">Done</button></div></div>';
       }
       h += '</div>' + (sel.length ? '<span class="hint">Showing ' + plural(list.length, 'creator') + '</span>' : '') + '</div>';
     }
-    h += '<section class="card"><div class="table-wrap"><table><thead><tr><th>Name</th><th>Groups</th><th>Accounts</th><th>Campaigns</th><th>Logins</th><th>Private link</th></tr></thead><tbody>' + list.map(function (cr) {
+    h += '<section class="card"><div class="table-wrap"><table><thead><tr><th>Name</th><th>Groups</th><th>Accounts</th><th>Campaigns</th><th>Logins</th><th>Private link</th><th></th></tr></thead><tbody>' + list.map(function (cr) {
+      var armedDel = S.armed === 'delcr:' + cr.id;
       var nCamps = d.members.filter(function (m) { var c = m.creatorId === cr.id && campaignById(m.campaignId); return c && c.status === 'Active'; }).length;
       var accs = cr.accounts || [];
       return '<tr class="cr-row"><td><button class="namebtn" type="button" data-act="open-cr" data-id="' + esc(cr.id) + '">' + esc(cr.name) + '</button></td>' +
-        '<td class="c-tags">' + (cr.tags.length ? compactTags(cr.tags, 2) : '<span class="faint">—</span>') + '</td>' +
-        '<td class="c-accs">' + (accs.length ? '<div class="tagrow">' + accLink(accs[0], 'tag acc') + (accs.length > 1 ? '<span class="more" title="' + esc(accs.slice(1).map(function (a) { return '@' + a; }).join(', ')) + '">+' + (accs.length - 1) + '</span>' : '') + '</div>' : '<span class="faint">None yet</span>') + '</td>' +
+        '<td class="c-tags">' + (cr.tags.length ? compactTags(cr, 2) : '<span class="faint">—</span>') + '</td>' +
+        '<td class="c-accs">' + (accs.length ? compactAccs(cr) : '<span class="faint">None yet</span>') + '</td>' +
         '<td class="num mono">' + (nCamps ? nCamps + ' active' : '<span class="faint">—</span>') + '</td>' +
         '<td>' + loginSummary(cr) + '</td>' +
-        '<td style="min-width:240px">' + (cr.link ? '<div class="linkbox"><input class="input small" readonly id="lk-' + esc(cr.id) + '" value="' + esc(cr.link) + '" aria-label="Private link for ' + esc(cr.name) + '"><button class="btn sm" type="button" data-act="copy-link" data-id="' + esc(cr.id) + '">Copy</button></div>' : '<span class="faint">Paste your app link above first</span>') + '</td></tr>';
+        '<td style="min-width:200px">' + (cr.link ? '<div class="linkbox"><input class="input small" readonly id="lk-' + esc(cr.id) + '" value="' + esc(cr.link) + '" aria-label="Private link for ' + esc(cr.name) + '"><button class="btn sm" type="button" data-act="copy-link" data-id="' + esc(cr.id) + '">Copy</button></div>' : '<span class="faint">Paste your app link above first</span>') + '</td>' +
+        '<td><button class="btn ghost sm danger' + (armedDel ? ' armed' : '') + '" type="button" data-act="del-creator" data-id="' + esc(cr.id) + '" title="Offboard: removes them from the list and their campaigns">' + (armedDel ? 'Delete ' + esc(cr.name) + '?' : 'Delete') + '</button></td></tr>';
     }).join('') + '</tbody></table></div></section>';
     return h;
   }
@@ -1438,10 +1462,10 @@ td { padding: 14px 16px; border-bottom-color: #f0f0f0; }
     h += '</section>';
     h += loginsCard(cr);
     var nPosts = d.posts.filter(function (x) { return x.creatorId === cr.id; }).length;
-    if (!nPosts && !cr.logins.length) {
-      var armedD = S.armed === 'delcr:' + cr.id;
-      h += '<div><button class="btn sm danger' + (armedD ? ' armed' : '') + '" type="button" data-act="del-creator" data-id="' + esc(cr.id) + '">' + (armedD ? 'Click again to delete ' + esc(cr.name) : 'Delete creator') + '</button></div>';
-    } else h += '<p class="hint">Creators with posts or saved logins can’t be deleted, so nothing is lost. Use <b>New link</b> above to switch off their access.</p>';
+    var armedD = S.armed === 'delcr:' + cr.id;
+    h += '<section class="card" aria-labelledby="off-h"><h2 id="off-h">Offboard</h2><p class="hint">Deleting removes ' + esc(cr.name) + ' from the Creators list and from their campaigns, and their private link stops working.' +
+      (nPosts || cr.logins.length ? ' Their ' + [nPosts ? plural(nPosts, 'posted link') : '', cr.logins.length ? 'saved logins' : ''].filter(Boolean).join(' and ') + ' are kept' + (cr.logins.length ? ' (logins stay in the sheet’s Logins tab)' : '') + '.' : '') + '</p>' +
+      '<div><button class="btn sm danger' + (armedD ? ' armed' : '') + '" type="button" data-act="del-creator" data-id="' + esc(cr.id) + '">' + (armedD ? 'Click again to delete ' + esc(cr.name) : 'Delete creator') + '</button></div></section>';
     return h;
   }
 
@@ -1543,7 +1567,7 @@ td { padding: 14px 16px; border-bottom-color: #f0f0f0; }
           '<td class="muted">' + ordinal(p.day) + ' of each month</td>' +
           '<td class="date">' + fmtDate(p.next, true) + '</td><td>' + payStatus(p) + '</td>' +
           '<td><div class="row-actions" style="flex-wrap:nowrap"><button class="btn sm' + (p.due.length ? ' primary' : '') + '" type="button" data-act="pay" data-how="next" data-id="' + esc(c.id) + '">Mark paid</button>' +
-          (p.lastPaid ? '<button class="subtle-link" type="button" data-act="pay" data-how="undo" data-id="' + esc(c.id) + '" title="Last marked paid: ' + esc(fmtDate(p.lastPaid)) + '">Undo ' + fmtDate(p.lastPaid) + '</button>' : '') + '</div></td></tr>';
+          '</div></td></tr>';
       }).join('') + '</tbody></table></div></section>';
     }
     if (without.length && withPay.length) h += '<p class="hint">No pay date yet: ' + without.map(function (c) { return '<button class="subtle-link" type="button" data-act="open-cr" data-id="' + esc(c.id) + '">' + esc(c.name) + '</button>'; }).join(', ') + '</p>';
@@ -1715,7 +1739,7 @@ td { padding: 14px 16px; border-bottom-color: #f0f0f0; }
     },
     'cancel-cr': function () { S.editCreator = null; render(); },
     'reset': function (el) { if (!arm('reset:' + el.dataset.id)) return; call('adminResetLink', [S.key, el.dataset.id], function (d) { setData(d); toast('New link made. Send it to them; the old one no longer works.'); }); },
-    'del-creator': function (el) { if (!arm('delcr:' + el.dataset.id)) return; call('adminDeleteCreator', [S.key, el.dataset.id], function (d) { S.creatorId = null; setData(d); toast('Creator deleted'); }); },
+    'del-creator': function (el) { if (!arm('delcr:' + el.dataset.id)) return; var who = creatorById(el.dataset.id); call('adminDeleteCreator', [S.key, el.dataset.id], function (d) { S.creatorId = null; setData(d); toast((who ? who.name : 'Creator') + ' deleted. Their link no longer works.'); }); },
     'test-push': function (el) {
       var cr = creatorById(el.dataset.id), label = el.textContent;
       if (el.disabled) return;
@@ -1739,6 +1763,8 @@ td { padding: 14px 16px; border-bottom-color: #f0f0f0; }
     },
     'group-match': function (el) { S.groupMatch = el.dataset.v; render(); },
     'gdrop': function () { S.gOpen = !S.gOpen; render(); },
+    'row-exp': function (el) { S.exp = S.exp || {}; S.exp[el.dataset.id] = !S.exp[el.dataset.id]; render(); },
+    'group-all': function () { S.groups = allTags().slice(); render(); },
     'edit-cr': function () {
       var cr = creatorById(S.creatorId); if (!cr) return;
       S.crEdit = { id: cr.id, origName: cr.name, name: cr.name, email: cr.email || '', notes: cr.notes || '', payStart: cr.payStart || '',
@@ -1803,7 +1829,7 @@ td { padding: 14px 16px; border-bottom-color: #f0f0f0; }
     var el = ev.target.closest('[data-act]');
     if (!el || el.dataset.act === 'member') return;
     // While waiting on Google, moving around is fine; anything that saves says why it can't run yet
-    var NAV = /^(tab|open|back|open-cr|back-cr|ctab|filter|group-filter|group-match|gdrop|cancel-edit|cancel-cr-edit|cancel-mine|lg-cancel|al-cancel|lg-req-cancel|show-old|close-tip|show-tip|tip-os|push-hint-close)$/;
+    var NAV = /^(tab|open|back|open-cr|back-cr|ctab|filter|group-filter|group-match|gdrop|row-exp|group-all|cancel-edit|cancel-cr-edit|cancel-mine|lg-cancel|al-cancel|lg-req-cancel|show-old|close-tip|show-tip|tip-os|push-hint-close)$/;
     if (S.busy && !NAV.test(el.dataset.act)) { ev.preventDefault(); stillBusy(); return; }
     var fn = actions[el.dataset.act]; if (fn) { ev.preventDefault(); fn(el); }
   });
