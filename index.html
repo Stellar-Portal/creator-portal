@@ -15,33 +15,33 @@
 </head>
 <body>
 <title>Stellar Advocates Portal</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
 <style>
 /* Layout: one narrow column for creators (phone-first), a wider single column with list → detail for the team. */
 :root {
-  --bg: #f1f2f5; --surface: #ffffff; --surface-2: #f6f7f9; --line: #e0e2e9; --line-strong: #c9ccd6;
-  --ink: #15161b; --muted: #5d6170; --faint: #8b8f9c;
-  --accent: #d0216a; --accent-ink: #ffffff; --accent-soft: #fbe6ee;
-  --ok: #187a4a; --ok-soft: #e1f3e8; --warn: #9a5b00; --warn-soft: #fbf0dc; --bad: #b42318; --bad-soft: #fde8e6;
-  --f-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
-  --f-body: "Instrument Sans", "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
-  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-  --r: 10px; --r-sm: 7px;
+  /* Same design language as Stellar OS / Live Marketing (Apple style): parchment canvas, white panels with hairlines,
+     Stellar cobalt as the only interactive colour, pill buttons, system font. */
+  --bg: #f5f5f7; --surface: #ffffff; --surface-2: #f5f5f7; --line: #e5e5ea; --line-strong: #d2d2d7;
+  --ink: #1d1d1f; --muted: #6e6e73; --faint: #86868b;
+  --accent: #0626c7; --accent-press: #041b93; --accent-ink: #ffffff; --accent-soft: #eef1fd;
+  --ok: #1a7f37; --ok-soft: #e6f4ea; --warn: #9a5b00; --warn-soft: #fff4e0; --bad: #c9302c; --bad-soft: #fdeceb;
+  --f-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+  --f-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+  --f-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --r: 18px; --r-sm: 11px;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #0f1014; --surface: #17181e; --surface-2: #1d1f26; --line: #2a2d36; --line-strong: #3a3e4a;
-  --ink: #eceef3; --muted: #a0a4b2; --faint: #747887;
-  --accent: #ff5a96; --accent-ink: #1b0610; --accent-soft: #3a1527;
+  --bg: #000000; --surface: #1c1c1e; --surface-2: #2c2c2e; --line: #38383a; --line-strong: #48484a;
+  --ink: #f5f5f7; --muted: #a1a1a6; --faint: #8e8e93;
+  --accent: #8aa0ff; --accent-press: #a9b9ff; --accent-ink: #050d3a; --accent-soft: #1b2347;
   --ok: #52c98a; --ok-soft: #14301f; --warn: #f0b252; --warn-soft: #33260f; --bad: #ff7a6b; --bad-soft: #3a1714;
   color-scheme: dark;
 } }
 :root[data-theme="dark"] {
-  --bg: #0f1014; --surface: #17181e; --surface-2: #1d1f26; --line: #2a2d36; --line-strong: #3a3e4a;
-  --ink: #eceef3; --muted: #a0a4b2; --faint: #747887;
-  --accent: #ff5a96; --accent-ink: #1b0610; --accent-soft: #3a1527;
+  --bg: #000000; --surface: #1c1c1e; --surface-2: #2c2c2e; --line: #38383a; --line-strong: #48484a;
+  --ink: #f5f5f7; --muted: #a1a1a6; --faint: #8e8e93;
+  --accent: #8aa0ff; --accent-press: #a9b9ff; --accent-ink: #050d3a; --accent-soft: #1b2347;
   --ok: #52c98a; --ok-soft: #14301f; --warn: #f0b252; --warn-soft: #33260f; --bad: #ff7a6b; --bad-soft: #3a1714;
   color-scheme: dark;
 }
@@ -332,7 +332,17 @@ a.tag.acc:hover { border-color: var(--accent); }
 .pill.bad { background: var(--bad-soft); color: var(--bad); }
 .pill.ok { background: var(--ok-soft); color: var(--ok); }
 .pill.lock { background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); }
-.gtag { font-size: 12px; font-weight: 600; background: var(--accent-soft); color: var(--accent); border-radius: 99px; padding: 2px 9px; white-space: nowrap; }
+.gtag { --th: 345; font-size: 12px; font-weight: 600; background: hsl(var(--th) 85% 94%); color: hsl(var(--th) 65% 32%); border-radius: 99px; padding: 2px 9px; white-space: nowrap; }
+.tagrow { display: flex; gap: 6px; align-items: center; flex-wrap: nowrap; }
+.tagrow .more { font-size: 12px; font-weight: 600; color: var(--muted); background: var(--surface-2); border: 1px solid var(--line); border-radius: 99px; padding: 1px 7px; cursor: default; white-space: nowrap; }
+td.c-tags { min-width: 230px; } td.c-accs { min-width: 190px; }
+.gfilter { display: grid; gap: 8px; }
+.gchip { --th: 345; background: hsl(var(--th) 85% 96%); color: hsl(var(--th) 65% 30%); border-color: hsl(var(--th) 60% 84%); }
+.gchip[aria-pressed="true"] { background: hsl(var(--th) 65% 38%); border-color: hsl(var(--th) 65% 38%); color: #fff; }
+.seg.match button { font-size: 12px; padding: 4px 12px; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .gtag { background: hsl(var(--th) 35% 20%); color: hsl(var(--th) 75% 78%); }
+  :root:not([data-theme="light"]) .gchip[aria-pressed="true"], :root:not([data-theme="light"]) .grp-chip[aria-pressed="true"] { background: hsl(var(--th) 50% 45%); border-color: hsl(var(--th) 50% 45%); } }
+:root[data-theme="dark"] .gtag { background: hsl(var(--th) 35% 20%); color: hsl(var(--th) 75% 78%); }
 .tab-dot { display: inline-block; min-width: 18px; height: 18px; line-height: 18px; text-align: center; border-radius: 99px; background: var(--bad); color: #fff; font-size: 11px; font-weight: 700; padding: 0 5px; margin-left: 4px; }
 .ctabs { overflow-x: auto; max-width: 100%; scrollbar-width: none; }
 .ctabs::-webkit-scrollbar { display: none; }
@@ -373,7 +383,120 @@ a.tag.acc:hover { border-color: var(--accent); }
 .guide-inline:hover { text-decoration: underline; }
 @media (max-width: 420px) { .guide-top span { display: none; } .guide-top { padding: 7px; } .guide-top::after { content: "Guide"; } }
 .tagpick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-.grp-chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.grp-chip { --th: 345; }
+.grp-chip[aria-pressed="true"] { background: hsl(var(--th) 65% 38%); border-color: hsl(var(--th) 65% 38%); color: #fff; }
+/* ───────── Apple-style layer (Stellar OS look). Only appearance: no feature changes. ───────── */
+body { font: 15px/1.47 var(--f-body); letter-spacing: -0.01em; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 600; }
+h1 { font-size: 40px; line-height: 1.1; letter-spacing: -0.025em; }
+h2 { font-size: 19px; letter-spacing: -0.01em; }
+@media (max-width: 560px) { h1 { font-size: 30px; } }
+a { color: var(--accent); }
+.card { border-radius: var(--r); padding: 24px; border-color: var(--line); }
+@media (max-width: 560px) { .card { padding: 18px; } }
+.btn { border-radius: 9999px; font-weight: 400; font-size: 14px; padding: 9px 18px; border-color: rgba(0,0,0,0.12); background: var(--surface); color: var(--ink);
+  transition: transform .08s ease, background .15s, border-color .15s; }
+.btn:hover { border-color: rgba(0,0,0,0.3); }
+.btn:active { transform: scale(0.97); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.btn.primary:hover { background: var(--accent-press); border-color: var(--accent-press); filter: none; }
+.btn.ghost { background: transparent; border-color: transparent; }
+.btn.ghost:hover { background: var(--surface-2); border-color: transparent; }
+.btn.sm { padding: 6px 14px; font-size: 13px; min-height: 32px; }
+.btn.danger.armed { background: var(--bad); border-color: var(--bad); color: #fff; }
+.btn[disabled] { opacity: 0.4; }
+.input, select.input, textarea.input { border-radius: var(--r-sm); border-color: rgba(0,0,0,0.12); padding: 10px 14px; font-size: 15px; }
+.input.small { border-radius: 8px; }
+.input:focus { border-color: #2b49e0; box-shadow: 0 0 0 3px rgba(43,73,224,0.18); }
+select.input { -webkit-appearance: none; appearance: none; padding-right: 38px; background-repeat: no-repeat; background-position: right 14px center; background-size: 12px 12px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%236e6e73' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+label.lbl { font-weight: 600; font-size: 13px; }
+.pill { font-weight: 400; padding: 3px 10px; }
+.pill::before { width: 5px; height: 5px; }
+.notice { border-radius: var(--r-sm); padding: 12px 14px; }
+.empty { border-radius: var(--r); background: var(--surface); border: 1px solid var(--line); }
+.toast { background: rgba(29,29,31,0.94); color: #fff; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); font-weight: 400; padding: 10px 18px; }
+.toast.busy-note { background: var(--surface); color: var(--ink); }
+/* segmented controls */
+.tabs, .seg { background: rgba(0,0,0,0.05); border: 0; border-radius: 9999px; padding: 3px; gap: 2px; }
+.tabs button, .seg button { color: var(--muted); font-weight: 400; padding: 7px 16px; }
+.tabs button[aria-current="page"], .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 0 0 0.5px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.08); }
+.chip { border-color: rgba(0,0,0,0.12); font-weight: 400; }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+/* numbers strip, as in Stellar OS */
+.stats { gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.stat { border: 0; border-right: 1px solid var(--line); border-radius: 0; padding: 18px 20px; }
+.stat:last-child { border-right: 0; }
+.stat .k { text-transform: none; letter-spacing: 0; font-size: 13px; font-weight: 400; color: var(--muted); }
+.stat .v { font-size: 24px; letter-spacing: -0.025em; }
+.t-box { border-radius: var(--r-sm); background: var(--surface-2); border-color: transparent; }
+.t-k { text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 13px; color: var(--muted); }
+/* lists and tables */
+.clist { border-radius: var(--r); border-color: var(--line); }
+.crow { padding: 16px 20px; }
+.crow.head { text-transform: none; letter-spacing: 0; font-size: 12px; color: var(--muted); background: var(--surface); }
+th { text-transform: none; letter-spacing: 0; color: var(--muted); font-size: 12px; padding: 12px 16px; border-bottom-color: var(--line); }
+td { padding: 14px 16px; border-bottom-color: #f0f0f0; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) td { border-bottom-color: var(--line); } }
+.mrow.mhead, .stat .k { text-transform: none; }
+.mrow { border-radius: var(--r-sm); }
+.lg-form, .secret, .install { border-radius: var(--r-sm); }
+.install { background: var(--accent-soft); }
+.tag { border-radius: 9999px; padding: 2px 9px; background: var(--surface-2); border-color: transparent; }
+.sound, .guide-inline, a.acc:hover { color: var(--accent); }
+.back { color: var(--accent); font-weight: 400; }
+.back:hover { color: var(--accent-press); }
+.namebtn:hover { color: var(--accent); }
+.subtle-link { color: var(--accent); text-decoration: none; }
+.subtle-link:hover { text-decoration: underline; }
+.badge { display: none; }
+
+/* team: black sidebar with white logo; blue only on the active section */
+.team .shell-content { margin-left: 232px; min-height: 100vh; }
+.team .wrap { max-width: 1240px; padding: 32px 32px 56px; }
+.sidebar { position: fixed; inset: 0 auto 0 0; z-index: 30; width: 232px; display: flex; flex-direction: column; gap: 22px; padding: 22px 14px 18px; background: #000; color: #fff; overflow-y: auto; }
+.sb-brand { display: flex; align-items: center; gap: 10px; padding: 2px 10px; }
+.sb-brand img { height: 18px; width: auto; display: block; }
+.sb-brand span { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); letter-spacing: 0.02em; }
+.sidebar .nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.nav-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.4); padding: 0 10px 6px; }
+.nav-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border: 0; border-radius: 8px; background: transparent; color: rgba(255,255,255,0.74); font: inherit; font-size: 14px; text-align: left; cursor: pointer; transition: background .15s, color .15s; }
+.nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.nav-item[aria-current="page"] { background: rgba(255,255,255,0.12); color: #fff; font-weight: 600; box-shadow: inset 3px 0 0 #8aa0ff; }
+.nav-item svg { width: 18px; height: 18px; flex: 0 0 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.nav-item .tab-dot { margin-left: auto; }
+.sb-foot { font-size: 12px; color: rgba(255,255,255,0.5); padding: 12px 10px 0; border-top: 1px solid rgba(255,255,255,0.12); }
+@media (max-width: 860px) {
+  .sidebar { position: sticky; top: 0; width: auto; flex-direction: row; align-items: center; gap: 12px; padding: 10px 14px; }
+  .sidebar .nav { flex-direction: row; overflow-x: auto; gap: 2px; }
+  .nav-label, .sb-foot, .sb-brand span { display: none; }
+  .nav-item { width: auto; white-space: nowrap; }
+  .nav-item[aria-current="page"] { box-shadow: inset 0 -2px 0 #8aa0ff; }
+  .team .shell-content { margin-left: 0; }
+  .team .wrap { padding: 20px 16px 48px; }
+}
+@media (max-width: 420px) { .nav-item svg { display: none; } .nav-item { padding: 8px; font-size: 13px; } }
+
+/* creators: thin black bar with the white logo */
+.gnav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: #000; height: 48px; display: flex; align-items: center; }
+.gnav-in { width: 100%; max-width: 880px; margin: 0 auto; padding: 0 16px; display: flex; align-items: center; gap: 12px; }
+.gnav img { height: 17px; display: block; }
+.gnav .guide-top { color: rgba(255,255,255,0.8); border-color: rgba(255,255,255,0.3); background: transparent; }
+.gnav .guide-top:hover { color: #fff; border-color: #fff; }
+.creator .wrap { padding-top: 32px; }
+
+/* group filter dropdown */
+.gdrop { position: relative; display: inline-block; }
+.gdrop-btn .caret { font-size: 11px; color: var(--muted); }
+.gdrop-menu { position: absolute; z-index: 25; top: calc(100% + 6px); left: 0; width: 300px; max-width: calc(100vw - 32px); background: var(--surface); border: 1px solid var(--line);
+  border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); padding: 8px; display: grid; gap: 2px; }
+.gopt { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+.gopt:hover { background: var(--surface-2); }
+.gopt input { width: 16px; height: 16px; margin: 0; accent-color: var(--accent); flex: none; }
+.gopt .num { margin-left: auto; color: var(--muted); font-size: 12px; }
+.gdrop-sep { height: 1px; background: var(--line); margin: 6px 4px; }
+.gdrop-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 4px 2px; }
+.gdrop-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 </style>
 
 <div id="app"><div class="loading">Loading…</div></div>
@@ -641,7 +764,7 @@ a.tag.acc:hover { border-color: var(--accent); }
     var d = S.data, tab = S.ctab || 'send';
     var active = d.campaigns.filter(function (c) { return c.status === 'Active'; });
     if (!active.some(function (c) { return c.id === S.campaign; })) S.campaign = active.length === 1 ? active[0].id : '';
-    var h = '<header class="top"><div class="top-in">' + brand() + guideLink('guide-top') + '</div></header><main class="wrap">';
+    var h = '<header class="gnav"><div class="gnav-in"><img src="' + LOGO_D + '" alt="Stellar">' + guideLink('guide-top') + '</div></header><main class="wrap">';
     h += '<section><h1>Hi, ' + esc(d.name) + '</h1><p class="lede">Only you and the Stellar team can see this page.</p></section>';
     h += installTip();
     var missing = missingLogins().length, fresh = d.campaigns.filter(isNewCampaign).length;
@@ -680,7 +803,6 @@ a.tag.acc:hover { border-color: var(--accent); }
     }
 
     if (tab === 'campaigns') {
-      h += '<p class="hint">Need ideas? ' + guideLink('guide-inline') + ' has eight post formats that perform well.</p>';
       if (!d.campaigns.length) h += '<div class="empty">You’re not on any campaigns yet.</div>';
       else h += '<section class="camp-cards" aria-label="Your campaigns">' + d.campaigns.map(function (c) {
         var mine = d.posts.filter(function (p) { return p.campaignId === c.id; }).length;
@@ -929,16 +1051,20 @@ a.tag.acc:hover { border-color: var(--accent); }
     var nPay = S.data.creators.filter(function (c) { return c.pay && c.pay.due.length; }).length;
     var tabs = [['campaigns', 'Campaigns', 0], ['creators', 'Creators', nReq], ['payments', 'Payments', nPay]];
     var cur = S.view === 'creators' || S.view === 'payments' ? S.view : 'campaigns';
-    var h = '<header class="top"><div class="top-in">' + brand(' <span class="badge">Team view</span>') +
-      '<nav class="tabs ctabs" aria-label="Sections">' + tabs.map(function (t) {
-        return '<button type="button" data-act="tab" data-v="' + t[0] + '"' + (cur === t[0] ? ' aria-current="page"' : '') + '>' + t[1] +
+    var ICON = {
+      campaigns: '<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
+      creators: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M18.5 14.5A6.5 6.5 0 0 1 21.5 20"/></svg>',
+      payments: '<svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6.5 15h4"/></svg>' };
+    var h = '<aside class="sidebar"><div class="sb-brand"><img src="' + LOGO_D + '" alt="Stellar"><span>Advocates</span></div>' +
+      '<nav class="nav" aria-label="Sections"><div class="nav-label">Team</div>' + tabs.map(function (t) {
+        return '<button type="button" class="nav-item" data-act="tab" data-v="' + t[0] + '"' + (cur === t[0] ? ' aria-current="page"' : '') + '>' + ICON[t[0]] + t[1] +
           (t[2] ? '<span class="tab-dot" aria-label="' + t[2] + ' need attention">' + t[2] + '</span>' : '') + '</button>';
-      }).join('') + '</nav></div></header><main class="wrap">' + versionBanner();
+      }).join('') + '</nav><div class="sb-foot">Team view</div></aside><div class="shell-content"><main class="wrap">' + versionBanner();
     if (cur === 'creators') h += S.creatorId && creatorById(S.creatorId) ? creatorDetail(creatorById(S.creatorId)) : creatorsTab();
     else if (cur === 'payments') h += paymentsTab();
     else if (S.campaignId && campaignById(S.campaignId)) h += campaignDetail(campaignById(S.campaignId));
     else h += campaignList();
-    return h + '</main>';
+    return h + '</main></div>';
   }
   function allTags() {
     var seen = {}, out = [];
@@ -965,7 +1091,21 @@ a.tag.acc:hover { border-color: var(--accent); }
     return added;
   }
   function inTag(c, t) { return (c.tags || []).some(function (x) { return x.toLowerCase() === t.toLowerCase(); }); }
-  function tagsHtml(c) { return (c.tags || []).map(function (t) { return '<span class="gtag">' + esc(t) + '</span>'; }).join(''); }
+  function tagsHtml(c) { return (c.tags || []).map(function (t) { return '<span class="gtag" style="' + tagStyle(t) + '">' + esc(t) + '</span>'; }).join(''); }
+  /** First few groups on one line, then "+2" (hover shows the rest). Keeps table rows one line tall. */
+  function compactTags(tags, n) {
+    return '<div class="tagrow">' + tags.slice(0, n).map(function (t) { return '<span class="gtag" style="' + tagStyle(t) + '">' + esc(t) + '</span>'; }).join('') +
+      (tags.length > n ? '<span class="more" title="' + esc(tags.slice(n).join(', ')) + '">+' + (tags.length - n) + '</span>' : '') + '</div>';
+  }
+  /** Each group gets its own colour: groups are coloured in A–Z order from a set of clearly different hues,
+      so up to 12 groups never share a colour (and everyone on the team sees the same colours). */
+  var TAG_HUES = [212, 345, 145, 32, 272, 188, 55, 0, 235, 105, 315, 165];
+  function tagStyle(t) {
+    var all = S.data && S.data.creators ? allTags() : [], i = -1, low = String(t).toLowerCase();
+    for (var k = 0; k < all.length; k++) if (all[k].toLowerCase() === low) { i = k; break; }
+    if (i < 0) { i = 0; for (var j = 0; j < low.length; j++) i = (i * 31 + low.charCodeAt(j)) >>> 0; }
+    return '--th:' + TAG_HUES[i % TAG_HUES.length];
+  }
   function ordinal(n) { var s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
   /** "Due today", "5 days late", "in 3 days" */
   function relDay(iso) {
@@ -1207,21 +1347,41 @@ a.tag.acc:hover { border-color: var(--accent); }
     h += '<section class="card" aria-labelledby="add-h"><h2 id="add-h">Add a creator</h2><p class="hint">Then click their name to add their accounts, groups, email and pay date.</p><div class="row-actions" style="flex-wrap:nowrap"><input class="input" id="new-creator" placeholder="Name, e.g. Alyssa" style="flex:1" autocomplete="off">' +
       '<button class="btn primary" type="button" data-act="add-creator">Add</button></div></section>';
     if (!d.creators.length) return h + '<div class="empty">No creators yet.</div>';
-    var tags = allTags(), g = S.group || '';
-    if (g && g !== '__none' && !tags.some(function (t) { return t.toLowerCase() === g.toLowerCase(); })) g = S.group = '';
+    // Several groups can be picked at once; "any" shows creators in at least one, "all" only those in every picked group
+    var tags = allTags(), sel = (S.groups || []).filter(function (g) { return g === '__none' || hasTag(tags, g); });
+    S.groups = sel;
     var noGroup = d.creators.filter(function (c) { return !(c.tags || []).length; }).length;
-    var list = d.creators.filter(function (c) { return !g || (g === '__none' ? !(c.tags || []).length : inTag(c, g)); })
-      .sort(function (a, b) { return a.name.localeCompare(b.name); });
-    if (tags.length) h += '<div class="chips" role="group" aria-label="Filter by group">' +
-      [['', 'All', d.creators.length]].concat(tags.map(function (t) { return [t, t, d.creators.filter(function (c) { return inTag(c, t); }).length]; }))
-        .concat(noGroup && noGroup < d.creators.length ? [['__none', 'No group', noGroup]] : [])
-        .map(function (x) { return '<button type="button" class="chip" data-act="group-filter" data-v="' + esc(x[0]) + '" aria-pressed="' + (g.toLowerCase() === x[0].toLowerCase()) + '">' + esc(x[1]) + ' <span class="num">' + x[2] + '</span></button>'; }).join('') + '</div>';
+    var matchAll = S.groupMatch === 'all', picked = sel.filter(function (g) { return g !== '__none'; });
+    var list = d.creators.filter(function (c) {
+      if (!sel.length) return true;
+      var none = sel.indexOf('__none') >= 0 && !(c.tags || []).length;
+      if (!picked.length) return none;
+      var hit = matchAll ? picked.every(function (g) { return inTag(c, g); }) : picked.some(function (g) { return inTag(c, g); });
+      return hit || none;
+    }).sort(function (a, b) { return a.name.localeCompare(b.name); });
+    if (tags.length) {
+      var label = !sel.length ? 'All groups' : sel.map(function (g) { return g === '__none' ? 'No group' : g; }).slice(0, 2).join(', ') + (sel.length > 2 ? ' +' + (sel.length - 2) : '');
+      h += '<div class="gdrop-row"><div class="gdrop"><button type="button" class="btn gdrop-btn" data-act="gdrop" aria-haspopup="true" aria-expanded="' + !!S.gOpen + '">Groups: ' + esc(label) + ' <span class="caret">▾</span></button>';
+      if (S.gOpen) {
+        h += '<div class="gdrop-menu" role="group" aria-label="Filter by group">' + tags.map(function (t) {
+          var on = sel.some(function (x) { return x.toLowerCase() === t.toLowerCase(); });
+          return '<label class="gopt"><input type="checkbox" data-gopt="' + esc(t) + '"' + (on ? ' checked' : '') + '><span class="gtag" style="' + tagStyle(t) + '">' + esc(t) + '</span>' +
+            '<span class="num">' + d.creators.filter(function (c) { return inTag(c, t); }).length + '</span></label>';
+        }).join('') +
+          (noGroup && noGroup < d.creators.length ? '<label class="gopt"><input type="checkbox" data-gopt="__none"' + (sel.indexOf('__none') >= 0 ? ' checked' : '') + '><span>No group</span><span class="num">' + noGroup + '</span></label>' : '') +
+          (picked.length > 1 ? '<div class="gdrop-sep"></div><div class="seg match" role="group" aria-label="How to combine groups"><button type="button" data-act="group-match" data-v="any" aria-pressed="' + !matchAll + '">In any of these</button>' +
+            '<button type="button" data-act="group-match" data-v="all" aria-pressed="' + matchAll + '">In all of these</button></div>' : '') +
+          '<div class="gdrop-sep"></div><div class="gdrop-foot"><button class="subtle-link" type="button" data-act="group-filter" data-v="">Clear</button>' +
+          '<button class="btn sm primary" type="button" data-act="gdrop">Done</button></div></div>';
+      }
+      h += '</div>' + (sel.length ? '<span class="hint">Showing ' + plural(list.length, 'creator') + '</span>' : '') + '</div>';
+    }
     h += '<section class="card"><div class="table-wrap"><table><thead><tr><th>Name</th><th>Groups</th><th>Accounts</th><th>Campaigns</th><th>Logins</th><th>Private link</th></tr></thead><tbody>' + list.map(function (cr) {
       var nCamps = d.members.filter(function (m) { var c = m.creatorId === cr.id && campaignById(m.campaignId); return c && c.status === 'Active'; }).length;
       var accs = cr.accounts || [];
       return '<tr class="cr-row"><td><button class="namebtn" type="button" data-act="open-cr" data-id="' + esc(cr.id) + '">' + esc(cr.name) + '</button></td>' +
-        '<td><div class="tagline">' + (cr.tags.length ? tagsHtml(cr) : '<span class="faint">—</span>') + '</div></td>' +
-        '<td style="min-width:150px">' + (accs.length ? '<div class="tagline">' + accs.slice(0, 3).map(function (a) { return accLink(a, 'tag acc'); }).join('') + (accs.length > 3 ? '<span class="faint">+' + (accs.length - 3) + '</span>' : '') + '</div>' : '<span class="faint">None yet</span>') + '</td>' +
+        '<td class="c-tags">' + (cr.tags.length ? compactTags(cr.tags, 2) : '<span class="faint">—</span>') + '</td>' +
+        '<td class="c-accs">' + (accs.length ? '<div class="tagrow">' + accLink(accs[0], 'tag acc') + (accs.length > 1 ? '<span class="more" title="' + esc(accs.slice(1).map(function (a) { return '@' + a; }).join(', ')) + '">+' + (accs.length - 1) + '</span>' : '') + '</div>' : '<span class="faint">None yet</span>') + '</td>' +
         '<td class="num mono">' + (nCamps ? nCamps + ' active' : '<span class="faint">—</span>') + '</td>' +
         '<td>' + loginSummary(cr) + '</td>' +
         '<td style="min-width:240px">' + (cr.link ? '<div class="linkbox"><input class="input small" readonly id="lk-' + esc(cr.id) + '" value="' + esc(cr.link) + '" aria-label="Private link for ' + esc(cr.name) + '"><button class="btn sm" type="button" data-act="copy-link" data-id="' + esc(cr.id) + '">Copy</button></div>' : '<span class="faint">Paste your app link above first</span>') + '</td></tr>';
@@ -1294,7 +1454,7 @@ a.tag.acc:hover { border-color: var(--accent); }
       '<div class="full"><span class="lbl" id="ce-tags-l">Groups</span>' +
         (labels.length ? '<div class="tagpick" role="group" aria-labelledby="ce-tags-l">' + labels.map(function (t) {
           var on = hasTag(e.tagList, t);
-          return '<button type="button" class="chip grp-chip" data-act="tag-toggle" data-tag="' + esc(t) + '" aria-pressed="' + on + '">' + (on ? '✓ ' : '+ ') + esc(t) + '</button>';
+          return '<button type="button" class="chip grp-chip" style="' + tagStyle(t) + '" data-act="tag-toggle" data-tag="' + esc(t) + '" aria-pressed="' + on + '">' + (on ? '✓ ' : '+ ') + esc(t) + '</button>';
         }).join('') + '</div>' : '') +
         '<div class="row-actions" style="flex-wrap:nowrap;margin-top:8px"><input class="input" id="ce-newtag" placeholder="' + (labels.length ? 'New group…' : 'e.g. hyperpop') + '" autocomplete="off" style="flex:1;max-width:320px" aria-label="New group name">' +
         '<button class="btn sm" type="button" data-act="tag-new">Add group</button></div>' +
@@ -1474,7 +1634,7 @@ a.tag.acc:hover { border-color: var(--accent); }
       var note = (document.getElementById('req-note') || {}).value || '';
       call('creatorRequestUnlock', [S.key, el.dataset.acc, note], function (d) { S.data = d; S.reqFor = null; render(); toast('Sent. The team will unlock it so you can send the new login.'); });
     },
-    'tab': function (el) { S.view = el.dataset.v; S.campaignId = null; S.creatorId = null; S.crEdit = null; S.alForm = null; S.edit = null; S.armed = null; render(); window.scrollTo(0, 0); },
+    'tab': function (el) { S.gOpen = false; S.view = el.dataset.v; S.campaignId = null; S.creatorId = null; S.crEdit = null; S.alForm = null; S.edit = null; S.armed = null; render(); window.scrollTo(0, 0); },
     'filter': function (el) { S.filter = el.dataset.v; render(); },
     'open': function (el) { S.view = 'campaigns'; S.campaignId = el.dataset.id; S.postCreator = ''; S.edit = null; render(); window.scrollTo(0, 0); },
     'back': function () { S.campaignId = null; S.edit = null; render(); },
@@ -1570,7 +1730,15 @@ a.tag.acc:hover { border-color: var(--accent); }
     },
     'open-cr': function (el) { S.view = 'creators'; S.creatorId = el.dataset.id; S.crEdit = null; S.alForm = null; S.armed = null; render(); window.scrollTo(0, 0); },
     'back-cr': function () { S.creatorId = null; S.crEdit = null; S.alForm = null; render(); },
-    'group-filter': function (el) { S.group = el.dataset.v; render(); },
+    'group-filter': function (el) {
+      var v = el.dataset.v, cur = S.groups || [];
+      if (!v) S.groups = [];
+      else if (cur.some(function (x) { return x.toLowerCase() === v.toLowerCase(); })) S.groups = cur.filter(function (x) { return x.toLowerCase() !== v.toLowerCase(); });
+      else S.groups = cur.concat([v]);
+      render();
+    },
+    'group-match': function (el) { S.groupMatch = el.dataset.v; render(); },
+    'gdrop': function () { S.gOpen = !S.gOpen; render(); },
     'edit-cr': function () {
       var cr = creatorById(S.creatorId); if (!cr) return;
       S.crEdit = { id: cr.id, origName: cr.name, name: cr.name, email: cr.email || '', notes: cr.notes || '', payStart: cr.payStart || '',
@@ -1635,10 +1803,14 @@ a.tag.acc:hover { border-color: var(--accent); }
     var el = ev.target.closest('[data-act]');
     if (!el || el.dataset.act === 'member') return;
     // While waiting on Google, moving around is fine; anything that saves says why it can't run yet
-    var NAV = /^(tab|open|back|open-cr|back-cr|ctab|filter|group-filter|cancel-edit|cancel-cr-edit|cancel-mine|lg-cancel|al-cancel|lg-req-cancel|show-old|close-tip|show-tip|tip-os|push-hint-close)$/;
+    var NAV = /^(tab|open|back|open-cr|back-cr|ctab|filter|group-filter|group-match|gdrop|cancel-edit|cancel-cr-edit|cancel-mine|lg-cancel|al-cancel|lg-req-cancel|show-old|close-tip|show-tip|tip-os|push-hint-close)$/;
     if (S.busy && !NAV.test(el.dataset.act)) { ev.preventDefault(); stillBusy(); return; }
     var fn = actions[el.dataset.act]; if (fn) { ev.preventDefault(); fn(el); }
   });
+  document.addEventListener('click', function (ev) {
+    if (S.gOpen && ev.target.closest && !ev.target.closest('.gdrop')) { S.gOpen = false; render(); }
+  });
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && S.gOpen) { S.gOpen = false; render(); } });
   app.addEventListener('change', function (ev) {
     var el = ev.target;
     if (el.dataset.act === 'member') {
@@ -1651,6 +1823,11 @@ a.tag.acc:hover { border-color: var(--accent); }
       var p = S.data.posts.filter(function (x) { return x.id === el.dataset.views; })[0];
       if (p && p.views !== el.value.trim()) call('adminUpdatePost', [S.key, p.id, { views: el.value.trim() }], function (d) { S.data = d; toast('Views saved'); });
       return;
+    }
+    if (el.dataset.gopt != null) {
+      var v = el.dataset.gopt, cur = S.groups || [];
+      S.groups = el.checked ? cur.concat([v]) : cur.filter(function (x) { return x.toLowerCase() !== v.toLowerCase(); });
+      render(); return;
     }
     if (el.id === 'e-notify' && S.edit) { S.edit.notify = el.checked; render(); return; }
     if (el.dataset.k === 'campaign') { S.campaign = el.value; S.result = null; render(); return; }
