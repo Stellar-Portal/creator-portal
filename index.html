@@ -488,6 +488,7 @@ button.more:hover { filter: brightness(0.96); }
 .gdrop-sep { height: 1px; background: var(--line); margin: 6px 4px; }
 .gdrop-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 4px 2px; }
 .gdrop-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.gdrop-row .export-btn { margin-left: auto; }
 </style>
 
 <div id="app"><div class="loading">Loading…</div></div>
@@ -1089,6 +1090,31 @@ button.more:hover { filter: brightness(0.96); }
     return '<div class="tagrow' + (open ? ' open' : '') + '">' + (open ? tags : tags.slice(0, n)).map(function (t) { return '<span class="gtag" style="' + tagStyle(t) + '">' + esc(t) + '</span>'; }).join('') +
       (tags.length > n ? moreBtn(cr, open ? 0 : tags.length - n) : '') + '</div>';
   }
+  function exportBtn() {
+    return '<button type="button" class="btn sm export-btn" data-act="export-accounts" title="One row per TikTok account">' +
+      '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Export accounts (CSV)</button>';
+  }
+  /** All TikTok accounts, one row each: creator, @account, profile link, groups, email, active campaigns. No passwords. */
+  function exportAccounts() {
+    var d = S.data, rows = [['Creator', 'Account', 'TikTok profile', 'Groups', 'Email', 'Active campaigns', 'Login saved']];
+    d.creators.slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).forEach(function (cr) {
+      var camps = d.members.filter(function (m) { return m.creatorId === cr.id; })
+        .map(function (m) { return campaignById(m.campaignId); }).filter(function (c) { return c && c.status === 'Active'; })
+        .map(function (c) { return c.name; }).join(', ');
+      (cr.accounts || []).forEach(function (a) {
+        var saved = cr.logins.some(function (l) { return l.account.toLowerCase() === a.toLowerCase(); });
+        rows.push([cr.name, '@' + a, 'https://www.tiktok.com/@' + a, (cr.tags || []).join(', '), cr.email || '', camps, saved ? 'Yes' : 'No']);
+      });
+    });
+    if (rows.length === 1) { toast('No TikTok accounts to export yet.', true); return; }
+    function cell(v) { v = String(v == null ? '' : v); if (/^[=+\-]/.test(v)) v = "'" + v; return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+    var csv = '\ufeff' + rows.map(function (r) { return r.map(cell).join(','); }).join('\r\n');
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' }), url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = 'stellar-advocates-tiktok-accounts-' + todayIso() + '.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    toast(plural(rows.length - 1, 'account') + ' exported');
+  }
   function compactAccs(cr) {
     var accs = cr.accounts, open = S.exp && S.exp[cr.id];
     return '<div class="tagrow' + (open ? ' open' : '') + '">' + (open ? accs : accs.slice(0, 1)).map(function (a) { return accLink(a, 'tag acc'); }).join('') +
@@ -1376,8 +1402,8 @@ button.more:hover { filter: brightness(0.96); }
           '<button class="subtle-link" type="button" data-act="group-filter" data-v="">Clear</button></span>' +
           '<button class="btn sm primary" type="button" data-act="gdrop">Done</button></div></div>';
       }
-      h += '</div>' + (sel.length ? '<span class="hint">Showing ' + plural(list.length, 'creator') + '</span>' : '') + '</div>';
-    }
+      h += '</div>' + (sel.length ? '<span class="hint">Showing ' + plural(list.length, 'creator') + '</span>' : '') + exportBtn() + '</div>';
+    } else h += '<div class="gdrop-row">' + exportBtn() + '</div>';
     h += '<section class="card"><div class="table-wrap"><table><thead><tr><th>Name</th><th>Groups</th><th>Accounts</th><th>Campaigns</th><th>Logins</th><th>Private link</th><th></th></tr></thead><tbody>' + list.map(function (cr) {
       var armedDel = S.armed === 'delcr:' + cr.id;
       var nCamps = d.members.filter(function (m) { var c = m.creatorId === cr.id && campaignById(m.campaignId); return c && c.status === 'Active'; }).length;
@@ -1743,6 +1769,7 @@ button.more:hover { filter: brightness(0.96); }
     },
     'group-match': function (el) { S.groupMatch = el.dataset.v; render(); },
     'gdrop': function () { S.gOpen = !S.gOpen; render(); },
+    'export-accounts': function () { exportAccounts(); },
     'row-exp': function (el) { S.exp = S.exp || {}; S.exp[el.dataset.id] = !S.exp[el.dataset.id]; render(); },
     'group-all': function () { S.groups = allTags().slice(); render(); },
     'edit-cr': function () {
@@ -1809,7 +1836,7 @@ button.more:hover { filter: brightness(0.96); }
     var el = ev.target.closest('[data-act]');
     if (!el || el.dataset.act === 'member') return;
     // While waiting on Google, moving around is fine; anything that saves says why it can't run yet
-    var NAV = /^(tab|open|back|open-cr|back-cr|ctab|filter|group-filter|group-match|gdrop|row-exp|group-all|cancel-edit|cancel-cr-edit|cancel-mine|lg-cancel|al-cancel|lg-req-cancel|show-old|close-tip|show-tip|tip-os|push-hint-close)$/;
+    var NAV = /^(tab|open|back|open-cr|back-cr|ctab|filter|group-filter|group-match|gdrop|row-exp|group-all|export-accounts|cancel-edit|cancel-cr-edit|cancel-mine|lg-cancel|al-cancel|lg-req-cancel|show-old|close-tip|show-tip|tip-os|push-hint-close)$/;
     if (S.busy && !NAV.test(el.dataset.act)) { ev.preventDefault(); stillBusy(); return; }
     var fn = actions[el.dataset.act]; if (fn) { ev.preventDefault(); fn(el); }
   });
