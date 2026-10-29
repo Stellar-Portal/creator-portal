@@ -366,7 +366,7 @@ td.c-tags { min-width: 180px; } td.c-accs { min-width: 170px; }
 @media (max-width: 420px) { .guide-top span { display: none; } .guide-top { padding: 7px; } .guide-top::after { content: "Guide"; } }
 .tagpick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .grp-chip { --th: 345; }
-.grp-chip[aria-pressed="true"] { background: hsl(var(--th) 65% 38%); border-color: hsl(var(--th) 65% 38%); color: #fff; }
+.chip.grp-chip[aria-pressed="true"] { background: hsl(var(--th) 65% 38%); border-color: hsl(var(--th) 65% 38%); color: #fff; }
 /* ───────── Apple-style layer (Stellar OS look). Only appearance: no feature changes. ───────── */
 body { font: 15px/1.47 var(--f-body); letter-spacing: -0.01em; }
 h1, h2, h3 { font-family: var(--f-display); font-weight: 600; }
@@ -489,6 +489,8 @@ button.more:hover { filter: brightness(0.96); }
 .gdrop-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 4px 2px; }
 .gdrop-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .gdrop-row .export-btn { margin-left: auto; }
+.pill.ctry::before { display: none; }
+.cr-country { font-size: 12px; color: var(--muted); margin-top: 2px; white-space: nowrap; }
 </style>
 
 <div id="app"><div class="loading">Loading…</div></div>
@@ -625,24 +627,25 @@ button.more:hover { filter: brightness(0.96); }
     });
   }
   /* Must match VERSION in Code.gs. */
-  var SCRIPT_VERSION = '2026-10-20.3';
+  var SCRIPT_VERSION = '2026-10-29.1';   // the oldest Code.gs this page works with
+  function scriptTooOld(d) { return !d || !d.version || String(d.version) < SCRIPT_VERSION; }
   /** Fills in anything an older script doesn't send, so the page never gets stuck. */
   function normalize(d) {
     if (!d || typeof d !== 'object') return d;
     if (d.view) normalize(d.view);
     (d.campaigns || []).forEach(function (c) { if (!c.sounds) c.sounds = c.sound ? [{ label: '', url: c.sound }] : []; });
-    (d.creators || []).forEach(function (c) { c.logins = c.logins || []; c.tags = c.tags || []; c.accounts = c.accounts || []; c.push = c.push || ''; c.email = c.email || ''; });
+    (d.creators || []).forEach(function (c) { c.logins = c.logins || []; c.tags = c.tags || []; c.accounts = c.accounts || []; c.push = c.push || ''; c.email = c.email || ''; c.country = c.country || ''; });
     if (d.posts && !d.logins && d.name) d.logins = [];
     if (d.accounts === undefined && d.name) d.accounts = [];
     return d;
   }
   function showCrash(e) {
     if (window.console) console.error(e);
-    var old = S.data && S.data.version !== SCRIPT_VERSION;
+    var old = S.data && scriptTooOld(S.data);
     toast(old && S.mode === 'admin' ? 'The Google script is an older version than this page. Redeploy it (Deploy → Manage deployments → New version).' : 'Something went wrong showing this page. Reload and try again.', true);
   }
   function versionBanner() {
-    if (S.mode !== 'admin' || !S.data || !window.API_URL || S.data.version === SCRIPT_VERSION) return '';
+    if (S.mode !== 'admin' || !S.data || !window.API_URL || !scriptTooOld(S.data)) return '';
     return '<div class="notice bad" role="alert"><b>The Google script needs redeploying.</b> This page is newer than the script Google is running, so some things won’t work. ' +
       'In Apps Script: <b>Deploy → Manage deployments → pencil icon → Version: New version → Deploy</b>, then reload this page.</div>';
   }
@@ -723,7 +726,7 @@ button.more:hover { filter: brightness(0.96); }
     api(fn, S.key).then(function (d) {
       S.data = normalize(d);
       try { render(); } catch (e) { showCrash(e); app.innerHTML = '<div class="gate">' + brand() + '<h1>This page couldn’t open</h1><p class="muted">' +
-        (S.mode === 'admin' && d && d.version !== SCRIPT_VERSION ? 'The Google script is an older version than this page. In Apps Script: Deploy → Manage deployments → pencil icon → New version → Deploy. Then reload.' : 'Reload the page and try again.') + '</p></div>'; return; }
+        (S.mode === 'admin' && d && scriptTooOld(d) ? 'The Google script is an older version than this page. In Apps Script: Deploy → Manage deployments → pencil icon → New version → Deploy. Then reload.' : 'Reload the page and try again.') + '</p></div>'; return; }
       if (boot.mode === 'creator' && d.push) initPush(d.push);
     },
       function (e) {
@@ -1090,20 +1093,43 @@ button.more:hover { filter: brightness(0.96); }
     return '<div class="tagrow' + (open ? ' open' : '') + '">' + (open ? tags : tags.slice(0, n)).map(function (t) { return '<span class="gtag" style="' + tagStyle(t) + '">' + esc(t) + '</span>'; }).join('') +
       (tags.length > n ? moreBtn(cr, open ? 0 : tags.length - n) : '') + '</div>';
   }
+  /* Countries: stored by name in the sheet (e.g. "Singapore"); names come from the browser, flags from the ISO code. */
+  var CC = 'AF AX AL DZ AS AD AO AI AG AR AM AW AU AT AZ BS BH BD BB BY BE BZ BJ BM BT BO BA BW BR BN BG BF BI CV KH CM CA KY CF TD CL CN CO KM CG CD CR CI HR CU CW CY CZ DK DJ DM DO EC EG SV GQ ER EE SZ ET FJ FI FR GF PF GA GM GE DE GH GI GR GL GD GP GU GT GG GN GW GY HT HN HK HU IS IN ID IR IQ IE IM IL IT JM JP JE JO KZ KE KI XK KW KG LA LV LB LS LR LY LI LT LU MO MG MW MY MV ML MT MH MQ MR MU MX FM MD MC MN ME MA MZ MM NA NR NP NL NC NZ NI NE NG MK NO OM PK PW PS PA PG PY PE PH PL PT PR QA RE RO RU RW KN LC VC WS SM ST SA SN RS SC SL SG SX SK SI SB SO ZA KR SS ES LK SD SR SE CH SY TW TJ TZ TH TL TG TO TT TN TR TM TC TV UG UA AE GB US UY UZ VU VA VE VN VG VI YE ZM ZW'.split(' ');
+  var COMMON_CC = ['ID', 'JP', 'MY', 'PH', 'SG', 'TH', 'VN', 'KR', 'AU', 'GB', 'US', 'BR', 'MX'];
+  var COUNTRY_BY_NAME = null;
+  function countryName(code) { try { return new Intl.DisplayNames(['en'], { type: 'region' }).of(code) || code; } catch (e) { return code; } }
+  function countries() {
+    if (!COUNTRY_BY_NAME) { COUNTRY_BY_NAME = {}; CC.forEach(function (c) { COUNTRY_BY_NAME[countryName(c).toLowerCase()] = c; }); }
+    return COUNTRY_BY_NAME;
+  }
+  function flag(name) {
+    var c = countries()[String(name || '').toLowerCase()]; if (!c) return '';
+    return String.fromCodePoint(127397 + c.charCodeAt(0), 127397 + c.charCodeAt(1));
+  }
+  function countryLabel(name) { return name ? (flag(name) ? flag(name) + ' ' : '') + esc(name) : ''; }
+  function countrySelect(cur) {
+    var opt = function (c) { var n = countryName(c); return '<option value="' + esc(n) + '"' + (n === cur ? ' selected' : '') + '>' + esc(n) + '</option>'; };
+    var all = CC.slice().sort(function (a, b) { return countryName(a).localeCompare(countryName(b)); });
+    var known = !cur || countries()[cur.toLowerCase()];
+    return '<select class="input" id="ce-country" data-ce="country"><option value="">Not set</option>' +
+      (known ? '' : '<option value="' + esc(cur) + '" selected>' + esc(cur) + '</option>') +
+      '<optgroup label="Common markets">' + COMMON_CC.map(opt).join('') + '</optgroup>' +
+      '<optgroup label="All countries">' + all.map(opt).join('') + '</optgroup></select>';
+  }
   function exportBtn() {
     return '<button type="button" class="btn sm export-btn" data-act="export-accounts" title="One row per TikTok account">' +
       '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Export accounts (CSV)</button>';
   }
   /** All TikTok accounts, one row each: creator, @account, profile link, groups, email, active campaigns. No passwords. */
   function exportAccounts() {
-    var d = S.data, rows = [['Creator', 'Account', 'TikTok profile', 'Groups', 'Email', 'Active campaigns', 'Login saved']];
+    var d = S.data, rows = [['Creator', 'Country', 'Account', 'TikTok profile', 'Groups', 'Email', 'Active campaigns', 'Login saved']];
     d.creators.slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).forEach(function (cr) {
       var camps = d.members.filter(function (m) { return m.creatorId === cr.id; })
         .map(function (m) { return campaignById(m.campaignId); }).filter(function (c) { return c && c.status === 'Active'; })
         .map(function (c) { return c.name; }).join(', ');
       (cr.accounts || []).forEach(function (a) {
         var saved = cr.logins.some(function (l) { return l.account.toLowerCase() === a.toLowerCase(); });
-        rows.push([cr.name, '@' + a, 'https://www.tiktok.com/@' + a, (cr.tags || []).join(', '), cr.email || '', camps, saved ? 'Yes' : 'No']);
+        rows.push([cr.name, cr.country || '', '@' + a, 'https://www.tiktok.com/@' + a, (cr.tags || []).join(', '), cr.email || '', camps, saved ? 'Yes' : 'No']);
       });
     });
     if (rows.length === 1) { toast('No TikTok accounts to export yet.', true); return; }
@@ -1408,7 +1434,8 @@ button.more:hover { filter: brightness(0.96); }
       var armedDel = S.armed === 'delcr:' + cr.id;
       var nCamps = d.members.filter(function (m) { var c = m.creatorId === cr.id && campaignById(m.campaignId); return c && c.status === 'Active'; }).length;
       var accs = cr.accounts || [];
-      return '<tr class="cr-row"><td><button class="namebtn" type="button" data-act="open-cr" data-id="' + esc(cr.id) + '">' + esc(cr.name) + '</button></td>' +
+      return '<tr class="cr-row"><td><button class="namebtn" type="button" data-act="open-cr" data-id="' + esc(cr.id) + '">' + esc(cr.name) + '</button>' +
+        (cr.country ? '<div class="cr-country">' + countryLabel(cr.country) + '</div>' : '') + '</td>' +
         '<td class="c-tags">' + (cr.tags.length ? compactTags(cr, 2) : '<span class="faint">—</span>') + '</td>' +
         '<td class="c-accs">' + (accs.length ? compactAccs(cr) : '<span class="faint">None yet</span>') + '</td>' +
         '<td class="num mono">' + (nCamps ? nCamps + ' active' : '<span class="faint">—</span>') + '</td>' +
@@ -1433,7 +1460,7 @@ button.more:hover { filter: brightness(0.96); }
     var h = '<button class="back" type="button" data-act="back-cr">← All creators</button>';
     if (ed) h += creatorForm(ed);
     else {
-      h += '<section style="display:grid;gap:10px"><div class="detail-head"><h1>' + esc(cr.name) + '</h1>' + (cr.tags.length ? '<div class="tagline">' + tagsHtml(cr) + '</div>' : '') +
+      h += '<section style="display:grid;gap:10px"><div class="detail-head"><h1>' + esc(cr.name) + '</h1>' + (cr.country ? '<span class="pill lock ctry">' + countryLabel(cr.country) + '</span>' : '') + (cr.tags.length ? '<div class="tagline">' + tagsHtml(cr) + '</div>' : '') +
         '<div class="row-actions"><button class="btn" type="button" data-act="edit-cr">Edit</button></div></div>' +
         (cr.accounts.length ? '<div class="tagline">' + cr.accounts.map(function (a) { return accLink(a, 'tag acc'); }).join('') + '</div>' : '') + '</section>';
       var p = cr.pay;
@@ -1489,6 +1516,7 @@ button.more:hover { filter: brightness(0.96); }
         '<div class="row-actions" style="flex-wrap:nowrap;margin-top:8px"><input class="input" id="ce-newtag" placeholder="' + (labels.length ? 'New group…' : 'e.g. hyperpop') + '" autocomplete="off" style="flex:1;max-width:320px" aria-label="New group name">' +
         '<button class="btn sm" type="button" data-act="tag-new">Add group</button></div>' +
         '<p class="hint" style="margin-top:6px">Tap a group to add or remove it. New groups appear here for every creator. Only the team sees groups.</p></div>' +
+      '<div><label class="lbl" for="ce-country">Country / market</label>' + countrySelect(e.country) + '</div>' +
       '<div><label class="lbl" for="ce-pay">Pay date <span class="faint" style="font-weight:400">DD/MM/YYYY</span></label><input class="input" id="ce-pay" type="date" data-ce="payStart" value="' + esc(e.payStart) + '">' +
         '<p class="hint" style="margin-top:6px">Their next pay day. It repeats every month on the same day.</p></div>' +
       '<div class="full"><label class="lbl" for="ce-notes">Notes <span class="faint" style="font-weight:400">only the team sees these</span></label><textarea class="input" id="ce-notes" data-ce="notes" style="min-height:70px">' + esc(e.notes) + '</textarea></div>' +
@@ -1774,7 +1802,7 @@ button.more:hover { filter: brightness(0.96); }
     'group-all': function () { S.groups = allTags().slice(); render(); },
     'edit-cr': function () {
       var cr = creatorById(S.creatorId); if (!cr) return;
-      S.crEdit = { id: cr.id, origName: cr.name, name: cr.name, email: cr.email || '', notes: cr.notes || '', payStart: cr.payStart || '',
+      S.crEdit = { id: cr.id, origName: cr.name, name: cr.name, email: cr.email || '', notes: cr.notes || '', payStart: cr.payStart || '', country: cr.country || '',
         accounts: (cr.accounts || []).map(function (a) { return '@' + a; }).join(', '), tagList: (cr.tags || []).slice() };
       render(); window.scrollTo(0, 0); var i = document.getElementById('ce-name'); if (i) i.focus();
     },
@@ -1796,7 +1824,7 @@ button.more:hover { filter: brightness(0.96); }
       if (!String(e.name).trim()) { toast('Add a name.', true); return; }
       if (e.email.trim() && !/^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(e.email.trim())) { toast('That email address doesn’t look right.', true); return; }
       var typed = document.getElementById('ce-newtag'); if (typed && typed.value.trim()) addNewTag(e, typed.value);   // typed but not added yet
-      call('adminSaveCreator', [S.key, { id: e.id, name: e.name, email: e.email.trim(), notes: e.notes, payStart: e.payStart, accounts: e.accounts, tags: e.tagList }],
+      call('adminSaveCreator', [S.key, { id: e.id, name: e.name, email: e.email.trim(), notes: e.notes, payStart: e.payStart, country: e.country, accounts: e.accounts, tags: e.tagList }],
         function (d) { S.crEdit = null; setData(d); toast('Saved'); });
     },
     'pay': function (el) {
