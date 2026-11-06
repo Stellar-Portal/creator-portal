@@ -490,6 +490,26 @@ button.more:hover { filter: brightness(0.96); }
 .gdrop-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .gdrop-row .export-btn { margin-left: auto; }
 .pill.ctry::before { display: none; }
+.sort-select { width: auto; max-width: 240px; display: inline-block; font-size: 14px; padding: 8px 36px 8px 14px; border-radius: 9999px; }
+.track-note { margin: -4px 0 0; }
+.stat .s { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; }
+.pf-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 24px; margin-top: 16px; }
+@media (max-width: 900px) { .pf-grid { grid-template-columns: minmax(0, 1fr); } }
+h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px; }
+.chart { width: 100%; height: auto; display: block; }
+.chart .bar-c { fill: var(--accent); } .chart .bar-f { fill: #b7c3f5; }
+.chart .lbl-v { font: 600 12px var(--f-body); fill: var(--ink); text-anchor: middle; }
+.chart .lbl-x { font: 12px var(--f-body); fill: var(--muted); text-anchor: middle; }
+.chart .quota-line { stroke: var(--bad); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.chart .lbl-q { font: 11px var(--f-body); fill: var(--bad); text-anchor: end; }
+.legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin-top: 6px; }
+.legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.legend .sw.c { background: var(--accent); } .legend .sw.f { background: #b7c3f5; }
+.acc-f { padding: 10px 0; border-top: 1px solid var(--line); } .acc-f:first-of-type { border-top: 0; padding-top: 0; }
+.acc-f-top { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; font-size: 14px; }
+.acc-f-top b { font-variant-numeric: tabular-nums; } .acc-f-top .up { color: var(--ok); font-size: 12px; } .acc-f-top .down { color: var(--bad); font-size: 12px; }
+.spark { width: 100%; height: 48px; display: block; margin-top: 6px; }
+.spark polyline { fill: none; stroke: var(--accent); stroke-width: 2; vector-effect: non-scaling-stroke; }
 .cr-country { font-size: 12px; color: var(--muted); margin-top: 2px; white-space: nowrap; }
 </style>
 
@@ -627,14 +647,16 @@ button.more:hover { filter: brightness(0.96); }
     });
   }
   /* Must match VERSION in Code.gs. */
-  var SCRIPT_VERSION = '2026-10-29.1';   // the oldest Code.gs this page works with
+  var SCRIPT_VERSION = '2026-11-06.1';   // the oldest Code.gs this page works with
   function scriptTooOld(d) { return !d || !d.version || String(d.version) < SCRIPT_VERSION; }
   /** Fills in anything an older script doesn't send, so the page never gets stuck. */
   function normalize(d) {
     if (!d || typeof d !== 'object') return d;
     if (d.view) normalize(d.view);
     (d.campaigns || []).forEach(function (c) { if (!c.sounds) c.sounds = c.sound ? [{ label: '', url: c.sound }] : []; });
-    (d.creators || []).forEach(function (c) { c.logins = c.logins || []; c.tags = c.tags || []; c.accounts = c.accounts || []; c.push = c.push || ''; c.email = c.email || ''; c.country = c.country || ''; });
+    (d.creators || []).forEach(function (c) { c.logins = c.logins || []; c.tags = c.tags || []; c.accounts = c.accounts || []; c.push = c.push || ''; c.email = c.email || ''; c.country = c.country || ''; c.quota = c.quota || ''; if (c.perf === undefined) c.perf = null;
+      c.campaignsJoined = c.campaignsJoined || 0; c.commissioned = c.commissioned || 0; });
+    if (d.creators && !d.tracking) d.tracking = { on: false, last: null };
     if (d.posts && !d.logins && d.name) d.logins = [];
     if (d.accounts === undefined && d.name) d.accounts = [];
     return d;
@@ -1116,6 +1138,113 @@ button.more:hover { filter: brightness(0.96); }
       '<optgroup label="Common markets">' + COMMON_CC.map(opt).join('') + '</optgroup>' +
       '<optgroup label="All countries">' + all.map(opt).join('') + '</optgroup></select>';
   }
+  /* ── account tracking (filled in nightly by the Google script from ScrapeCreators) ── */
+  var SORTS = [['name', 'Name A–Z'], ['behind', 'Behind on quota'], ['month', 'Most posts this month'], ['views', 'Highest median views'],
+    ['campaigns', 'Most campaigns joined'], ['commissioned', 'Most commissioned videos']];
+  function sortSelect() {
+    var cur = S.crSort || 'name', tr = S.data.tracking && S.data.tracking.on;
+    return '<select class="input sort-select" id="cr-sort" aria-label="Sort creators">' + SORTS.filter(function (o) { return tr || ['behind', 'month', 'views'].indexOf(o[0]) < 0; })
+      .map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === cur ? ' selected' : '') + '>Sort: ' + o[1] + '</option>'; }).join('') + '</select>';
+  }
+  function creatorSorter() {
+    var k = S.crSort || 'name';
+    function pm(c) { return c.perf ? c.perf.month : { count: 0, quota: 0, expected: 0 }; }
+    return function (a, b) {
+      var r = 0;
+      if (k === 'behind') r = (pm(a).count - pm(a).expected) - (pm(b).count - pm(b).expected);
+      else if (k === 'month') r = pm(b).count - pm(a).count;
+      else if (k === 'views') r = (b.perf ? b.perf.last30.median : 0) - (a.perf ? a.perf.last30.median : 0);
+      else if (k === 'campaigns') r = b.campaignsJoined - a.campaignsJoined;
+      else if (k === 'commissioned') r = b.commissioned - a.commissioned;
+      return r || a.name.localeCompare(b.name);
+    };
+  }
+  function quotaCell(cr) {
+    var m = cr.perf && cr.perf.month;
+    if (!m || !cr.accounts.length) return '<span class="faint">—</span>';
+    var cls = m.status === 'done' ? 'ok' : m.status === 'on' ? 'lock' : 'bad';
+    return '<span class="pill ' + cls + '" title="' + (m.status === 'behind' ? 'Should be at ' + m.expected + ' by today' : m.status === 'done' ? 'Quota reached' : 'On track') + '">' + m.count + ' / ' + m.quota + '</span>';
+  }
+  function trackingNote() {
+    var t = S.data.tracking;
+    if (!t || !t.on || !t.last) return '';
+    var errs = t.last.errors || [];
+    return '<p class="hint track-note">Account stats updated ' + esc(t.last.at) + ' · ' + t.last.updated + ' of ' + t.last.accounts + ' accounts' +
+      (t.last.credits !== '' && t.last.credits != null ? ' · ' + esc(String(t.last.credits)) + ' ScrapeCreators credits left' : '') +
+      (errs.length ? ' · <button class="subtle-link" type="button" data-act="track-errs">' + plural(errs.length, 'problem') + '</button>' : '') + '</p>' +
+      (errs.length && S.showTrackErrs ? '<div class="notice warn">' + errs.map(esc).join('<br>') + '</div>' : '');
+  }
+  function fmtNum(n) {
+    n = +n || 0;
+    return n >= 1e6 ? (Math.round(n / 1e5) / 10) + 'M' : n >= 1e4 ? Math.round(n / 1e3) + 'K' : n >= 1e3 ? (Math.round(n / 100) / 10) + 'K' : String(n);
+  }
+  var MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  /** Posts per month, campaign vs filler, with the quota as a dashed line. */
+  function monthsChart(months, quota) {
+    var W = 560, H = 170, pad = 26, bw = 48, gap = (W - pad * 2 - bw * months.length) / Math.max(1, months.length - 1);
+    var max = Math.max(quota || 0, 4); months.forEach(function (m) { max = Math.max(max, m.campaign + m.filler); });
+    var y = function (v) { return H - 24 - v / max * (H - 44); };
+    var out = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Posts per month">';
+    months.forEach(function (m, i) {
+      var x = pad + i * (bw + gap), t = m.campaign + m.filler, yc = y(m.campaign), yt = y(t);
+      out += '<rect x="' + x + '" y="' + yt + '" width="' + bw + '" height="' + (yc - yt) + '" rx="3" class="bar-f"><title>' + m.filler + ' filler</title></rect>' +
+        '<rect x="' + x + '" y="' + yc + '" width="' + bw + '" height="' + (y(0) - yc) + '" rx="3" class="bar-c"><title>' + m.campaign + ' campaign</title></rect>' +
+        '<text x="' + (x + bw / 2) + '" y="' + (yt - 6) + '" class="lbl-v">' + t + '</text>' +
+        '<text x="' + (x + bw / 2) + '" y="' + (H - 6) + '" class="lbl-x">' + MONTH_SHORT[+m.month.slice(5, 7) - 1] + '</text>';
+    });
+    if (quota) out += '<line x1="' + (pad - 8) + '" x2="' + (W - pad + 8) + '" y1="' + y(quota) + '" y2="' + y(quota) + '" class="quota-line"/>' +
+      '<text x="' + (W - pad + 8) + '" y="' + (y(quota) - 5) + '" class="lbl-q">quota ' + quota + '</text>';
+    return out + '</svg>';
+  }
+  /** Followers over time for one account (needs at least two days). */
+  function followersChart(hist) {
+    var W = 260, H = 60, vals = hist.map(function (p) { return p.followers; });
+    var min = Math.min.apply(null, vals), max = Math.max.apply(null, vals), span = Math.max(1, max - min);
+    var pts = hist.map(function (p, i) { return (i / Math.max(1, hist.length - 1) * (W - 4) + 2).toFixed(1) + ',' + (H - 4 - (p.followers - min) / span * (H - 8)).toFixed(1); }).join(' ');
+    return '<svg class="spark" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" aria-hidden="true"><polyline points="' + pts + '"/></svg>';
+  }
+  function performanceCard(cr) {
+    var d = S.data, t = d.tracking, h = '<section class="card" aria-labelledby="pf-h"><div class="card-head"><h2 id="pf-h">Performance</h2>' +
+      (t.on && t.last ? '<span class="hint">Updated ' + esc(t.last.at) + '</span>' : '') + '</div>';
+    var m = cr.perf && cr.perf.month, l = cr.perf && cr.perf.last30;
+    h += '<div class="stats">' +
+      (m ? '<div class="stat"><div class="k">This month</div><div class="v">' + m.count + ' <span class="faint">/ ' + m.quota + '</span></div>' +
+        '<div class="s">' + (m.status === 'done' ? '<span class="pill ok">Quota reached</span>' : m.status === 'on' ? 'On track' : '<span class="pill bad">Behind: should be at ' + m.expected + '</span>') + '</div></div>' +
+        '<div class="stat"><div class="k">Campaign · filler</div><div class="v">' + m.campaign + ' · ' + (m.count - m.campaign) + '</div><div class="s">this month</div></div>' +
+        '<div class="stat"><div class="k">Median views</div><div class="v">' + fmtNum(l.median) + '</div><div class="s">last 30 days · ' + plural(l.posts, 'post') + '</div></div>' +
+        '<div class="stat"><div class="k">Engagement</div><div class="v">' + l.engagement + '%</div><div class="s">likes, comments, shares ÷ views</div></div>' : '') +
+      '<div class="stat"><div class="k">Campaigns joined</div><div class="v">' + cr.campaignsJoined + '</div><div class="s">all time</div></div>' +
+      '<div class="stat"><div class="k">Commissioned videos</div><div class="v">' + cr.commissioned + '</div><div class="s">links sent for campaigns</div></div></div>';
+    if (!t.on) return h + '<p class="hint">To see monthly posts against their quota, views and follower growth, turn on account tracking: in the Google Sheet, open <b>Advocates Portal → Set up account tracking…</b></p></section>';
+    if (!cr.accounts.length) return h + '<p class="hint">Add their TikTok accounts (Edit) and they’ll be tracked from tonight.</p></section>';
+    var st = S.cstats && S.cstats[cr.id];
+    if (!st) {
+      if (!S.cstatsLoading) {
+        S.cstatsLoading = cr.id;
+        api('adminCreatorStats', S.key, cr.id).then(function (r) {
+          S.cstats = S.cstats || {}; S.cstats[cr.id] = r; S.cstatsLoading = null;
+          if (S.creatorId === cr.id && !S.crEdit) render();
+        }, function () { S.cstatsLoading = null; });
+      }
+      return h + '<p class="hint">Loading charts…</p></section>';
+    }
+    h += '<div class="pf-grid"><div><h3 class="sub">Posts per month</h3>' + monthsChart(st.months, m ? m.quota : 0) +
+      '<div class="legend"><span><i class="sw c"></i>Campaign</span><span><i class="sw f"></i>Filler</span></div></div>';
+    h += '<div><h3 class="sub">Followers</h3>' + (st.accounts.length ? st.accounts.map(function (a) {
+      var first = a.history[0], last = a.latest, diff = last.followers - first.followers;
+      return '<div class="acc-f"><div class="acc-f-top">' + accLink(a.account, 'acc') + '<b>' + fmtNum(last.followers) + '</b>' +
+        (a.history.length > 1 ? '<span class="' + (diff >= 0 ? 'up' : 'down') + '">' + (diff >= 0 ? '+' : '') + fmtNum(Math.abs(diff)).replace(/^/, diff < 0 ? '−' : '') + ' since ' + fmtDate(first.date) + '</span>' : '<span class="faint">growth shows after a few days</span>') +
+        '</div>' + (a.history.length > 1 ? followersChart(a.history) : '') + '</div>';
+    }).join('') : '<p class="hint">Shows after the first nightly update.</p>') + '</div></div>';
+    if (st.recent.length) h += '<h3 class="sub" style="margin-top:6px">Recent posts</h3><div class="table-wrap"><table><thead><tr><th>Posted</th><th>Account</th><th>Type</th><th>Views</th><th>Likes</th><th>Comments</th><th>Shares</th><th></th></tr></thead><tbody>' +
+      st.recent.slice(0, 15).map(function (v) {
+        return '<tr><td class="date">' + fmtDate(v.postedOn) + '</td><td>' + accLink(v.account, 'acc') + '</td><td>' + (v.kind === 'Campaign' ? '<span class="pill new" title="' + esc(v.campaign) + '">Campaign</span>' : '<span class="pill lock">Filler</span>') + '</td>' +
+          '<td class="num">' + fmtNum(v.views) + '</td><td class="num">' + fmtNum(v.likes) + '</td><td class="num">' + fmtNum(v.comments) + '</td><td class="num">' + fmtNum(v.shares) + '</td>' +
+          '<td><a class="sound" href="' + esc(v.url) + '" target="_blank" rel="noopener noreferrer">Open ↗</a></td></tr>';
+      }).join('') + '</tbody></table></div>';
+    else h += '<p class="hint">No posts found yet. They show after the next nightly update.</p>';
+    return h + '</section>';
+  }
   function exportBtn() {
     return '<button type="button" class="btn sm export-btn" data-act="export-accounts" title="One row per TikTok account">' +
       '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Export accounts (CSV)</button>';
@@ -1411,7 +1540,7 @@ button.more:hover { filter: brightness(0.96); }
       if (!picked.length) return none;
       var hit = matchAll ? picked.every(function (g) { return inTag(c, g); }) : picked.some(function (g) { return inTag(c, g); });
       return hit || none;
-    }).sort(function (a, b) { return a.name.localeCompare(b.name); });
+    }).sort(creatorSorter());
     if (tags.length) {
       var label = !sel.length ? 'All groups' : sel.map(function (g) { return g === '__none' ? 'No group' : g; }).slice(0, 2).join(', ') + (sel.length > 2 ? ' +' + (sel.length - 2) : '');
       h += '<div class="gdrop-row"><div class="gdrop"><button type="button" class="btn gdrop-btn" data-act="gdrop" aria-haspopup="true" aria-expanded="' + !!S.gOpen + '">Groups: ' + esc(label) + ' <span class="caret">▾</span></button>';
@@ -1428,9 +1557,10 @@ button.more:hover { filter: brightness(0.96); }
           '<button class="subtle-link" type="button" data-act="group-filter" data-v="">Clear</button></span>' +
           '<button class="btn sm primary" type="button" data-act="gdrop">Done</button></div></div>';
       }
-      h += '</div>' + (sel.length ? '<span class="hint">Showing ' + plural(list.length, 'creator') + '</span>' : '') + exportBtn() + '</div>';
-    } else h += '<div class="gdrop-row">' + exportBtn() + '</div>';
-    h += '<section class="card"><div class="table-wrap"><table><thead><tr><th>Name</th><th>Groups</th><th>Accounts</th><th>Campaigns</th><th>Logins</th><th>Private link</th><th></th></tr></thead><tbody>' + list.map(function (cr) {
+      h += '</div>' + sortSelect() + (sel.length ? '<span class="hint">Showing ' + plural(list.length, 'creator') + '</span>' : '') + exportBtn() + '</div>';
+    } else h += '<div class="gdrop-row">' + sortSelect() + exportBtn() + '</div>';
+    h += trackingNote();
+    h += '<section class="card"><div class="table-wrap"><table><thead><tr><th>Name</th><th>Groups</th><th>Accounts</th><th>Campaigns</th><th>Logins</th>' + (d.tracking.on ? '<th>This month</th>' : '') + '<th>Private link</th><th></th></tr></thead><tbody>' + list.map(function (cr) {
       var armedDel = S.armed === 'delcr:' + cr.id;
       var nCamps = d.members.filter(function (m) { var c = m.creatorId === cr.id && campaignById(m.campaignId); return c && c.status === 'Active'; }).length;
       var accs = cr.accounts || [];
@@ -1439,7 +1569,7 @@ button.more:hover { filter: brightness(0.96); }
         '<td class="c-tags">' + (cr.tags.length ? compactTags(cr, 2) : '<span class="faint">—</span>') + '</td>' +
         '<td class="c-accs">' + (accs.length ? compactAccs(cr) : '<span class="faint">None yet</span>') + '</td>' +
         '<td class="num mono">' + (nCamps ? nCamps + ' active' : '<span class="faint">—</span>') + '</td>' +
-        '<td>' + loginSummary(cr) + '</td>' +
+        '<td>' + loginSummary(cr) + '</td>' + (d.tracking.on ? '<td>' + quotaCell(cr) + '</td>' : '') +
         '<td style="min-width:200px">' + (cr.link ? '<div class="linkbox"><input class="input small" readonly id="lk-' + esc(cr.id) + '" value="' + esc(cr.link) + '" aria-label="Private link for ' + esc(cr.name) + '"><button class="btn sm" type="button" data-act="copy-link" data-id="' + esc(cr.id) + '">Copy</button></div>' : '<span class="faint">Paste your app link above first</span>') + '</td>' +
         '<td><button class="btn ghost sm danger' + (armedDel ? ' armed' : '') + '" type="button" data-act="del-creator" data-id="' + esc(cr.id) + '" title="Offboard: removes them from the list and their campaigns">' + (armedDel ? 'Delete ' + esc(cr.name) + '?' : 'Delete') + '</button></td></tr>';
     }).join('') + '</tbody></table></div></section>';
@@ -1475,6 +1605,7 @@ button.more:hover { filter: brightness(0.96); }
           p ? payLine(cr) + '<br>' + payStatus(p) + (p.due.length ? ' <button class="btn sm primary" type="button" data-act="pay" data-how="next" data-id="' + esc(cr.id) + '" style="margin-left:6px">Mark paid</button>' : '') : 'Click Edit to add one') +
         (cr.notes ? factBox('Notes', '<span style="font:400 14px/1.5 var(--f-body);white-space:pre-wrap">' + esc(cr.notes) + '</span>') : '') + '</div>';
     }
+    if (!ed) h += performanceCard(cr);
     var armedR = S.armed === 'reset:' + cr.id;
     h += '<section class="card" aria-labelledby="pl-h"><h2 id="pl-h">Private link</h2>' +
       (cr.link ? '<div class="linkbox"><input class="input small" readonly id="lk-' + esc(cr.id) + '" value="' + esc(cr.link) + '" aria-label="Private link"><button class="btn sm" type="button" data-act="copy-link" data-id="' + esc(cr.id) + '">Copy</button>' +
@@ -1519,6 +1650,8 @@ button.more:hover { filter: brightness(0.96); }
       '<div><label class="lbl" for="ce-country">Country / market</label>' + countrySelect(e.country) + '</div>' +
       '<div><label class="lbl" for="ce-pay">Pay date <span class="faint" style="font-weight:400">DD/MM/YYYY</span></label><input class="input" id="ce-pay" type="date" data-ce="payStart" value="' + esc(e.payStart) + '">' +
         '<p class="hint" style="margin-top:6px">Their next pay day. It repeats every month on the same day.</p></div>' +
+      '<div><label class="lbl" for="ce-quota">Monthly video quota</label><input class="input" id="ce-quota" inputmode="numeric" data-ce="quota" value="' + esc(e.quota) + '" placeholder="28" style="max-width:140px">' +
+        '<p class="hint" style="margin-top:6px">Leave empty for the standard 28 videos a month.</p></div>' +
       '<div class="full"><label class="lbl" for="ce-notes">Notes <span class="faint" style="font-weight:400">only the team sees these</span></label><textarea class="input" id="ce-notes" data-ce="notes" style="min-height:70px">' + esc(e.notes) + '</textarea></div>' +
       '</div><div class="row-actions"><button class="btn primary" type="button" data-act="save-cr">Save</button><button class="btn ghost" type="button" data-act="cancel-cr-edit">Cancel</button></div></section>';
   }
@@ -1798,11 +1931,12 @@ button.more:hover { filter: brightness(0.96); }
     'group-match': function (el) { S.groupMatch = el.dataset.v; render(); },
     'gdrop': function () { S.gOpen = !S.gOpen; render(); },
     'export-accounts': function () { exportAccounts(); },
+    'track-errs': function () { S.showTrackErrs = !S.showTrackErrs; render(); },
     'row-exp': function (el) { S.exp = S.exp || {}; S.exp[el.dataset.id] = !S.exp[el.dataset.id]; render(); },
     'group-all': function () { S.groups = allTags().slice(); render(); },
     'edit-cr': function () {
       var cr = creatorById(S.creatorId); if (!cr) return;
-      S.crEdit = { id: cr.id, origName: cr.name, name: cr.name, email: cr.email || '', notes: cr.notes || '', payStart: cr.payStart || '', country: cr.country || '',
+      S.crEdit = { id: cr.id, origName: cr.name, name: cr.name, email: cr.email || '', notes: cr.notes || '', payStart: cr.payStart || '', country: cr.country || '', quota: cr.quota || '',
         accounts: (cr.accounts || []).map(function (a) { return '@' + a; }).join(', '), tagList: (cr.tags || []).slice() };
       render(); window.scrollTo(0, 0); var i = document.getElementById('ce-name'); if (i) i.focus();
     },
@@ -1824,7 +1958,7 @@ button.more:hover { filter: brightness(0.96); }
       if (!String(e.name).trim()) { toast('Add a name.', true); return; }
       if (e.email.trim() && !/^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(e.email.trim())) { toast('That email address doesn’t look right.', true); return; }
       var typed = document.getElementById('ce-newtag'); if (typed && typed.value.trim()) addNewTag(e, typed.value);   // typed but not added yet
-      call('adminSaveCreator', [S.key, { id: e.id, name: e.name, email: e.email.trim(), notes: e.notes, payStart: e.payStart, country: e.country, accounts: e.accounts, tags: e.tagList }],
+      call('adminSaveCreator', [S.key, { id: e.id, name: e.name, email: e.email.trim(), notes: e.notes, payStart: e.payStart, country: e.country, quota: String(e.quota || '').trim(), accounts: e.accounts, tags: e.tagList }],
         function (d) { S.crEdit = null; setData(d); toast('Saved'); });
     },
     'pay': function (el) {
@@ -1864,7 +1998,7 @@ button.more:hover { filter: brightness(0.96); }
     var el = ev.target.closest('[data-act]');
     if (!el || el.dataset.act === 'member') return;
     // While waiting on Google, moving around is fine; anything that saves says why it can't run yet
-    var NAV = /^(tab|open|back|open-cr|back-cr|ctab|filter|group-filter|group-match|gdrop|row-exp|group-all|export-accounts|cancel-edit|cancel-cr-edit|cancel-mine|lg-cancel|al-cancel|lg-req-cancel|show-old|close-tip|show-tip|tip-os|push-hint-close)$/;
+    var NAV = /^(tab|open|back|open-cr|back-cr|ctab|filter|group-filter|group-match|gdrop|row-exp|group-all|export-accounts|track-errs|cancel-edit|cancel-cr-edit|cancel-mine|lg-cancel|al-cancel|lg-req-cancel|show-old|close-tip|show-tip|tip-os|push-hint-close)$/;
     if (S.busy && !NAV.test(el.dataset.act)) { ev.preventDefault(); stillBusy(); return; }
     var fn = actions[el.dataset.act]; if (fn) { ev.preventDefault(); fn(el); }
   });
@@ -1885,6 +2019,7 @@ button.more:hover { filter: brightness(0.96); }
       if (p && p.views !== el.value.trim()) call('adminUpdatePost', [S.key, p.id, { views: el.value.trim() }], function (d) { S.data = d; toast('Views saved'); });
       return;
     }
+    if (el.id === 'cr-sort') { S.crSort = el.value; render(); return; }
     if (el.dataset.gopt != null) {
       var v = el.dataset.gopt, cur = S.groups || [];
       S.groups = el.checked ? cur.concat([v]) : cur.filter(function (x) { return x.toLowerCase() !== v.toLowerCase(); });
