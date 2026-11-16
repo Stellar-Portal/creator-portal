@@ -492,6 +492,48 @@ button.more:hover { filter: brightness(0.96); }
 .pill.ctry::before { display: none; }
 .sort-select { width: auto; max-width: 240px; display: inline-block; font-size: 14px; padding: 8px 36px 8px 14px; border-radius: 9999px; }
 .track-note { margin: -4px 0 0; }
+.stat .of { font-size: 16px; color: var(--faint); font-weight: 500; letter-spacing: 0; }
+.stat-wide { grid-column: span 2; }
+@media (max-width: 600px) { .stat-wide { grid-column: 1 / -1; } }
+.qbar { position: relative; height: 6px; border-radius: 3px; background: var(--surface-2); margin: 10px 0 2px; }
+.qbar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; background: var(--accent); }
+.qbar.done i { background: var(--ok); } .qbar.behind i { background: var(--bad); }
+.qbar b { position: absolute; top: -3px; width: 2px; height: 12px; margin-left: -1px; background: var(--ink); opacity: .35; border-radius: 1px; }
+.st-done { color: var(--ok); font-weight: 600; } .st-on { color: var(--ink); font-weight: 600; } .st-behind { color: var(--bad); font-weight: 600; }
+th.r, td.r { text-align: right; }
+table.vids td { padding-top: 10px; padding-bottom: 10px; }
+.pill.kind { max-width: 16ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle; }
+.sub-head { margin: 18px 0 4px; } .sub-head .sub { margin: 0; }
+.more-vids { margin-top: 10px; }
+a.vid-date { color: inherit; text-decoration: none; } a.vid-date:hover { color: var(--accent); text-decoration: underline; }
+@media (max-width: 600px) { a.vid-date { color: var(--accent); } }
+@media (max-width: 600px) {
+  .hide-sm { display: none; }
+  svg.chart text.lbl-v, svg.chart text.lbl-x { font-size: 22px; }
+  table.vids th, table.vids td { padding-left: 6px; padding-right: 6px; }
+  .pill.kind { max-width: 9ch; }
+}
+.legend .sw.q { background: none; border-top: 2px dashed var(--bad); height: 0; width: 14px; border-radius: 0; vertical-align: 3px; }
+.probs { display: grid; margin-top: 14px; border-top: 1px solid var(--line); }
+.prob { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 24px; padding: 14px 0; border-bottom: 1px solid var(--line); align-items: start; }
+.prob:last-child { border-bottom: 0; padding-bottom: 0; }
+.prob .who { font-weight: 600; } .prob .who .namebtn { font-weight: 600; }
+.prob .meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.prob .lk { font-size: 13px; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 600px) { .prob { grid-template-columns: minmax(0, 1fr); } }
+.lcheck { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; font-size: 13px; color: var(--muted); margin: 4px 0 12px; }
+.lcheck .lc-k { font-weight: 600; color: var(--ink); }
+.lcheck .btn { margin-left: auto; }
+.lc-n b { font-variant-numeric: tabular-nums; color: var(--ink); }
+.lc-n::before { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; background: var(--faint); vertical-align: 1px; }
+.lc-n.ok::before { background: var(--ok); } .lc-n.warn::before { background: var(--warn); } .lc-n.bad::before { background: var(--bad); }
+.lcheck-card .lcheck { margin-bottom: 0; }
+.lcheck-card .table-wrap { margin-top: 14px; }
+.pill.chk { white-space: nowrap; }
+.chk-why { font-size: 12px; color: var(--muted); margin-top: 4px; max-width: 34ch; }
+.found-card .section-title .pill { margin-left: 8px; }
+.found-card .fs-lede { margin: 2px 0 12px; max-width: 72ch; }
+.found-card .fs-cmp { margin: -4px 0 12px; }
 .stat .s { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; }
 .pf-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 24px; margin-top: 16px; }
 @media (max-width: 900px) { .pf-grid { grid-template-columns: minmax(0, 1fr); } }
@@ -647,16 +689,17 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
     });
   }
   /* Must match VERSION in Code.gs. */
-  var SCRIPT_VERSION = '2026-11-06.1';   // the oldest Code.gs this page works with
+  var SCRIPT_VERSION = '2026-11-16.1';   // the oldest Code.gs this page works with
   function scriptTooOld(d) { return !d || !d.version || String(d.version) < SCRIPT_VERSION; }
   /** Fills in anything an older script doesn't send, so the page never gets stuck. */
   function normalize(d) {
     if (!d || typeof d !== 'object') return d;
     if (d.view) normalize(d.view);
-    (d.campaigns || []).forEach(function (c) { if (!c.sounds) c.sounds = c.sound ? [{ label: '', url: c.sound }] : []; });
+    (d.campaigns || []).forEach(function (c) { if (!c.sounds) c.sounds = c.sound ? [{ label: '', url: c.sound }] : []; if (c.found === undefined) c.found = null; c.endedOn = c.endedOn || ''; });
     (d.creators || []).forEach(function (c) { c.logins = c.logins || []; c.tags = c.tags || []; c.accounts = c.accounts || []; c.push = c.push || ''; c.email = c.email || ''; c.country = c.country || ''; c.quota = c.quota || ''; if (c.perf === undefined) c.perf = null;
       c.campaignsJoined = c.campaignsJoined || 0; c.commissioned = c.commissioned || 0; });
     if (d.creators && !d.tracking) d.tracking = { on: false, last: null };
+    if (d.creators && d.posts) d.posts.forEach(function (p) { if (p.check === undefined) p.check = null; });
     if (d.posts && !d.logins && d.name) d.logins = [];
     if (d.accounts === undefined && d.name) d.accounts = [];
     return d;
@@ -1169,10 +1212,42 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
     var t = S.data.tracking;
     if (!t || !t.on || !t.last) return '';
     var errs = t.last.errors || [];
-    return '<p class="hint track-note">Account stats updated ' + esc(t.last.at) + ' · ' + t.last.updated + ' of ' + t.last.accounts + ' accounts' +
-      (t.last.credits !== '' && t.last.credits != null ? ' · ' + esc(String(t.last.credits)) + ' ScrapeCreators credits left' : '') +
+    return '<p class="hint track-note">TikTok stats updated ' + whenStamp(t.last.at) + ' · ' + t.last.updated + ' of ' + plural(t.last.accounts, 'account') +
+      (t.last.credits !== '' && t.last.credits != null ? ' · ' + fmtInt(t.last.credits) + ' ScrapeCreators credits left' : '') +
       (errs.length ? ' · <button class="subtle-link" type="button" data-act="track-errs">' + plural(errs.length, 'problem') + '</button>' : '') + '</p>' +
       (errs.length && S.showTrackErrs ? '<div class="notice warn">' + errs.map(esc).join('<br>') + '</div>' : '');
+  }
+  /** "today at 04:12", "yesterday at 04:12", or "3 Nov at 04:12" from "2026-11-06 04:12". */
+  function whenStamp(at) {
+    var m = /^(\d{4}-\d{2}-\d{2})(?: (\d{2}:\d{2}))?/.exec(at || ''); if (!m) return esc(at || '');
+    var ago = daysSince(m[1]), day = ago === 0 ? 'today' : ago === 1 ? 'yesterday' : fmtDate(m[1]);
+    return day + (m[2] ? ' at ' + m[2] : '');
+  }
+  function fmtInt(n) { return String(Math.round(+n || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+  /* Link check: is each campaign link one of the videos on the creator's TikTok? (filled in by the nightly update) */
+  var CHECK = {
+    ok: ['ok', 'Found', 'On one of their saved accounts.'],
+    other: ['warn', 'Other account', 'Posted from an account that isn’t saved on their profile.'],
+    dup: ['warn', 'Sent twice', 'The same video was sent more than once.'],
+    gone: ['bad', 'Not found', 'TikTok doesn’t show this video: deleted, private, or the wrong link. Tried again each week.'],
+    bad: ['bad', 'Not a TikTok link', 'This isn’t a link to a TikTok video.'],
+    wait: ['lock', 'Next update', 'Checked in the next update (tonight, or Advocates Portal → Update account stats now).'],
+    'new': ['lock', 'Not checked yet', 'Checked after the first update.']
+  };
+  var PROBLEMS = ['other', 'dup', 'gone', 'bad'];
+  function isProblem(p) { return !!(p.check && PROBLEMS.indexOf(p.check.s) >= 0); }
+  function checkPill(p) {
+    var c = p.check; if (!c) return '';
+    var k = CHECK[c.s] || CHECK.wait, label = k[1];
+    if (c.s === 'other' && c.account) label = 'On @' + c.account;
+    return '<span class="pill ' + k[0] + ' chk" title="' + esc(c.s === 'other' && c.account ? 'Posted from @' + c.account + ', which isn’t saved on their profile.' : k[2]) + '">' + esc(label) + '</span>';
+  }
+  /** One line of counts: 40 found · 2 other account · 1 not found */
+  function checkCounts(posts) {
+    var n = {}; posts.forEach(function (p) { if (p.check) n[p.check.s] = (n[p.check.s] || 0) + 1; });
+    return ['ok', 'other', 'dup', 'gone', 'bad', 'wait', 'new'].filter(function (k) { return n[k]; }).map(function (k) {
+      return '<span class="lc-n ' + CHECK[k][0] + '"><b>' + n[k] + '</b> ' + esc(CHECK[k][1].toLowerCase()) + '</span>';
+    }).join('');
   }
   function fmtNum(n) {
     n = +n || 0;
@@ -1192,8 +1267,7 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
         '<text x="' + (x + bw / 2) + '" y="' + (yt - 6) + '" class="lbl-v">' + t + '</text>' +
         '<text x="' + (x + bw / 2) + '" y="' + (H - 6) + '" class="lbl-x">' + MONTH_SHORT[+m.month.slice(5, 7) - 1] + '</text>';
     });
-    if (quota) out += '<line x1="' + (pad - 8) + '" x2="' + (W - pad + 8) + '" y1="' + y(quota) + '" y2="' + y(quota) + '" class="quota-line"/>' +
-      '<text x="' + (W - pad + 8) + '" y="' + (y(quota) - 5) + '" class="lbl-q">quota ' + quota + '</text>';
+    if (quota) out += '<line x1="' + (pad - 8) + '" x2="' + (W - pad + 8) + '" y1="' + y(quota) + '" y2="' + y(quota) + '" class="quota-line"><title>Quota: ' + quota + ' a month</title></line>';
     return out + '</svg>';
   }
   /** Followers over time for one account (needs at least two days). */
@@ -1205,14 +1279,16 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
   }
   function performanceCard(cr) {
     var d = S.data, t = d.tracking, h = '<section class="card" aria-labelledby="pf-h"><div class="card-head"><h2 id="pf-h">Performance</h2>' +
-      (t.on && t.last ? '<span class="hint">Updated ' + esc(t.last.at) + '</span>' : '') + '</div>';
+      (t.on && t.last ? '<span class="hint">Updated ' + whenStamp(t.last.at) + '</span>' : '') + '</div>';
     var m = cr.perf && cr.perf.month, l = cr.perf && cr.perf.last30;
     h += '<div class="stats">' +
-      (m ? '<div class="stat"><div class="k">This month</div><div class="v">' + m.count + ' <span class="faint">/ ' + m.quota + '</span></div>' +
-        '<div class="s">' + (m.status === 'done' ? '<span class="pill ok">Quota reached</span>' : m.status === 'on' ? 'On track' : '<span class="pill bad">Behind: should be at ' + m.expected + '</span>') + '</div></div>' +
-        '<div class="stat"><div class="k">Campaign · filler</div><div class="v">' + m.campaign + ' · ' + (m.count - m.campaign) + '</div><div class="s">this month</div></div>' +
-        '<div class="stat"><div class="k">Median views</div><div class="v">' + fmtNum(l.median) + '</div><div class="s">last 30 days · ' + plural(l.posts, 'post') + '</div></div>' +
-        '<div class="stat"><div class="k">Engagement</div><div class="v">' + l.engagement + '%</div><div class="s">likes, comments, shares ÷ views</div></div>' : '') +
+      (m ? '<div class="stat stat-wide"><div class="k">Videos this month</div><div class="v">' + m.count + ' <span class="of">/ ' + m.quota + '</span></div>' +
+        '<div class="qbar ' + m.status + '" aria-hidden="true"><i style="width:' + Math.min(100, Math.round(m.count / Math.max(1, m.quota) * 100)) + '%"></i>' +
+          '<b style="left:' + Math.min(100, Math.round(m.expected / Math.max(1, m.quota) * 100)) + '%" title="Where they should be today"></b></div>' +
+        '<div class="s"><span class="st-' + m.status + '">' + (m.status === 'done' ? 'Quota reached' : m.status === 'on' ? 'On track' : 'Behind · should be at ' + m.expected) + '</span>' +
+          ' · ' + m.campaign + ' campaign, ' + (m.count - m.campaign) + ' filler</div></div>' +
+        '<div class="stat"><div class="k">Views</div><div class="v">' + fmtNum(l.views) + '</div><div class="s">last 30 days · ' + fmtNum(l.median) + ' median a video</div></div>' +
+        '<div class="stat"><div class="k">Engagement</div><div class="v">' + l.engagement + '%</div><div class="s">likes, comments and shares per view</div></div>' : '') +
       '<div class="stat"><div class="k">Campaigns joined</div><div class="v">' + cr.campaignsJoined + '</div><div class="s">all time</div></div>' +
       '<div class="stat"><div class="k">Commissioned videos</div><div class="v">' + cr.commissioned + '</div><div class="s">links sent for campaigns</div></div></div>';
     if (!t.on) return h + '<p class="hint">To see monthly posts against their quota, views and follower growth, turn on account tracking: in the Google Sheet, open <b>Advocates Portal → Set up account tracking…</b></p></section>';
@@ -1229,19 +1305,22 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
       return h + '<p class="hint">Loading charts…</p></section>';
     }
     h += '<div class="pf-grid"><div><h3 class="sub">Posts per month</h3>' + monthsChart(st.months, m ? m.quota : 0) +
-      '<div class="legend"><span><i class="sw c"></i>Campaign</span><span><i class="sw f"></i>Filler</span></div></div>';
+      '<div class="legend"><span><i class="sw c"></i>Campaign</span><span><i class="sw f"></i>Filler</span>' + (m ? '<span><i class="sw q"></i>Quota (' + m.quota + ')</span>' : '') + '</div></div>';
     h += '<div><h3 class="sub">Followers</h3>' + (st.accounts.length ? st.accounts.map(function (a) {
       var first = a.history[0], last = a.latest, diff = last.followers - first.followers;
-      return '<div class="acc-f"><div class="acc-f-top">' + accLink(a.account, 'acc') + '<b>' + fmtNum(last.followers) + '</b>' +
+      return '<div class="acc-f"><div class="acc-f-top">' + accLink(a.account, 'acc') + '<span><b>' + fmtNum(last.followers) + '</b> <span class="faint">followers</span></span>' +
         (a.history.length > 1 ? '<span class="' + (diff >= 0 ? 'up' : 'down') + '">' + (diff >= 0 ? '+' : '') + fmtNum(Math.abs(diff)).replace(/^/, diff < 0 ? '−' : '') + ' since ' + fmtDate(first.date) + '</span>' : '<span class="faint">growth shows after a few days</span>') +
         '</div>' + (a.history.length > 1 ? followersChart(a.history) : '') + '</div>';
     }).join('') : '<p class="hint">Shows after the first nightly update.</p>') + '</div></div>';
-    if (st.recent.length) h += '<h3 class="sub" style="margin-top:6px">Recent posts</h3><div class="table-wrap"><table><thead><tr><th>Posted</th><th>Account</th><th>Type</th><th>Views</th><th>Likes</th><th>Comments</th><th>Shares</th><th></th></tr></thead><tbody>' +
-      st.recent.slice(0, 15).map(function (v) {
-        return '<tr><td class="date">' + fmtDate(v.postedOn) + '</td><td>' + accLink(v.account, 'acc') + '</td><td>' + (v.kind === 'Campaign' ? '<span class="pill new" title="' + esc(v.campaign) + '">Campaign</span>' : '<span class="pill lock">Filler</span>') + '</td>' +
-          '<td class="num">' + fmtNum(v.views) + '</td><td class="num">' + fmtNum(v.likes) + '</td><td class="num">' + fmtNum(v.comments) + '</td><td class="num">' + fmtNum(v.shares) + '</td>' +
-          '<td><a class="sound" href="' + esc(v.url) + '" target="_blank" rel="noopener noreferrer">Open ↗</a></td></tr>';
-      }).join('') + '</tbody></table></div>';
+    var nShow = S.allRecent ? st.recent.length : 10;
+    if (st.recent.length) h += '<div class="card-head sub-head"><h3 class="sub">Recent videos</h3><span class="hint">' + plural(st.recent.length, 'video') + ' tracked</span></div>' +
+      '<div class="table-wrap"><table class="vids"><thead><tr><th>Posted</th><th>Account</th><th>Type</th><th class="r">Views</th><th class="r hide-sm">Likes</th><th class="r hide-sm">Comments</th><th class="r hide-sm">Shares</th><th class="hide-sm"></th></tr></thead><tbody>' +
+      st.recent.slice(0, nShow).map(function (v) {
+        return '<tr><td class="date"><a class="vid-date" href="' + esc(v.url) + '" target="_blank" rel="noopener noreferrer">' + fmtDate(v.postedOn) + '</a></td><td>' + accLink(v.account, 'acc') + '</td><td>' + (v.kind === 'Campaign' ? '<span class="pill new kind" title="' + esc(v.campaign) + '">' + esc(v.campaign || 'Campaign') + '</span>' : '<span class="pill lock kind">Filler</span>') + '</td>' +
+          '<td class="num r">' + fmtNum(v.views) + '</td><td class="num r hide-sm">' + fmtNum(v.likes) + '</td><td class="num r hide-sm">' + fmtNum(v.comments) + '</td><td class="num r hide-sm">' + fmtNum(v.shares) + '</td>' +
+          '<td class="r hide-sm"><a class="sound" href="' + esc(v.url) + '" target="_blank" rel="noopener noreferrer" aria-label="Open on TikTok">Open ↗</a></td></tr>';
+      }).join('') + '</tbody></table></div>' +
+      (st.recent.length > 10 ? '<button class="subtle-link more-vids" type="button" data-act="all-recent">' + (S.allRecent ? 'Show fewer' : 'Show all ' + st.recent.length) + '</button>' : '');
     else h += '<p class="hint">No posts found yet. They show after the next nightly update.</p>';
     return h + '</section>';
   }
@@ -1319,6 +1398,7 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
     list.sort(function (a, b) { return lastPost(b.id).localeCompare(lastPost(a.id)) || a.name.localeCompare(b.name); });
     var h = '<section><h1>Campaigns</h1><div class="summary" style="margin-top:10px"><span><b>' + nActive + '</b> active</span><span><b>' + d.creators.length + '</b> creators</span><span><b>' + d.posts.length + '</b> links logged</span></div></section>';
     if (S.edit && !S.edit.id) h += campaignForm(S.edit);
+    h += allLinksCheck();
     h += '<div class="toolbar"><div class="chips" role="group" aria-label="Filter campaigns">' + ['Active', 'Ended', 'All'].map(function (k) {
       var n = k === 'All' ? d.campaigns.length : d.campaigns.filter(function (c) { return c.status === k; }).length;
       return '<button type="button" class="chip" data-act="filter" data-v="' + k + '" aria-pressed="' + (f === k) + '">' + k + ' <span class="num">' + n + '</span></button>';
@@ -1337,6 +1417,24 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
         '<span class="c-last mono">' + (lp ? fmtDate(lp) : '—') + '</span></span><span class="chev" aria-hidden="true">›</span></button>';
     }).join('') + '</div>';
     return h;
+  }
+  /** Link check across every campaign, with the links that need a look. */
+  function allLinksCheck() {
+    var d = S.data, posts = d.posts.filter(function (p) { return p.check; });
+    if (!posts.length) return '';
+    var probs = posts.filter(isProblem), t = d.tracking;
+    var h = '<section class="card lcheck-card" aria-labelledby="lc-h"><div class="card-head"><h2 id="lc-h">Link check</h2>' +
+      (t && t.last ? '<span class="hint">Every campaign link matched against their TikTok · ' + whenStamp(t.last.at) + '</span>' : '') + '</div>' +
+      '<div class="lcheck">' + checkCounts(posts) +
+      (probs.length ? '<button class="btn sm" type="button" data-act="show-probs" aria-expanded="' + !!S.showProbs + '">' + (S.showProbs ? 'Hide' : 'Show the ' + plural(probs.length, 'problem')) + '</button>' : '<span class="lc-n ok">Everything matches</span>') + '</div>';
+    if (probs.length && S.showProbs) h += '<div class="probs">' + probs.map(function (p) {
+        var cr = creatorById(p.creatorId), c = campaignById(p.campaignId);
+        return '<div class="prob"><div><div class="who">' + (cr ? '<button class="namebtn" type="button" data-act="open-cr" data-id="' + esc(cr.id) + '">' + esc(cr.name) + '</button>' : esc(p.creator)) + '</div>' +
+          '<div class="meta"><button class="subtle-link" type="button" data-act="open" data-id="' + esc(p.campaignId) + '">' + esc(c ? c.name : p.campaign) + '</button> · posted ' + fmtDate(p.postedOn) + (p.account ? ' · sent as @' + esc(p.account) : '') + '</div>' +
+          '<div class="lk">' + linkHtml(p.link) + '</div></div>' +
+          '<div>' + checkPill(p) + '<div class="chk-why">' + esc(p.check.s === 'other' && p.check.account ? 'Posted from @' + p.check.account + ', which isn’t saved on ' + (cr ? cr.name + '’s' : 'their') + ' profile. Add it under Edit if it’s theirs.' : CHECK[p.check.s][2]) + '</div></div></div>';
+      }).join('') + '</div>';
+    return h + '</section>';
   }
   var QUIET_DAYS = 7;
   function daysSince(iso) {
@@ -1496,28 +1594,84 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
     }).join('') + '</div>';
     h += '</section>';
 
-    var who = S.postCreator, shown = posts.filter(function (p) { return !who || p.creatorId === who; });
+    var who = S.postCreator, checked = posts.some(function (p) { return p.check; });
+    var nProb = posts.filter(function (p) { return (!who || p.creatorId === who) && isProblem(p); }).length;
+    if (!nProb) S.onlyProblems = false;
+    var shown = posts.filter(function (p) { return (!who || p.creatorId === who) && (!S.onlyProblems || isProblem(p)); });
     var posters = {}; posts.forEach(function (p) { posters[p.creatorId] = p.creator; });
     h += '<section class="card" aria-labelledby="links-h"><div class="card-head"><div class="section-title"><h2 id="links-h">Links</h2><span class="count">' + shown.length + '</span></div>' +
       '<div class="row-actions"><select class="input small" id="post-filter" data-k="postCreator" aria-label="Filter by creator" style="width:auto"><option value="">All creators</option>' +
       Object.keys(posters).map(function (id) { var cr = creatorById(id); return '<option value="' + esc(id) + '"' + (who === id ? ' selected' : '') + '>' + esc(cr ? cr.name : posters[id]) + '</option>'; }).join('') +
       '</select>' + (shown.length ? '<button class="btn sm" type="button" data-act="copy-links">Copy links</button>' : '') + '</div></div>';
+    if (checked && posts.length) h += '<div class="lcheck"><span class="lc-k">Link check</span>' + checkCounts(posts.filter(function (p) { return !who || p.creatorId === who; })) +
+      (nProb ? '<button class="btn sm' + (S.onlyProblems ? ' on' : '') + '" type="button" data-act="only-problems" aria-pressed="' + !!S.onlyProblems + '">' + (S.onlyProblems ? 'Show all links' : 'Show only the ' + plural(nProb, 'problem')) + '</button>' : '') + '</div>';
     if (!shown.length) h += '<div class="empty">No links yet. They appear here as soon as a creator sends them.</div>';
     var hasAcc = shown.some(function (p) { return p.account; });
-    if (shown.length) h += '<div class="table-wrap"><table><thead><tr><th>Posted</th><th>Creator</th>' + (hasAcc ? '<th>Account</th>' : '') + '<th>Link</th><th>Sent</th><th></th></tr></thead><tbody>' +
+    if (shown.length) h += '<div class="table-wrap"><table><thead><tr><th>Posted</th><th>Creator</th>' + (hasAcc ? '<th>Account</th>' : '') + '<th>Link</th><th>Sent</th>' +
+      (checked ? '<th class="r">Views</th><th>Check</th>' : '') + '<th></th></tr></thead><tbody>' +
       shown.map(function (p) {
         var cr = creatorById(p.creatorId), armed = S.armed === 'delp:' + p.id;
         return '<tr><td class="date">' + fmtDate(p.postedOn, true) + '</td><td>' + esc(cr ? cr.name : p.creator) + '</td>' + (hasAcc ? '<td class="muted">' + (p.account ? accLink(p.account, 'acc') : '—') + '</td>' : '') +
           '<td class="lk">' + linkHtml(p.link) + '</td>' +
           '<td class="date faint">' + esc(String(p.submitted || '').slice(0, 10) === p.postedOn ? 'same day' : fmtDate(String(p.submitted || '').slice(0, 10))) + '</td>' +
+          (checked ? '<td class="num r">' + (p.check && p.check.views != null ? fmtNum(p.check.views) : '<span class="faint">—</span>') + '</td><td>' + checkPill(p) +
+            (p.check && p.check.sound === 'diff' ? '<div class="chk-why">Uses a different sound</div>' : '') + '</td>' : '') +
           '<td><button class="btn ghost sm danger' + (armed ? ' armed' : '') + '" type="button" data-act="del-post" data-id="' + esc(p.id) + '">' + (armed ? 'Delete?' : 'Delete') + '</button></td></tr>';
       }).join('') + '</tbody></table></div>';
     h += '</section>';
+    h += foundCard(c, posts, who);
     if (!posts.length) {
       var armedC = S.armed === 'delc:' + c.id;
       h += '<div><button class="btn sm danger' + (armedC ? ' armed' : '') + '" type="button" data-act="del-campaign">' + (armedC ? 'Click again to delete this campaign' : 'Delete campaign') + '</button></div>';
     }
     return h;
+  }
+
+  /**
+   * Test mode: videos on the campaign creators' accounts that use the campaign's sound (from the nightly update).
+   * Team only, and nothing here counts towards anyone's videos: it's to compare with the links advocates sent.
+   */
+  function foundCard(c, posts, who) {
+    var f = c.found; if (!f) return '';
+    var end = c.endedOn || (c.status === 'Ended' ? 'their last logged post' : '');
+    var h = '<section class="card found-card" aria-labelledby="fs-h"><div class="card-head"><div class="section-title"><h2 id="fs-h">Found by sound</h2><span class="pill lock">Test</span></div>' +
+      '<span class="hint">Only the team sees this</span></div>' +
+      '<p class="hint fs-lede">Videos on their saved accounts that use this campaign’s sound, posted after they joined' +
+      (c.endedOn ? ' and up to the day it ended (' + fmtDate(c.endedOn) + ')' : end ? ' and up to ' + end : '') +
+      '. Nothing here counts towards their videos. It’s here to compare with the links they sent.</p>';
+    if (!f.sounds) return h + '<div class="empty">' + (f.unreadable
+      ? 'Couldn’t read the sound from this campaign’s sound link yet. Short links (vm.tiktok.com/…) are read at the next update. Links like tiktok.com/music/Name-7673… work straight away.'
+      : 'Add the campaign’s TikTok sound link (Edit) to find videos that use it.') + '</div></section>';
+    var all = f.videos.filter(function (v) { return !who || v.creatorId === who; });
+    var nSent = all.filter(function (v) { return v.sent; }).length, nExtra = all.filter(function (v) { return !v.sent && v.extra; }).length;
+    var nNot = all.length - nSent - nExtra;
+    if (!nNot) S.onlyUnsent = false;
+    var list = all.filter(function (v) { return !S.onlyUnsent || (!v.sent && !v.extra); });
+    var mine = posts.filter(function (p) { return !who || p.creatorId === who; });
+    var same = mine.filter(function (p) { return p.check && p.check.sound === 'match'; }).length, diff = mine.filter(function (p) { return p.check && p.check.sound === 'diff'; }).length;
+    h += '<div class="lcheck"><span class="lc-k">' + plural(all.length, 'video') + '</span>' +
+      (nSent ? '<span class="lc-n ok"><b>' + nSent + '</b> also sent by them</span>' : '') +
+      (nNot ? '<span class="lc-n warn"><b>' + nNot + '</b> not sent</span>' : '') +
+      (nExtra ? '<span class="lc-n"><b>' + nExtra + '</b> beyond their videos</span>' : '') +
+      (nNot ? '<button class="btn sm' + (S.onlyUnsent ? ' on' : '') + '" type="button" data-act="only-unsent" aria-pressed="' + !!S.onlyUnsent + '">' + (S.onlyUnsent ? 'Show all' : 'Show only the ' + nNot + ' not sent') + '</button>' : '') + '</div>';
+    if (same || diff) h += '<p class="hint fs-cmp">Of the links they sent: <b>' + same + '</b> use' + (same === 1 ? 's' : '') + ' this sound' +
+      (diff ? ', <b>' + diff + '</b> use' + (diff === 1 ? 's' : '') + ' a different sound (not found this way)' : '') + '.</p>';
+    if (f.unreadable) h += '<p class="hint">' + plural(f.unreadable, 'sound link') + ' couldn’t be read yet: videos using ' + (f.unreadable === 1 ? 'it' : 'them') + ' aren’t found.</p>';
+    if (!list.length) return h + '<div class="empty">' + (all.length ? 'Nothing here.' : 'No videos with this sound yet. New ones show up after the nightly update.') + '</div></section>';
+    var tgt = {}; membersOf(c.id).forEach(function (m) { tgt[m.creatorId] = toInt(m.videos); });
+    h += '<div class="table-wrap"><table class="vids"><thead><tr><th>Posted</th><th>Creator</th><th class="hide-sm">Account</th><th class="hide-sm">Sound</th><th class="r">Views</th><th>Status</th><th class="hide-sm"></th></tr></thead><tbody>' +
+      list.map(function (v) {
+        var cr = creatorById(v.creatorId);
+        var st = v.sent ? '<span class="pill ok" title="They sent this link too">Also sent</span>'
+          : v.extra ? '<span class="pill lock" title="Posted after they already had ' + esc(String(tgt[v.creatorId] || '')) + ' videos with this sound">Beyond their ' + esc(String(tgt[v.creatorId] || '')) + '</span>'
+          : '<span class="pill warn" title="Uses the campaign sound, but they didn’t send this link">Not sent</span>';
+        return '<tr><td class="date"><a class="vid-date" href="' + esc(v.url) + '" target="_blank" rel="noopener noreferrer">' + fmtDate(v.postedOn) + '</a></td>' +
+          '<td>' + (cr ? '<button class="namebtn" type="button" data-act="open-cr" data-id="' + esc(cr.id) + '">' + esc(cr.name) + '</button>' : '—') + '</td>' +
+          '<td class="hide-sm">' + accLink(v.account, 'acc') + '</td><td class="hide-sm muted">' + esc(v.sound) + '</td>' +
+          '<td class="num r">' + fmtNum(v.views) + '</td><td>' + st + '</td>' +
+          '<td class="r hide-sm"><a class="sound" href="' + esc(v.url) + '" target="_blank" rel="noopener noreferrer" aria-label="Open on TikTok">Open ↗</a></td></tr>';
+      }).join('') + '</tbody></table></div>';
+    return h + '</section>';
   }
 
   function creatorsTab() {
@@ -1827,7 +1981,7 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
     },
     'tab': function (el) { S.gOpen = false; S.view = el.dataset.v; S.campaignId = null; S.creatorId = null; S.crEdit = null; S.alForm = null; S.edit = null; S.armed = null; render(); window.scrollTo(0, 0); },
     'filter': function (el) { S.filter = el.dataset.v; render(); },
-    'open': function (el) { S.view = 'campaigns'; S.campaignId = el.dataset.id; S.postCreator = ''; S.edit = null; render(); window.scrollTo(0, 0); },
+    'open': function (el) { S.view = 'campaigns'; S.campaignId = el.dataset.id; S.postCreator = ''; S.onlyProblems = false; S.onlyUnsent = false; S.edit = null; render(); window.scrollTo(0, 0); },
     'back': function () { S.campaignId = null; S.edit = null; render(); },
     'new-campaign': function () { S.sugOpen = false; S.edit = { name: '', artist: '', sounds: [{ label: '', url: '' }], brief: '', status: 'Active', deadline: '', totalVideos: '', members: [], q: '', notify: true, orig: {} }; render(); var el = document.getElementById('e-name'); if (el) el.focus(); },
     'edit-campaign': function () {
@@ -1932,6 +2086,10 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
     'gdrop': function () { S.gOpen = !S.gOpen; render(); },
     'export-accounts': function () { exportAccounts(); },
     'track-errs': function () { S.showTrackErrs = !S.showTrackErrs; render(); },
+    'only-problems': function () { S.onlyProblems = !S.onlyProblems; render(); },
+    'only-unsent': function () { S.onlyUnsent = !S.onlyUnsent; render(); },
+    'show-probs': function () { S.showProbs = !S.showProbs; render(); },
+    'all-recent': function () { S.allRecent = !S.allRecent; render(); },
     'row-exp': function (el) { S.exp = S.exp || {}; S.exp[el.dataset.id] = !S.exp[el.dataset.id]; render(); },
     'group-all': function () { S.groups = allTags().slice(); render(); },
     'edit-cr': function () {
