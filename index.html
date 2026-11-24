@@ -623,6 +623,41 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
 .pf-recent .table-wrap { margin: 0; } .pf-recent .pf-card-head { margin-bottom: 0; }
 @media (max-width: 900px) { .pf-top, .pf-row { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 600px) { .pf-ring-wrap { flex-direction: column; align-items: flex-start; gap: 16px; } .pf-ring { width: 130px; height: 130px; } .pf-squares i { height: 18px; border-radius: 4px; } .pf-squares { gap: 3px; } }
+
+/* posts per month: stacked blocks like the design (filler on top, commissioned below) */
+.mb { display: grid; gap: 8px; }
+.mb-plot { position: relative; display: grid; gap: clamp(8px, 4%, 36px); align-items: end; height: 178px; padding: 0 6px; border-bottom: 1px solid var(--line); }
+.mb-quota { position: absolute; left: 0; right: 0; border-top: 1.5px dashed #c2410c; opacity: .7; pointer-events: none; }
+.mb-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; height: 100%; min-width: 0; padding: 0; border: 0; background: none; font: inherit; color: inherit; }
+.mb-n { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; } .mb-n.zero { color: var(--muted); font-weight: 500; }
+.mb-stack { display: flex; flex-direction: column; gap: 2px; width: 100%; max-width: 72px; }
+.mb-stack i { display: block; width: 100%; }
+.mb-stack i:first-child { border-radius: 8px 8px 0 0; }
+.mb-f { background: #b7c3f5; } .mb-c { background: var(--accent); } .mb-0 { height: 2px; background: #ececf0; border-radius: 1px; }
+.mb-col.zoomable { cursor: pointer; border-radius: 10px; transition: background .15s; }
+.mb-col.zoomable:hover { background: rgba(6, 38, 199, 0.05); }
+.mb-col.zoomable:hover .mb-stack { filter: brightness(1.08); }
+.mb-col.zoomable:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mb-x { display: grid; gap: clamp(8px, 4%, 36px); padding: 0 6px; text-align: center; font-size: 13px; color: var(--muted); }
+.mb-x .now { color: var(--ink); font-weight: 600; }
+.mb-tip { margin: 10px 0 0; font-size: 12px; }
+.an-chart .mb { max-width: 760px; margin: 0 auto; }
+/* deep dive into one month */
+.drill-head h1 { margin: 2px 0 4px; }
+.drill-head .crumbs { font-size: 14px; color: var(--muted); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.drill-head .crumbs span { color: var(--faint); }
+.drill-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 760px) { .drill-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.pf-card-head h3 .sw { margin-right: 4px; vertical-align: 0; }
+.card > .pf-card-head + .table-wrap { margin-top: -6px; }
+.pf-card-head h3 .count { font-weight: 500; color: var(--muted); margin-left: 4px; }
+main.wrap.zoom-leave { transition: transform .17s ease-in, opacity .17s ease-in; transform: scale(1.06); opacity: 0; }
+main.wrap.zoom-leave-back { transition: transform .14s ease-in, opacity .14s ease-in; transform: scale(0.94); opacity: 0; }
+@keyframes cp-zoom-in { from { transform: scale(0.86); opacity: 0; filter: blur(4px); } 60% { filter: blur(0); } to { transform: none; opacity: 1; } }
+@keyframes cp-zoom-out { from { transform: scale(1.08); opacity: 0; } to { transform: none; opacity: 1; } }
+main.wrap.zoom-in { animation: cp-zoom-in .42s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+main.wrap.zoom-out { animation: cp-zoom-out .36s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@media (prefers-reduced-motion: reduce) { main.wrap.zoom-in, main.wrap.zoom-out { animation: none; } main.wrap.zoom-leave, main.wrap.zoom-leave-back { transition: none; transform: none; opacity: 1; } }
 </style>
 
 <div id="app"><div class="loading">Loading…</div></div>
@@ -759,7 +794,7 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
     });
   }
   /* Must match VERSION in Code.gs. */
-  var SCRIPT_VERSION = '2026-11-24.1';   // the oldest Code.gs this page works with
+  var SCRIPT_VERSION = '2026-11-24.2';   // the oldest Code.gs this page works with
   function scriptTooOld(d) { return !d || !d.version || String(d.version) < SCRIPT_VERSION; }
   /** Fills in anything an older script doesn't send, so the page never gets stuck. */
   function normalize(d) {
@@ -1191,7 +1226,7 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
         return '<button type="button" class="nav-item" data-act="tab" data-v="' + t[0] + '"' + (cur === t[0] ? ' aria-current="page"' : '') + '>' + ICON[t[0]] + t[1] +
           (t[2] ? '<span class="tab-dot" aria-label="' + t[2] + ' need attention">' + t[2] + '</span>' : '') + '</button>';
       }).join('') + '</nav><div class="sb-foot">Team view</div></aside><div class="shell-content"><main class="wrap">' + versionBanner();
-    if (cur === 'creators') h += S.creatorId && creatorById(S.creatorId) ? creatorDetail(creatorById(S.creatorId)) : creatorsTab();
+    if (cur === 'creators') h += S.creatorId && creatorById(S.creatorId) ? (S.drill && S.drill.creatorId === S.creatorId ? monthDrill(creatorById(S.creatorId)) : creatorDetail(creatorById(S.creatorId))) : creatorsTab();
     else if (cur === 'payments') h += paymentsTab();
     else if (cur === 'analytics') h += analyticsTab();
     else if (S.campaignId && campaignById(S.campaignId)) h += campaignDetail(campaignById(S.campaignId));
@@ -1328,6 +1363,82 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
   var MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   var MONTH_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   /** Posts per month, campaign vs filler, with the quota as a dashed line. */
+  /** Posts per month as stacked blocks (filler on top of commissioned). With clickable, each month opens its videos. */
+  function monthBars(months, quota, clickable) {
+    var max = Math.max(quota || 0, 4), PLOT = 150;
+    months.forEach(function (m) { max = Math.max(max, m.campaign + m.filler); });
+    var px = function (v) { return Math.round(v / max * PLOT); };
+    var cols = months.map(function (m) {
+      var t = m.campaign + m.filler, name = MONTH_LONG[+m.month.slice(5, 7) - 1];
+      var stack = t ? '<span class="mb-stack">' + (m.filler ? '<i class="mb-f" style="height:' + Math.max(3, px(m.filler)) + 'px"></i>' : '') +
+          (m.campaign ? '<i class="mb-c" style="height:' + Math.max(3, px(m.campaign)) + 'px"></i>' : '') + '</span>'
+        : '<span class="mb-stack"><i class="mb-0"></i></span>';
+      var inner = '<span class="mb-n' + (t ? '' : ' zero') + '">' + t + '</span>' + stack;
+      var label = name + ': ' + m.campaign + ' commissioned, ' + m.filler + ' filler';
+      return clickable && t
+        ? '<button type="button" class="mb-col zoomable" data-act="drill-month" data-m="' + esc(m.month) + '" aria-label="' + esc(label + '. Open the videos') + '" title="' + esc(label) + '">' + inner + '</button>'
+        : '<div class="mb-col" title="' + esc(label) + '">' + inner + '</div>';
+    }).join('');
+    var n = months.length;
+    return '<div class="mb"><div class="mb-plot" style="grid-template-columns:repeat(' + n + ',minmax(0,1fr))">' +
+      (quota ? '<div class="mb-quota" style="bottom:' + px(quota) + 'px" title="Quota: ' + quota + ' a month"></div>' : '') + cols + '</div>' +
+      '<div class="mb-x" style="grid-template-columns:repeat(' + n + ',minmax(0,1fr))">' + months.map(function (m, i) {
+        return '<span' + (i === n - 1 ? ' class="now"' : '') + '>' + MONTH_SHORT[+m.month.slice(5, 7) - 1] + '</span>';
+      }).join('') + '</div></div>';
+  }
+  /* Zoom like Stellar OS analytics: the page swells and fades from the point clicked, then the new view grows out of it. */
+  function zoomTo(change, ev, back) {
+    var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var wrap = document.querySelector('main.wrap'), x = ev && ev.clientX, y = ev && ev.clientY;
+    if (!wrap || reduce) { change(); render(); window.scrollTo(0, 0); return; }
+    var r = wrap.getBoundingClientRect();
+    if (x == null && ev && ev.target && ev.target.getBoundingClientRect) { var b = ev.target.getBoundingClientRect(); x = b.left + b.width / 2; y = b.top + b.height / 2; }
+    var origin = x != null ? (x - r.left) + 'px ' + (y - r.top) + 'px' : '50% 30%';
+    wrap.style.transformOrigin = origin;
+    wrap.classList.add(back ? 'zoom-leave-back' : 'zoom-leave');
+    setTimeout(function () {
+      change(); render(); window.scrollTo(0, 0);
+      var w = document.querySelector('main.wrap'); if (!w) return;
+      w.style.transformOrigin = back ? '50% 30%' : (x != null ? (x - r.left) + 'px ' + Math.max(0, y - r.top) + 'px' : '50% 0');
+      w.classList.add(back ? 'zoom-out' : 'zoom-in');
+      setTimeout(function () { w.classList.remove('zoom-in', 'zoom-out'); }, 600);
+    }, back ? 140 : 170);
+  }
+  /** One month of a creator's videos, commissioned and filler apart. */
+  function monthDrill(cr) {
+    var st = S.cstats && S.cstats[cr.id], mk = S.drill.month, name = MONTH_LONG[+mk.slice(5, 7) - 1] + ' ' + mk.slice(0, 4);
+    var h = '<button class="back" type="button" data-act="drill-back">← Back to ' + esc(cr.name) + '</button>';
+    var vids = ((st && (st.videos || st.recent)) || []).filter(function (v) { return v.postedOn.slice(0, 7) === mk; });
+    var camp = vids.filter(function (v) { return v.kind === 'Campaign'; }), fill = vids.filter(function (v) { return v.kind !== 'Campaign'; });
+    var views = vids.reduce(function (a, v) { return a + v.views; }, 0), inter = vids.reduce(function (a, v) { return a + v.likes + v.comments + v.shares; }, 0);
+    var med = vids.map(function (v) { return v.views; }).sort(function (a, b) { return a - b; }), md = med.length ? (med.length % 2 ? med[(med.length - 1) / 2] : Math.round((med[med.length / 2 - 1] + med[med.length / 2]) / 2)) : 0;
+    var q = cr.perf && cr.perf.month ? cr.perf.month.quota : 0;
+    h += '<section class="drill-head"><div class="crumbs"><button class="subtle-link" type="button" data-act="drill-back">' + esc(cr.name) + '</button> <span>›</span> Posts per month <span>›</span></div>' +
+      '<h1>' + esc(name) + '</h1><p class="lede">' + plural(vids.length, 'video') + (q ? ' of a ' + q + '-video quota' : '') + ' · every TikTok link they posted this month</p></section>';
+    h += '<div class="pf-minis drill-stats">' +
+      '<div class="card pf-stat"><div class="k">Commissioned</div><div class="v">' + camp.length + '</div><div class="s">' + (vids.length ? Math.round(camp.length / vids.length * 100) : 0) + '% of the month</div></div>' +
+      '<div class="card pf-stat"><div class="k">Filler</div><div class="v">' + fill.length + '</div><div class="s">' + (vids.length ? Math.round(fill.length / vids.length * 100) : 0) + '% of the month</div></div>' +
+      '<div class="card pf-stat"><div class="k">Views</div><div class="v">' + fmtNum(views) + '</div><div class="s">' + fmtNum(md) + ' median a video</div></div>' +
+      '<div class="card pf-stat"><div class="k">Engagement</div><div class="v">' + (views ? Math.round(inter / views * 1000) / 10 : 0) + '%</div><div class="s">Likes, comments, shares</div></div></div>';
+    if (st && !st.videos) h += '<p class="hint">Showing the latest videos only. Redeploy the Google script (New version) to see every video of the month.</p>';
+    var table = function (list, kind) {
+      if (!list.length) return '<div class="empty">' + (kind === 'c' ? 'No commissioned videos this month.' : 'No filler videos this month.') + '</div>';
+      return '<div class="table-wrap"><table class="vids"><thead><tr><th>Posted</th><th>Account</th>' + (kind === 'c' ? '<th>Campaign</th>' : '') +
+        '<th class="r">Views</th><th class="r hide-sm">Likes</th><th class="r hide-sm">Engagement</th><th class="hide-sm"></th></tr></thead><tbody>' +
+        list.map(function (v) {
+          var e = v.views ? Math.round((v.likes + v.comments + v.shares) / v.views * 1000) / 10 : 0;
+          return '<tr><td class="date"><a class="vid-date" href="' + esc(v.url) + '" target="_blank" rel="noopener noreferrer">' + fmtDate(v.postedOn) + '</a></td><td>' + accLink(v.account, 'acc') + '</td>' +
+            (kind === 'c' ? '<td><span class="pill new kind" title="' + esc(v.campaign) + '">' + esc(v.campaign || 'Campaign') + '</span></td>' : '') +
+            '<td class="num r"><b>' + fmtNum(v.views) + '</b></td><td class="num r hide-sm">' + fmtNum(v.likes) + '</td><td class="num r hide-sm">' + e + '%</td>' +
+            '<td class="r hide-sm"><a class="sound" href="' + esc(v.url) + '" target="_blank" rel="noopener noreferrer" aria-label="Open on TikTok">Open ↗</a></td></tr>';
+        }).join('') + '</tbody></table></div>';
+    };
+    h += '<section class="card"><div class="pf-card-head"><h3><i class="sw c"></i> Commissioned <span class="count">' + camp.length + '</span></h3>' +
+      (camp.length ? '<button class="btn sm" type="button" data-act="copy-month" data-k="c">Copy links</button>' : '') + '</div>' + table(camp, 'c') + '</section>';
+    h += '<section class="card"><div class="pf-card-head"><h3><i class="sw f"></i> Filler <span class="count">' + fill.length + '</span></h3>' +
+      (fill.length ? '<button class="btn sm" type="button" data-act="copy-month" data-k="f">Copy links</button>' : '') + '</div>' + table(fill, 'f') + '</section>';
+    return h;
+  }
   function monthsChart(months, quota) {
     var W = 560, H = 170, pad = 26, bw = 48, gap = (W - pad * 2 - bw * months.length) / Math.max(1, months.length - 1);
     var max = Math.max(quota || 0, 4); months.forEach(function (m) { max = Math.max(max, m.campaign + m.filler); });
@@ -1410,7 +1521,8 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
       return h + '<p class="hint">Loading charts…</p></section>';
     }
     h += '<div class="pf-row"><div class="card pf-chart"><div class="pf-card-head"><h3>Posts per month</h3><div class="legend"><span><i class="sw c"></i>Commissioned</span><span><i class="sw f"></i>Filler</span>' +
-      (m ? '<span><i class="sw q"></i>Quota (' + m.quota + ')</span>' : '') + '</div></div>' + monthsChart(st.months, m ? m.quota : 0) + '</div>';
+      (m ? '<span><i class="sw q"></i>Quota (' + m.quota + ')</span>' : '') + '</div></div>' + monthBars(st.months, m ? m.quota : 0, true) +
+      '<p class="hint mb-tip">Click a month to see its videos.</p></div>';
     h += '<div class="card pf-fol"><div class="pf-card-head"><h3>Followers</h3>' + (st.accounts.length && st.accounts[0].history.length > 1 ? '<span class="hint">Since ' + fmtDate(st.accounts[0].history[0].date) + '</span>' : '') + '</div>' +
       (st.accounts.length ? st.accounts.map(function (a) {
         var first = a.history[0], last = a.latest, diff = last.followers - first.followers;
@@ -1469,7 +1581,7 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
         '<div class="split" aria-hidden="true"><i style="width:' + pc + '%"></i></div>' +
         '<div class="s"><span class="lgd c"></span>' + fmtInt(x.campaign) + ' commissioned · <span class="lgd f"></span>' + fmtInt(x.filler) + ' filler' +
         (range === 'all' ? ' · ' + fmtInt(x.linksSent) + ' campaign links sent in total' : '') + '</div></div></div>';
-    if (range === 'all' && x.months.length) h += '<section class="card an-chart"><div class="card-head"><h2>Posts per month</h2><span class="hint">Whole roster</span></div>' + monthsChart(x.months, 0) +
+    if (range === 'all' && x.months.length) h += '<section class="card an-chart"><div class="card-head"><h2>Posts per month</h2><span class="hint">Whole roster</span></div>' + monthBars(x.months, 0, false) +
       '<div class="legend"><span><i class="sw c"></i>Commissioned</span><span><i class="sw f"></i>Filler</span></div></section>';
     // Top videos
     h += '<section class="card"><div class="card-head"><h2>Top videos</h2><span class="hint">' + (range === 'all' ? 'All time' : 'Last 30 days') + ', by views</span></div>';
@@ -2161,7 +2273,7 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
       var note = (document.getElementById('req-note') || {}).value || '';
       call('creatorRequestUnlock', [S.key, el.dataset.acc, note], function (d) { S.data = d; S.reqFor = null; render(); toast('Sent. The team will unlock it so you can send the new login.'); });
     },
-    'tab': function (el) { S.gOpen = false; if (el.dataset.v === 'analytics' && S.view !== 'analytics') { S.roster = null; S.rosterErr = null; } S.view = el.dataset.v; S.campaignId = null; S.creatorId = null; S.crEdit = null; S.alForm = null; S.edit = null; S.armed = null; render(); window.scrollTo(0, 0); },
+    'tab': function (el) { S.gOpen = false; S.drill = null; if (el.dataset.v === 'analytics' && S.view !== 'analytics') { S.roster = null; S.rosterErr = null; } S.view = el.dataset.v; S.campaignId = null; S.creatorId = null; S.crEdit = null; S.alForm = null; S.edit = null; S.armed = null; render(); window.scrollTo(0, 0); },
     'filter': function (el) { S.filter = el.dataset.v; render(); },
     'open': function (el) { S.view = 'campaigns'; S.campaignId = el.dataset.id; S.postCreator = ''; S.onlyProblems = false; S.onlyUnsent = false; S.edit = null; render(); window.scrollTo(0, 0); },
     'back': function () { S.campaignId = null; S.edit = null; render(); },
@@ -2255,8 +2367,8 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
           ? (cr ? cr.name : 'This creator') + '’s phone isn’t registered yet. On their phone: open the portal, go to My details and tap Turn on notifications.' : e.message, true);
       });
     },
-    'open-cr': function (el) { S.view = 'creators'; S.creatorId = el.dataset.id; S.crEdit = null; S.alForm = null; S.armed = null; render(); window.scrollTo(0, 0); },
-    'back-cr': function () { S.creatorId = null; S.crEdit = null; S.alForm = null; render(); },
+    'open-cr': function (el) { S.view = 'creators'; S.creatorId = el.dataset.id; S.drill = null; S.crEdit = null; S.alForm = null; S.armed = null; render(); window.scrollTo(0, 0); },
+    'back-cr': function () { S.drill = null; S.creatorId = null; S.crEdit = null; S.alForm = null; render(); },
     'group-filter': function (el) {
       var v = el.dataset.v, cur = S.groups || [];
       if (!v) S.groups = [];
@@ -2271,6 +2383,13 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
     'only-problems': function () { S.onlyProblems = !S.onlyProblems; render(); },
     'only-unsent': function () { S.onlyUnsent = !S.onlyUnsent; render(); },
     'a-range': function (el) { S.aRange = el.dataset.v; render(); },
+    'drill-month': function (el, ev) { var id = S.creatorId, mk = el.dataset.m; zoomTo(function () { S.drill = { creatorId: id, month: mk }; }, ev); },
+    'drill-back': function (el, ev) { zoomTo(function () { S.drill = null; }, ev, true); },
+    'copy-month': function (el) {
+      var cr = creatorById(S.creatorId), st = cr && S.cstats && S.cstats[cr.id]; if (!st || !S.drill) return;
+      var links = (st.videos || st.recent).filter(function (v) { return v.postedOn.slice(0, 7) === S.drill.month && ((v.kind === 'Campaign') === (el.dataset.k === 'c')); }).map(function (v) { return v.url; });
+      copy(links.join('\n'));
+    },
     'quota-view': function (el) { S.quotaView = el.dataset.v; store('cp-quota-view', el.dataset.v); render(); },
     'a-reload': function () { S.roster = null; S.rosterErr = null; render(); },
     'show-probs': function () { S.showProbs = !S.showProbs; render(); },
@@ -2341,9 +2460,9 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
     var el = ev.target.closest('[data-act]');
     if (!el || el.dataset.act === 'member') return;
     // While waiting on Google, moving around is fine; anything that saves says why it can't run yet
-    var NAV = /^(tab|open|back|open-cr|back-cr|ctab|filter|group-filter|group-match|gdrop|row-exp|group-all|export-accounts|track-errs|cancel-edit|cancel-cr-edit|cancel-mine|lg-cancel|al-cancel|lg-req-cancel|show-old|close-tip|show-tip|tip-os|push-hint-close)$/;
+    var NAV = /^(tab|open|back|open-cr|back-cr|ctab|filter|group-filter|group-match|gdrop|row-exp|group-all|export-accounts|track-errs|cancel-edit|cancel-cr-edit|cancel-mine|lg-cancel|al-cancel|lg-req-cancel|show-old|close-tip|show-tip|tip-os|push-hint-close|drill-month|drill-back|quota-view|a-range|all-recent|drill-all)$/;
     if (S.busy && !NAV.test(el.dataset.act)) { ev.preventDefault(); stillBusy(); return; }
-    var fn = actions[el.dataset.act]; if (fn) { ev.preventDefault(); fn(el); }
+    var fn = actions[el.dataset.act]; if (fn) { ev.preventDefault(); fn(el, ev); }
   });
   document.addEventListener('click', function (ev) {
     if (S.gOpen && ev.target.closest && !ev.target.closest('.gdrop')) { S.gOpen = false; render(); }
