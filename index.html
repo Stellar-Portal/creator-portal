@@ -456,7 +456,7 @@ td { padding: 14px 16px; border-bottom-color: #f0f0f0; }
   .team .shell-content { margin-left: 0; }
   .team .wrap { padding: 20px 16px 48px; }
 }
-@media (max-width: 420px) { .nav-item svg { display: none; } .nav-item { padding: 8px; font-size: 13px; } }
+@media (max-width: 420px) { .nav-item svg { display: none; } .nav-item { padding: 8px 5px; font-size: 12.5px; } .sidebar { gap: 6px; padding-left: 12px; padding-right: 8px; } .sb-brand img { height: 18px; width: auto; } .sb-brand span { display: none; } }
 
 /* creators: thin black bar with the white logo */
 .gnav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: #000; height: 48px; display: flex; align-items: center; }
@@ -532,6 +532,23 @@ a.vid-date { color: inherit; text-decoration: none; } a.vid-date:hover { color: 
 .pill.chk { white-space: nowrap; }
 .chk-why { font-size: 12px; color: var(--muted); margin-top: 4px; max-width: 34ch; }
 .found-card .section-title .pill { margin-left: 8px; }
+.an-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.an-head .lede { margin-bottom: 0; }
+.an-note { margin: -6px 0 0; }
+.an-kpis .stat-wide { grid-column: span 2; }
+@media (max-width: 600px) { .an-kpis .stat:first-child { grid-column: 1 / -1; } }
+.split { height: 8px; border-radius: 4px; background: #b7c3f5; margin: 12px 0 8px; overflow: hidden; }
+.split i { display: block; height: 100%; background: var(--accent); border-radius: 4px 0 0 4px; }
+.lgd { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 5px; vertical-align: 0; }
+.lgd.c { background: var(--accent); } .lgd.f { background: #b7c3f5; }
+.an-chart svg.chart { display: block; max-width: 640px; max-height: 220px; margin: 4px auto 0; }
+.top-vids .rank, .top-vids th.rank { width: 28px; color: var(--faint); }
+.vbar-cell { width: 22%; min-width: 80px; }
+.vbar { display: block; height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
+.vbar i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+.an-sort { display: inline-flex; align-items: center; gap: 8px; }
+.an-sort select { width: auto; }
+.an-quiet { margin: 14px 0 0; }
 .found-card .fs-lede { margin: 2px 0 12px; max-width: 72ch; }
 .found-card .fs-cmp { margin: -4px 0 12px; }
 .stat .s { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; }
@@ -689,7 +706,7 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
     });
   }
   /* Must match VERSION in Code.gs. */
-  var SCRIPT_VERSION = '2026-11-16.1';   // the oldest Code.gs this page works with
+  var SCRIPT_VERSION = '2026-11-24.1';   // the oldest Code.gs this page works with
   function scriptTooOld(d) { return !d || !d.version || String(d.version) < SCRIPT_VERSION; }
   /** Fills in anything an older script doesn't send, so the page never gets stuck. */
   function normalize(d) {
@@ -1109,12 +1126,13 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
   function teamPage() {
     var nReq = S.data.creators.filter(function (c) { return c.logins.some(function (l) { return l.status === 'requested'; }); }).length;
     var nPay = S.data.creators.filter(function (c) { return c.pay && c.pay.due.length; }).length;
-    var tabs = [['campaigns', 'Campaigns', 0], ['creators', 'Creators', nReq], ['payments', 'Payments', nPay]];
-    var cur = S.view === 'creators' || S.view === 'payments' ? S.view : 'campaigns';
+    var tabs = [['campaigns', 'Campaigns', 0], ['creators', 'Creators', nReq], ['payments', 'Payments', nPay], ['analytics', 'Analytics', 0]];
+    var cur = S.view === 'creators' || S.view === 'payments' || S.view === 'analytics' ? S.view : 'campaigns';
     var ICON = {
       campaigns: '<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
       creators: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M18.5 14.5A6.5 6.5 0 0 1 21.5 20"/></svg>',
-      payments: '<svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6.5 15h4"/></svg>' };
+      payments: '<svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6.5 15h4"/></svg>',
+      analytics: '<svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>' };
     var h = '<aside class="sidebar"><div class="sb-brand"><img src="' + LOGO_D + '" alt="Stellar"><span>Advocates</span></div>' +
       '<nav class="nav" aria-label="Sections"><div class="nav-label">Team</div>' + tabs.map(function (t) {
         return '<button type="button" class="nav-item" data-act="tab" data-v="' + t[0] + '"' + (cur === t[0] ? ' aria-current="page"' : '') + '>' + ICON[t[0]] + t[1] +
@@ -1122,6 +1140,7 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
       }).join('') + '</nav><div class="sb-foot">Team view</div></aside><div class="shell-content"><main class="wrap">' + versionBanner();
     if (cur === 'creators') h += S.creatorId && creatorById(S.creatorId) ? creatorDetail(creatorById(S.creatorId)) : creatorsTab();
     else if (cur === 'payments') h += paymentsTab();
+    else if (cur === 'analytics') h += analyticsTab();
     else if (S.campaignId && campaignById(S.campaignId)) h += campaignDetail(campaignById(S.campaignId));
     else h += campaignList();
     return h + '</main></div>';
@@ -1322,6 +1341,71 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
       }).join('') + '</tbody></table></div>' +
       (st.recent.length > 10 ? '<button class="subtle-link more-vids" type="button" data-act="all-recent">' + (S.allRecent ? 'Show fewer' : 'Show all ' + st.recent.length) + '</button>' : '');
     else h += '<p class="hint">No posts found yet. They show after the next nightly update.</p>';
+    return h + '</section>';
+  }
+  /* ── Analytics: the whole roster, last 30 days or all tracked time ── */
+  var A_SORTS = { views: 'Views', posts: 'Posts', campaign: 'Commissioned', median: 'Median views', engagement: 'Engagement' };
+  function analyticsTab() {
+    var d = S.data, t = d.tracking, range = S.aRange === 'all' ? 'all' : 'last30';
+    var h = '<section class="an-head"><div><h1>Analytics</h1><p class="lede">Everything posted on your advocates’ TikTok accounts: commissioned and filler videos, views and engagement.</p></div>' +
+      '<div class="seg" role="group" aria-label="Period"><button type="button" data-act="a-range" data-v="last30" aria-pressed="' + (range === 'last30') + '">Last 30 days</button>' +
+      '<button type="button" data-act="a-range" data-v="all" aria-pressed="' + (range === 'all') + '">All time</button></div></section>';
+    if (!t.on) return h + '<section class="card"><p class="hint">This needs account tracking. In the Google Sheet, open <b>Advocates Portal → Set up account tracking…</b></p></section>';
+    if (!S.roster) {
+      if (!S.rosterLoading) {
+        S.rosterLoading = true;
+        api('adminRosterStats', S.key).then(function (r) { S.roster = r; S.rosterLoading = false; if (S.view === 'analytics') render(); },
+          function (e) { S.rosterLoading = false; S.rosterErr = (e && e.message) || 'Couldn’t load the numbers.'; if (S.view === 'analytics') render(); });
+      }
+      return h + (S.rosterErr ? '<div class="notice warn" role="alert">' + esc(S.rosterErr) + ' <button class="btn sm" type="button" data-act="a-reload">Try again</button></div>' : '<p class="hint">Loading…</p>');
+    }
+    var R = S.roster, x = R[range], inter = x.likes + x.comments + x.shares;
+    var pc = x.posts ? Math.round(x.campaign / x.posts * 100) : 0;
+    h += '<p class="hint an-note">' + (range === 'all' ? 'All time = since tracking started' + (x.since ? ' (first video ' + fmtDate(x.since) + ')' : '') : 'Videos posted in the last 30 days') +
+      ' · ' + plural(R.roster, 'advocate') + ' on the roster' + (t.last ? ' · updated ' + whenStamp(t.last.at) : '') + '</p>';
+    h += '<div class="stats an-kpis">' +
+      '<div class="stat"><div class="k">Total views</div><div class="v">' + fmtNum(x.views) + '</div><div class="s">' + fmtNum(x.median) + ' median a video</div></div>' +
+      '<div class="stat"><div class="k">Posts</div><div class="v">' + fmtInt(x.posts) + '</div><div class="s">by ' + plural(x.active, 'advocate') + '</div></div>' +
+      '<div class="stat"><div class="k">Engagement rate</div><div class="v">' + x.engagement + '%</div><div class="s">' + fmtNum(inter) + ' likes, comments and shares</div></div>' +
+      '<div class="stat stat-wide"><div class="k">Commissioned vs filler</div><div class="v">' + pc + '% <span class="of">commissioned</span></div>' +
+        '<div class="split" aria-hidden="true"><i style="width:' + pc + '%"></i></div>' +
+        '<div class="s"><span class="lgd c"></span>' + fmtInt(x.campaign) + ' commissioned · <span class="lgd f"></span>' + fmtInt(x.filler) + ' filler' +
+        (range === 'all' ? ' · ' + fmtInt(x.linksSent) + ' campaign links sent in total' : '') + '</div></div></div>';
+    if (range === 'all' && x.months.length) h += '<section class="card an-chart"><div class="card-head"><h2>Posts per month</h2><span class="hint">Whole roster</span></div>' + monthsChart(x.months, 0) +
+      '<div class="legend"><span><i class="sw c"></i>Commissioned</span><span><i class="sw f"></i>Filler</span></div></section>';
+    // Top videos
+    h += '<section class="card"><div class="card-head"><h2>Top videos</h2><span class="hint">' + (range === 'all' ? 'All time' : 'Last 30 days') + ', by views</span></div>';
+    if (!x.top.length) h += '<div class="empty">No videos in this period yet.</div>';
+    else h += '<div class="table-wrap"><table class="vids top-vids"><thead><tr><th class="rank">#</th><th>Posted</th><th>Advocate</th><th class="hide-sm">Account</th><th>Type</th><th class="r">Views</th><th class="r hide-sm">Engagement</th><th class="hide-sm"></th></tr></thead><tbody>' +
+      x.top.map(function (v, i) {
+        var e = v.views ? Math.round((v.likes + v.comments + v.shares) / v.views * 1000) / 10 : 0;
+        return '<tr><td class="rank num">' + (i + 1) + '</td><td class="date"><a class="vid-date" href="' + esc(v.url) + '" target="_blank" rel="noopener noreferrer">' + fmtDate(v.postedOn) + '</a></td>' +
+          '<td><button class="namebtn" type="button" data-act="open-cr" data-id="' + esc(v.creatorId) + '">' + esc(v.creator) + '</button></td>' +
+          '<td class="hide-sm">' + accLink(v.account, 'acc') + '</td>' +
+          '<td>' + (v.kind === 'Campaign' ? '<span class="pill new kind" title="' + esc(v.campaign) + '">' + esc(v.campaign || 'Commissioned') + '</span>' : '<span class="pill lock kind">Filler</span>') + '</td>' +
+          '<td class="num r"><b>' + fmtNum(v.views) + '</b></td><td class="num r hide-sm">' + e + '%</td>' +
+          '<td class="r hide-sm"><a class="sound" href="' + esc(v.url) + '" target="_blank" rel="noopener noreferrer" aria-label="Open on TikTok">Open ↗</a></td></tr>';
+      }).join('') + '</tbody></table></div>';
+    h += '</section>';
+    // Advocates
+    var sort = A_SORTS[S.aSort] ? S.aSort : 'views';
+    var rows = x.creators.slice().sort(function (a, b) { return (b[sort] - a[sort]) || a.name.localeCompare(b.name); });
+    var posted = {}; x.creators.forEach(function (c) { posted[c.id] = true; });
+    var quiet = d.creators.filter(function (c) { return !posted[c.id] && c.accounts.length; }).sort(function (a, b) { return a.name.localeCompare(b.name); });
+    var maxV = rows.reduce(function (m, c) { return Math.max(m, c.views); }, 0) || 1;
+    h += '<section class="card"><div class="card-head"><h2>Advocates</h2><label class="hint an-sort">Sort by <select class="input small" id="a-sort" aria-label="Sort advocates">' +
+      Object.keys(A_SORTS).map(function (k) { return '<option value="' + k + '"' + (k === sort ? ' selected' : '') + '>' + A_SORTS[k] + '</option>'; }).join('') + '</select></label></div>';
+    if (!rows.length) h += '<div class="empty">No posts in this period yet.</div>';
+    else h += '<div class="table-wrap"><table class="vids an-crs"><thead><tr><th>Advocate</th><th class="r">Posts</th><th class="r hide-sm">Commissioned</th><th class="r hide-sm">Filler</th><th class="r">Views</th><th class="hide-sm"></th><th class="r hide-sm">Median</th><th class="r">Eng.</th></tr></thead><tbody>' +
+      rows.map(function (c) {
+        return '<tr><td><button class="namebtn" type="button" data-act="open-cr" data-id="' + esc(c.id) + '">' + esc(c.name) + '</button></td>' +
+          '<td class="num r">' + c.posts + '</td><td class="num r hide-sm">' + c.campaign + '</td><td class="num r hide-sm">' + c.filler + '</td>' +
+          '<td class="num r"><b>' + fmtNum(c.views) + '</b></td><td class="hide-sm vbar-cell"><span class="vbar"><i style="width:' + Math.max(2, Math.round(c.views / maxV * 100)) + '%"></i></span></td>' +
+          '<td class="num r hide-sm">' + fmtNum(c.median) + '</td><td class="num r">' + c.engagement + '%</td></tr>';
+      }).join('') + '</tbody></table></div>';
+    if (quiet.length) h += '<p class="hint an-quiet"><b>No posts ' + (range === 'all' ? 'tracked yet' : 'in the last 30 days') + ':</b> ' + quiet.map(function (c) {
+      return '<button class="subtle-link" type="button" data-act="open-cr" data-id="' + esc(c.id) + '">' + esc(c.name) + '</button>';
+    }).join(', ') + '</p>';
     return h + '</section>';
   }
   function exportBtn() {
@@ -1979,7 +2063,7 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
       var note = (document.getElementById('req-note') || {}).value || '';
       call('creatorRequestUnlock', [S.key, el.dataset.acc, note], function (d) { S.data = d; S.reqFor = null; render(); toast('Sent. The team will unlock it so you can send the new login.'); });
     },
-    'tab': function (el) { S.gOpen = false; S.view = el.dataset.v; S.campaignId = null; S.creatorId = null; S.crEdit = null; S.alForm = null; S.edit = null; S.armed = null; render(); window.scrollTo(0, 0); },
+    'tab': function (el) { S.gOpen = false; if (el.dataset.v === 'analytics' && S.view !== 'analytics') { S.roster = null; S.rosterErr = null; } S.view = el.dataset.v; S.campaignId = null; S.creatorId = null; S.crEdit = null; S.alForm = null; S.edit = null; S.armed = null; render(); window.scrollTo(0, 0); },
     'filter': function (el) { S.filter = el.dataset.v; render(); },
     'open': function (el) { S.view = 'campaigns'; S.campaignId = el.dataset.id; S.postCreator = ''; S.onlyProblems = false; S.onlyUnsent = false; S.edit = null; render(); window.scrollTo(0, 0); },
     'back': function () { S.campaignId = null; S.edit = null; render(); },
@@ -2088,6 +2172,8 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
     'track-errs': function () { S.showTrackErrs = !S.showTrackErrs; render(); },
     'only-problems': function () { S.onlyProblems = !S.onlyProblems; render(); },
     'only-unsent': function () { S.onlyUnsent = !S.onlyUnsent; render(); },
+    'a-range': function (el) { S.aRange = el.dataset.v; render(); },
+    'a-reload': function () { S.roster = null; S.rosterErr = null; render(); },
     'show-probs': function () { S.showProbs = !S.showProbs; render(); },
     'all-recent': function () { S.allRecent = !S.allRecent; render(); },
     'row-exp': function (el) { S.exp = S.exp || {}; S.exp[el.dataset.id] = !S.exp[el.dataset.id]; render(); },
@@ -2178,6 +2264,7 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
       return;
     }
     if (el.id === 'cr-sort') { S.crSort = el.value; render(); return; }
+    if (el.id === 'a-sort') { S.aSort = el.value; render(); return; }
     if (el.dataset.gopt != null) {
       var v = el.dataset.gopt, cur = S.groups || [];
       S.groups = el.checked ? cur.concat([v]) : cur.filter(function (x) { return x.toLowerCase() !== v.toLowerCase(); });
