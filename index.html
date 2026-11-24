@@ -570,6 +570,59 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
 .spark { width: 100%; height: 48px; display: block; margin-top: 6px; }
 .spark polyline { fill: none; stroke: var(--accent); stroke-width: 2; vector-effect: non-scaling-stroke; }
 .cr-country { font-size: 12px; color: var(--muted); margin-top: 2px; white-space: nowrap; }
+
+/* creator performance: quota ring or squares, small stat cards, posts chart, follower growth */
+.pf { display: grid; gap: 14px; }
+.pf-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.pf-head h2 { margin: 0; }
+.pf .card { margin: 0; }
+.pf-top { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 14px; }
+.pf-minis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.pf-stat { display: flex; flex-direction: column; gap: 4px; padding: 18px 20px; }
+.pf-stat .k, .pf-hero .k { font-size: 13px; font-weight: 500; color: var(--muted); }
+.pf-stat .v { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.pf-stat .s { font-size: 13px; color: var(--muted); }
+.pf-hero { display: flex; flex-direction: column; gap: 16px; }
+.pf-hero-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.seg.sm button { padding: 4px 12px; font-size: 12px; }
+.pf-ring-wrap { display: flex; align-items: center; gap: 26px; }
+.pf-ring { width: 150px; height: 150px; flex: none; }
+.pf-ring circle { fill: none; stroke-width: 14; stroke-linecap: round; }
+.pf-ring .rg-track { stroke: #ececf0; } .pf-ring .rg-f { stroke: #b7c3f5; } .pf-ring .rg-c { stroke: var(--accent); }
+.pf-ring .rg-n { font-size: 38px; font-weight: 600; fill: var(--ink); text-anchor: middle; font-variant-numeric: tabular-nums; }
+.pf-ring .rg-of { font-size: 14px; font-weight: 500; fill: var(--muted); text-anchor: middle; }
+.pf-ring-text { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.pf-status { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.pf-status.st-on { color: var(--ink); } .pf-status.st-done { color: var(--ok); } .pf-status.st-behind { color: var(--bad); }
+.pf-count { color: var(--ink); font-size: 20px; font-variant-numeric: tabular-nums; }
+.pf-why { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.45; }
+.pf-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); }
+.pf-legend span { display: inline-flex; align-items: center; gap: 6px; } .pf-legend b { color: var(--ink); font-weight: 600; }
+.pf-legend .sw, .pf-card-head .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; }
+.sw.c { background: var(--accent); } .sw.f { background: #b7c3f5; } .pf-legend .sw.p { background: #fff; border: 1.5px dashed #c2410c; box-sizing: border-box; }
+.pf-sq-wrap { display: flex; flex-direction: column; gap: 12px; }
+.pf-squares { display: grid; gap: 4px; }
+.pf-squares i { height: 24px; border-radius: 5px; background: #ececf0; box-sizing: border-box; }
+.pf-squares i.c { background: var(--accent); } .pf-squares i.f { background: #b7c3f5; }
+.pf-squares i.over { box-shadow: inset 0 0 0 2px var(--ok); }
+.pf-squares i.pace { outline: 1.5px dashed #c2410c; outline-offset: 2px; }
+.pf-row { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 14px; }
+.pf-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.pf-card-head h3 { margin: 0; font-size: 16px; font-weight: 600; }
+.pf-card-head .legend { margin: 0; }
+.pf-chart svg.chart { display: block; }
+.fol { display: flex; flex-direction: column; gap: 6px; padding: 14px 0; border-top: 1px solid var(--line); }
+.pf-card-head + .fol { border-top: 0; padding-top: 0; }
+.fol:last-child { padding-bottom: 0; }
+.fol-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 14px; font-weight: 500; }
+.fol-chip { font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 99px; background: var(--surface-2); color: var(--muted); white-space: nowrap; }
+.fol-chip.up { background: var(--ok-soft); color: var(--ok); } .fol-chip.down { background: var(--bad-soft); color: var(--bad); }
+.fol-n { font-size: 13px; color: var(--muted); } .fol-n b { font-size: 24px; font-weight: 600; color: var(--ink); letter-spacing: -0.02em; margin-right: 4px; font-variant-numeric: tabular-nums; }
+.fol-area { width: 100%; height: 56px; display: block; }
+.fol-area path { fill: var(--accent); fill-opacity: 0.08; } .fol-area polyline { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.pf-recent .table-wrap { margin: 0; } .pf-recent .pf-card-head { margin-bottom: 0; }
+@media (max-width: 900px) { .pf-top, .pf-row { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 600px) { .pf-ring-wrap { flex-direction: column; align-items: flex-start; gap: 16px; } .pf-ring { width: 130px; height: 130px; } .pf-squares i { height: 18px; border-radius: 4px; } .pf-squares { gap: 3px; } }
 </style>
 
 <div id="app"><div class="loading">Loading…</div></div>
@@ -1273,6 +1326,7 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
     return n >= 1e6 ? (Math.round(n / 1e5) / 10) + 'M' : n >= 1e4 ? Math.round(n / 1e3) + 'K' : n >= 1e3 ? (Math.round(n / 100) / 10) + 'K' : String(n);
   }
   var MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  var MONTH_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   /** Posts per month, campaign vs filler, with the quota as a dashed line. */
   function monthsChart(months, quota) {
     var W = 560, H = 170, pad = 26, bw = 48, gap = (W - pad * 2 - bw * months.length) / Math.max(1, months.length - 1);
@@ -1296,20 +1350,52 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
     var pts = hist.map(function (p, i) { return (i / Math.max(1, hist.length - 1) * (W - 4) + 2).toFixed(1) + ',' + (H - 4 - (p.followers - min) / span * (H - 8)).toFixed(1); }).join(' ');
     return '<svg class="spark" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" aria-hidden="true"><polyline points="' + pts + '"/></svg>';
   }
+  /** This month against the quota: a ring (campaign and filler arcs) or one square per video. */
+  function quotaRing(m) {
+    var C = 2 * Math.PI * 68, q = Math.max(1, m.quota), all = Math.min(m.count, q) / q * C, camp = Math.min(m.campaign, q) / q * C;
+    return '<svg class="pf-ring" viewBox="0 0 160 160" role="img" aria-label="' + m.count + ' of ' + m.quota + ' videos this month">' +
+      '<circle cx="80" cy="80" r="68" class="rg-track"/>' +
+      (all > 0 ? '<circle cx="80" cy="80" r="68" class="rg-f" stroke-dasharray="' + all.toFixed(1) + ' 1000" transform="rotate(-90 80 80)"/>' : '') +
+      (camp > 0 ? '<circle cx="80" cy="80" r="68" class="rg-c" stroke-dasharray="' + camp.toFixed(1) + ' 1000" transform="rotate(-90 80 80)"/>' : '') +
+      '<text x="80" y="82" class="rg-n">' + m.count + '</text><text x="80" y="106" class="rg-of">of ' + m.quota + '</text></svg>';
+  }
+  function quotaSquares(m) {
+    var n = Math.max(m.quota, m.count), cols = Math.min(n, 28), out = '';
+    for (var i = 0; i < n; i++) {
+      var cls = i < m.campaign ? 'c' : i < m.count ? 'f' : '';
+      if (i >= m.quota) cls += ' over';
+      if (m.expected && i === m.expected - 1 && m.status !== 'done') cls += ' pace';
+      out += '<i class="' + cls + '"></i>';
+    }
+    return '<div class="pf-squares" style="grid-template-columns:repeat(' + cols + ',minmax(0,1fr))" role="img" aria-label="' + m.count + ' of ' + m.quota + ' videos this month">' + out + '</div>';
+  }
   function performanceCard(cr) {
-    var d = S.data, t = d.tracking, h = '<section class="card" aria-labelledby="pf-h"><div class="card-head"><h2 id="pf-h">Performance</h2>' +
+    var d = S.data, t = d.tracking, m = cr.perf && cr.perf.month, l = cr.perf && cr.perf.last30;
+    var h = '<section class="pf" aria-labelledby="pf-h"><div class="pf-head"><h2 id="pf-h">Performance</h2>' +
       (t.on && t.last ? '<span class="hint">Updated ' + whenStamp(t.last.at) + '</span>' : '') + '</div>';
-    var m = cr.perf && cr.perf.month, l = cr.perf && cr.perf.last30;
-    h += '<div class="stats">' +
-      (m ? '<div class="stat stat-wide"><div class="k">Videos this month</div><div class="v">' + m.count + ' <span class="of">/ ' + m.quota + '</span></div>' +
-        '<div class="qbar ' + m.status + '" aria-hidden="true"><i style="width:' + Math.min(100, Math.round(m.count / Math.max(1, m.quota) * 100)) + '%"></i>' +
-          '<b style="left:' + Math.min(100, Math.round(m.expected / Math.max(1, m.quota) * 100)) + '%" title="Where they should be today"></b></div>' +
-        '<div class="s"><span class="st-' + m.status + '">' + (m.status === 'done' ? 'Quota reached' : m.status === 'on' ? 'On track' : 'Behind · should be at ' + m.expected) + '</span>' +
-          ' · ' + m.campaign + ' campaign, ' + (m.count - m.campaign) + ' filler</div></div>' +
-        '<div class="stat"><div class="k">Views</div><div class="v">' + fmtNum(l.views) + '</div><div class="s">last 30 days · ' + fmtNum(l.median) + ' median a video</div></div>' +
-        '<div class="stat"><div class="k">Engagement</div><div class="v">' + l.engagement + '%</div><div class="s">likes, comments and shares per view</div></div>' : '') +
-      '<div class="stat"><div class="k">Campaigns joined</div><div class="v">' + cr.campaignsJoined + '</div><div class="s">all time</div></div>' +
-      '<div class="stat"><div class="k">Commissioned videos</div><div class="v">' + cr.commissioned + '</div><div class="s">links sent for campaigns</div></div></div>';
+    var mini = function (k, v, sub) { return '<div class="card pf-stat"><div class="k">' + k + '</div><div class="v">' + v + '</div><div class="s">' + sub + '</div></div>'; };
+    h += '<div class="pf-top">';
+    if (m) {
+      var view = S.quotaView || load('cp-quota-view') || 'ring';
+      var today = todayIso(), day = +today.slice(8, 10), dim = new Date(+today.slice(0, 4), +today.slice(5, 7), 0).getDate(), left = dim - day;
+      var monthName = MONTH_LONG[+today.slice(5, 7) - 1];
+      var togo = Math.max(0, m.quota - m.count);
+      var status = m.status === 'done' ? 'Quota reached' : m.status === 'on' ? 'On track · ' + togo + ' to go' : 'Behind · ' + togo + ' to go';
+      var why = m.status === 'done' ? 'They’ve posted all ' + m.quota + ' videos for ' + monthName + '.'
+        : 'Should be at ' + m.expected + ' by today. ' + (left === 0 ? 'Last day of ' + monthName + '.' : plural(left, 'day') + ' left in ' + monthName + '.');
+      var legend = '<div class="pf-legend"><span><i class="sw c"></i><b>' + m.campaign + '</b> commissioned</span><span><i class="sw f"></i><b>' + (m.count - m.campaign) + '</b> filler</span>' +
+        (view === 'squares' && m.status !== 'done' ? '<span><i class="sw p"></i>Where they should be today</span>' : '') + '</div>';
+      h += '<div class="card pf-hero"><div class="pf-hero-head"><span class="k">Videos this month</span>' +
+        '<div class="seg sm" role="group" aria-label="Show this month as"><button type="button" data-act="quota-view" data-v="ring" aria-pressed="' + (view === 'ring') + '">Ring</button>' +
+        '<button type="button" data-act="quota-view" data-v="squares" aria-pressed="' + (view === 'squares') + '">Squares</button></div></div>';
+      if (view === 'squares') h += '<div class="pf-sq-wrap"><div class="pf-status st-' + m.status + '">' + status + '<span class="pf-count">' + m.count + ' <span class="of">/ ' + m.quota + '</span></span></div>' +
+        quotaSquares(m) + '<p class="pf-why">' + why + '</p>' + legend + '</div>';
+      else h += '<div class="pf-ring-wrap">' + quotaRing(m) + '<div class="pf-ring-text"><div class="pf-status st-' + m.status + '">' + status + '</div><p class="pf-why">' + why + '</p>' + legend + '</div></div>';
+      h += '</div>';
+    }
+    h += '<div class="pf-minis">' +
+      (l ? mini('Views · 30 days', fmtNum(l.views), fmtNum(l.median) + ' median a video') + mini('Engagement', l.engagement + '%', 'Likes, comments, shares') : '') +
+      mini('Campaigns joined', cr.campaignsJoined, 'All time') + mini('Commissioned videos', cr.commissioned, 'Links sent, all time') + '</div></div>';
     if (!t.on) return h + '<p class="hint">To see monthly posts against their quota, views and follower growth, turn on account tracking: in the Google Sheet, open <b>Advocates Portal → Set up account tracking…</b></p></section>';
     if (!cr.accounts.length) return h + '<p class="hint">Add their TikTok accounts (Edit) and they’ll be tracked from tonight.</p></section>';
     var st = S.cstats && S.cstats[cr.id];
@@ -1323,16 +1409,20 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
       }
       return h + '<p class="hint">Loading charts…</p></section>';
     }
-    h += '<div class="pf-grid"><div><h3 class="sub">Posts per month</h3>' + monthsChart(st.months, m ? m.quota : 0) +
-      '<div class="legend"><span><i class="sw c"></i>Campaign</span><span><i class="sw f"></i>Filler</span>' + (m ? '<span><i class="sw q"></i>Quota (' + m.quota + ')</span>' : '') + '</div></div>';
-    h += '<div><h3 class="sub">Followers</h3>' + (st.accounts.length ? st.accounts.map(function (a) {
-      var first = a.history[0], last = a.latest, diff = last.followers - first.followers;
-      return '<div class="acc-f"><div class="acc-f-top">' + accLink(a.account, 'acc') + '<span><b>' + fmtNum(last.followers) + '</b> <span class="faint">followers</span></span>' +
-        (a.history.length > 1 ? '<span class="' + (diff >= 0 ? 'up' : 'down') + '">' + (diff >= 0 ? '+' : '') + fmtNum(Math.abs(diff)).replace(/^/, diff < 0 ? '−' : '') + ' since ' + fmtDate(first.date) + '</span>' : '<span class="faint">growth shows after a few days</span>') +
-        '</div>' + (a.history.length > 1 ? followersChart(a.history) : '') + '</div>';
-    }).join('') : '<p class="hint">Shows after the first nightly update.</p>') + '</div></div>';
+    h += '<div class="pf-row"><div class="card pf-chart"><div class="pf-card-head"><h3>Posts per month</h3><div class="legend"><span><i class="sw c"></i>Commissioned</span><span><i class="sw f"></i>Filler</span>' +
+      (m ? '<span><i class="sw q"></i>Quota (' + m.quota + ')</span>' : '') + '</div></div>' + monthsChart(st.months, m ? m.quota : 0) + '</div>';
+    h += '<div class="card pf-fol"><div class="pf-card-head"><h3>Followers</h3>' + (st.accounts.length && st.accounts[0].history.length > 1 ? '<span class="hint">Since ' + fmtDate(st.accounts[0].history[0].date) + '</span>' : '') + '</div>' +
+      (st.accounts.length ? st.accounts.map(function (a) {
+        var first = a.history[0], last = a.latest, diff = last.followers - first.followers;
+        var pct = first.followers ? Math.round(diff / first.followers * 1000) / 10 : 0;
+        var chip = a.history.length > 1 ? '<span class="fol-chip ' + (diff > 0 ? 'up' : diff < 0 ? 'down' : '') + '">' + (diff > 0 ? '+' : diff < 0 ? '−' : '±') + fmtNum(Math.abs(diff)) + (first.followers ? ' · ' + Math.abs(pct) + '%' : '') + '</span>' : '';
+        return '<div class="fol"><div class="fol-top">' + accLink(a.account, 'acc') + chip + '</div>' +
+          '<div class="fol-n"><b>' + fmtNum(last.followers) + '</b> followers</div>' +
+          (a.history.length > 1 ? followersArea(a.history) : '<p class="hint">Growth shows after a few days.</p>') + '</div>';
+      }).join('') : '<p class="hint">Shows after the first nightly update.</p>') + '</div></div>';
+    h += '<div class="card pf-recent">';
     var nShow = S.allRecent ? st.recent.length : 10;
-    if (st.recent.length) h += '<div class="card-head sub-head"><h3 class="sub">Recent videos</h3><span class="hint">' + plural(st.recent.length, 'video') + ' tracked</span></div>' +
+    if (st.recent.length) h += '<div class="pf-card-head"><h3>Recent videos</h3><span class="hint">' + plural(st.recent.length, 'video') + ' tracked</span></div>' +
       '<div class="table-wrap"><table class="vids"><thead><tr><th>Posted</th><th>Account</th><th>Type</th><th class="r">Views</th><th class="r hide-sm">Likes</th><th class="r hide-sm">Comments</th><th class="r hide-sm">Shares</th><th class="hide-sm"></th></tr></thead><tbody>' +
       st.recent.slice(0, nShow).map(function (v) {
         return '<tr><td class="date"><a class="vid-date" href="' + esc(v.url) + '" target="_blank" rel="noopener noreferrer">' + fmtDate(v.postedOn) + '</a></td><td>' + accLink(v.account, 'acc') + '</td><td>' + (v.kind === 'Campaign' ? '<span class="pill new kind" title="' + esc(v.campaign) + '">' + esc(v.campaign || 'Campaign') + '</span>' : '<span class="pill lock kind">Filler</span>') + '</td>' +
@@ -1341,7 +1431,15 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
       }).join('') + '</tbody></table></div>' +
       (st.recent.length > 10 ? '<button class="subtle-link more-vids" type="button" data-act="all-recent">' + (S.allRecent ? 'Show fewer' : 'Show all ' + st.recent.length) + '</button>' : '');
     else h += '<p class="hint">No posts found yet. They show after the next nightly update.</p>';
+    h += '</div>';
     return h + '</section>';
+  }
+  /** Followers over time with a soft area under the line (needs at least two days). */
+  function followersArea(hist) {
+    var W = 300, H = 56, vals = hist.map(function (p) { return p.followers; });
+    var min = Math.min.apply(null, vals), max = Math.max.apply(null, vals), span = Math.max(1, max - min);
+    var pts = hist.map(function (p, i) { return (i / Math.max(1, hist.length - 1) * W).toFixed(1) + ',' + (H - 4 - (p.followers - min) / span * (H - 12)).toFixed(1); });
+    return '<svg class="fol-area" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" aria-hidden="true"><path d="M' + pts.join(' L') + ' L' + W + ',' + H + ' L0,' + H + ' Z"/><polyline points="' + pts.join(' ') + '"/></svg>';
   }
   /* ── Analytics: the whole roster, last 30 days or all tracked time ── */
   var A_SORTS = { views: 'Views', posts: 'Posts', campaign: 'Commissioned', median: 'Median views', engagement: 'Engagement' };
@@ -2173,6 +2271,7 @@ h3.sub { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 8px
     'only-problems': function () { S.onlyProblems = !S.onlyProblems; render(); },
     'only-unsent': function () { S.onlyUnsent = !S.onlyUnsent; render(); },
     'a-range': function (el) { S.aRange = el.dataset.v; render(); },
+    'quota-view': function (el) { S.quotaView = el.dataset.v; store('cp-quota-view', el.dataset.v); render(); },
     'a-reload': function () { S.roster = null; S.rosterErr = null; render(); },
     'show-probs': function () { S.showProbs = !S.showProbs; render(); },
     'all-recent': function () { S.allRecent = !S.allRecent; render(); },
